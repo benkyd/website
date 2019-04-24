@@ -1,6 +1,17 @@
 const Logger = require('./logger.js');
-
+const Server = require('./server.js');
+const Services = require('./servicehandle.js');
 
 module.exports.main = async function() {
-    Logger.info('oof');
+
+    Logger.init();
+    Logger.SetLevel(Logger.VERBOSE_LOGS);
+
+    Logger.info('Webservice starting up');
+
+    await Server.init(80);
+    
+    await Services.init();
+    await Services.registerServices();
+
 }
