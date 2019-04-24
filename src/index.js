@@ -10,7 +10,7 @@ module.exports.main = async function() {
 
     Logger.info('Webservice starting up');
 
-    await Server.init(8081);
+    await Server.init(80);
 
     Website.init('./client/');
     
