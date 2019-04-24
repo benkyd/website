@@ -1,0 +1,34 @@
+
+body {
+    font-family: 'Dosis', sans-serif;
+    font-weight: lighter;
+    
+    color: #F1F1F1;
+    background: #1A1A1A;
+}
+
+.table {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+}
+
+.title {
+    left: 50%;
+    right: 50%;
+    font-size: 500%;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+.gh {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 30px;
+    width: 50%;
+    fill: #F1F1F1;
+}
