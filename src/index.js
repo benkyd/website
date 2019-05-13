@@ -17,4 +17,5 @@ module.exports.main = async function() {
     await Services.init();
     await Services.registerServices();
 
+    Logger.ready();
 }
