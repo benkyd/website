@@ -13,13 +13,11 @@ module.exports.init = async function() {
 }
 
 module.exports.registerServices = async function() {
-
     const services = require(module.exports.serviceRegisterPath);
     if (!services.serviceRegister) Logger.panic('There are no services in the register or it was not found');
     
     for ([key, value] of Object.entries(services.serviceRegister)) {
         Logger.info(`Loading registered service ${key}`);
-        
 
         try {
             let location = value.location;
@@ -34,9 +32,6 @@ module.exports.registerServices = async function() {
                 let routerLocation = module.exports.serviceRegisterPath + location  + value1.router;
                 let route = value1.route;
 
-                Logger.debug(routerLocation);
-                Logger.debug(route);
-
                 // indexed as [module][route]
                 module.exports.routers[key][key1] = require(routerLocation);
                 Server.app.use(route, module.exports.routers[key][key1]);
@@ -47,4 +42,8 @@ module.exports.registerServices = async function() {
             Logger.error(`Service ${key} failed to load: ${e}`);
         }
     }
+}
+
+module.exports.reloadServices = async function() {
+
 }

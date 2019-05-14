@@ -15,5 +15,17 @@ module.exports.serviceRegister = {
                 router: "router.js"
             }
         }
+    },
+    shortURL: {
+        name: 'shorturl',
+        author: 'Ben',
+        location: '/shorturl/',
+        entryPoint: 'index.js',
+        routes: {
+            url: {
+                route: '/url',
+                router: 'router.js'
+            }
+        }
     }
 };
