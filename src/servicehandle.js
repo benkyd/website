@@ -1,7 +1,6 @@
 const Logger = require('./logger.js');
 const Server = require('./server.js');
 
-
 const fs = require('fs');
 
 module.exports.serviceRegisterPath = './services';
@@ -45,5 +44,9 @@ module.exports.registerServices = async function() {
 }
 
 module.exports.reloadServices = async function() {
+    // TODO: This
+}
 
+module.exports.registeredNewServices = async function() {
+    // TODO: This
 }
