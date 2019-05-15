@@ -25,8 +25,7 @@ module.exports.registerServices = async function() {
             module.exports.registeredServices[key] = require(entryPoint);
             module.exports.routers[key] = {};
 
-            // Settup router
-
+            // Setup router
             for ([key1, value1] of Object.entries(value.routes)) {
                 let routerLocation = module.exports.serviceRegisterPath + location  + value1.router;
                 let route = value1.route;
@@ -36,7 +35,8 @@ module.exports.registerServices = async function() {
                 Server.app.use(route, module.exports.routers[key][key1]);
             } 
 
-            module.exports.registeredServices[key].main(value);
+            // Calls main of the module
+            await  module.exports.registeredServices[key].main(value);
         } catch (e) {
             Logger.error(`Service ${key} failed to load: ${e}`);
         }

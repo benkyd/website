@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Bens Amazing URL Shortener</title>
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Raleway', sans-serif;
+            }        
+        </style>
+    </head>
+    <body>
+        Place a URL in the box below for it to be shortened
+
+        <br>
+        Url to shorten: <input type="text" id="smh" name="url"><br>
+        <input type="submit" id="submit" value="Submit">
+
+        <div id="url"></div>
+
+        <script>
+            let urlOutput = document.getElementById('url');
+            let urlInput  = document.getElementById('smh');
+
+            document.getElementById('submit').addEventListener('click', async (event) => {                
+
+                function gotResponse() {
+                    console.log(this.responseText);
+                    urlOutput.innerText = JSON.parse(this.responseText).url;
+                }
+
+                const params = {
+                    url: urlInput.value
+                };
+
+                let req = new XMLHttpRequest();
+                req.addEventListener('load', gotResponse);
+                req.open('POST', '/url');
+
+                req.send(JSON.stringify(params));
+            });
+
+        </script>
+
+    </body>
+</html>

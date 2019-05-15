@@ -60,6 +60,14 @@ module.exports.service = function(service, message) {
         + colours.blue(service) + '] ' + message);
 }
 
+module.exports.serviceError = function(service, message) {
+    let d = moment().format(dateFormat);
+    fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${service}] ${message} \n`);
+    if (LogLevel > 0) return; 
+    console.log('[' + d.toLocaleString() + '] [' 
+        + colours.red(`ERROR: ${service}`) + '] ' + message);
+}
+
 module.exports.debug = function(message) {
     let d = moment().format(dateFormat);
     fs.appendFileSync(logPath, `[${d.toLocaleString()}] [DEBUG] ${message} \n`);

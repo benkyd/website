@@ -25,6 +25,10 @@ module.exports.serviceRegister = {
             url: {
                 route: '/url',
                 router: 'router.js'
+            },
+            page: {
+                route: '/urlshort',
+                router: 'pageRouter.js'
             }
         }
     }
