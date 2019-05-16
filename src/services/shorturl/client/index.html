@@ -9,16 +9,22 @@
         <style>
             body {
                 font-family: 'Raleway', sans-serif;
-            }        
+            }
+            input {
+                width: 200px;
+            }
         </style>
     </head>
     <body>
         Place a URL in the box below for it to be shortened
 
         <br>
+        <br>
         Url to shorten: <input type="text" id="smh" name="url"><br>
+        <br>
         <input type="submit" id="submit" value="Submit">
 
+        <br>
         <div id="url"></div>
 
         <script>
@@ -27,22 +33,28 @@
 
             document.getElementById('submit').addEventListener('click', async (event) => {                
 
-                function gotResponse() {
-                    console.log(this.responseText);
-                    urlOutput.innerText = JSON.parse(this.responseText).url;
+                let url = '/url';
+                let data = { url: smh.value };
+
+                let res = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(data), 
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                })
+                
+                res = await res.json();
+
+                url = res.url;
+
+                if (url.startsWith('/')) {
+                    url = window.location.protocol + '//' + window.location.hostname + url;
+                    url = `<a herf=${url}>${url}</a>`;
                 }
 
-                const params = {
-                    url: urlInput.value
-                };
-
-                let req = new XMLHttpRequest();
-                req.addEventListener('load', gotResponse);
-                req.open('POST', '/url');
-
-                req.send(JSON.stringify(params));
+                urlOutput.innerHTML = url;
             });
-
         </script>
 
     </body>
