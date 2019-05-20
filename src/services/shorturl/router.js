@@ -1,9 +1,14 @@
-const Logger = require('../../logger.js');
 const Database = require('./database.js');
 const Controller = require('./controller.js');
 
 const express = require('express');
 const router = express.Router();
+
+let Logger;
+
+module.exports.init = async function(logger) {
+    Logger = logger;
+}
 
 router.get('/:endpoint', async (req, res, next) => {
     let e = req.param('endpoint');
@@ -38,7 +43,16 @@ router.post('/', async (req, res) => {
         target = 'http://' + target;
     }
 
-    let endpoint = await Controller.genEndpoint();
+    let endpoint = null;
+
+    // Check if it already exists, if so, use that endpoint
+    let exists = await Database.getEndpointFromURL(target)
+    if (exists != -1) {
+        endpoint = exists.endpoint;
+    } else {
+        endpoint = await Controller.genEndpoint();
+    }
+
 
     let response = {
         url: '/url/' + endpoint
@@ -46,7 +60,11 @@ router.post('/', async (req, res) => {
 
     res.send(response);
 
-    Database.newURL(endpoint, target);
+    // If it already exists, don't insert a new entry
+    // into the database
+    if (exists == -1) {
+        Database.newURL(endpoint, target);
+    }
 
 });
 

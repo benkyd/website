@@ -134,10 +134,10 @@ module.exports.ServiceLogger = class {
     // with contexts
     database(message) {
         let d = moment().format(dateFormat);
-        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.name.singular}: ${this.dialect.toUpperCase()}] ${message} \n`);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [Service: SQLITE] ${message} \n`);
         if (LogLevel > 0) return; 
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.magenta(`${this.name.singular}: ${this.dialect.toUpperCase()}`) + '] ' + message);
+            + colours.magenta(`Service: SQLITE`) + '] ' + message);
     }
 
     error(message) {

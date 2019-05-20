@@ -20,7 +20,10 @@ module.exports.init = async function(logger) {
             primaryKey: true,
             unique: true
         },
-        target: Sequelize.TEXT,
+        target: {
+            type: Sequelize.TEXT,
+            unique: true
+        },
         uses: Sequelize.BIGINT
     }, {
         tableName: 'shorturl'
