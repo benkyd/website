@@ -1,5 +1,4 @@
-const Logger = require('../../logger.js');
 
-module.exports.main = async function(service, router) {
-    Logger.service(service.name, "Service SCHost initializng...");
+module.exports.main = async function(service, logger) {
+    logger.info("Service SCHost initializng...");
 }

@@ -35,8 +35,10 @@ module.exports.registerServices = async function() {
                 Server.app.use(route, module.exports.routers[key][key1]);
             } 
 
+            let serviceLogger = new Logger.ServiceLogger(value);
+
             // Calls main of the module
-            await  module.exports.registeredServices[key].main(value);
+            await  module.exports.registeredServices[key].main(value, serviceLogger);
         } catch (e) {
             Logger.error(`Service ${key} failed to load: ${e}`);
         }

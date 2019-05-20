@@ -52,22 +52,6 @@ module.exports.middleware = function(message) {
         + colours.blue('MIDDLEWARE') + '] ' + message);
 }
 
-module.exports.service = function(service, message) {
-    let d = moment().format(dateFormat);
-    fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${service}] ${message} \n`);
-    if (LogLevel > 0) return; 
-    console.log('[' + d.toLocaleString() + '] [' 
-        + colours.blue(service) + '] ' + message);
-}
-
-module.exports.serviceError = function(service, message) {
-    let d = moment().format(dateFormat);
-    fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${service}] ${message} \n`);
-    if (LogLevel > 0) return; 
-    console.log('[' + d.toLocaleString() + '] [' 
-        + colours.red(`ERROR: ${service}`) + '] ' + message);
-}
-
 module.exports.debug = function(message) {
     let d = moment().format(dateFormat);
     fs.appendFileSync(logPath, `[${d.toLocaleString()}] [DEBUG] ${message} \n`);
@@ -114,4 +98,52 @@ module.exports.panic = function(message) {
     console.log('[' + d.toLocaleString() + '] [' 
         + colours.red('PANIC') + '] ABORTING...');
     process.exit();
+}
+
+module.exports.ServiceLogger = class {
+
+    // service.name
+
+    constructor(service) {
+        this.service = service;
+        this.name = service.name;
+        this.dialect = Dialect;
+    }
+
+    setDialect(dialect) {
+        this.dialect = dialect;
+    }
+
+    info(message) {
+        let d = moment().format(dateFormat);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}] ${message} \n`);
+        if (LogLevel > 2) return; 
+        console.log('[' + d.toLocaleString() + '] [' 
+            + colours.blue(this.service.name) + '] ' + message);
+    }
+
+    debug(message) {
+        let d = moment().format(dateFormat);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}: DEBUG] ${message} \n`);
+        if (LogLevel > 1) return; 
+        console.log('[' + d.toLocaleString() + '] [' 
+            + colours.cyan(`${this.service.name}: DEBUG`) + '] ' + message);
+    }
+
+    // This is so weird because Sqelize does some weird ass shit
+    // with contexts
+    database(message) {
+        let d = moment().format(dateFormat);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.name.singular}: ${this.dialect.toUpperCase()}] ${message} \n`);
+        if (LogLevel > 0) return; 
+        console.log('[' + d.toLocaleString() + '] [' 
+            + colours.magenta(`${this.name.singular}: ${this.dialect.toUpperCase()}`) + '] ' + message);
+    }
+
+    error(message) {
+        let d = moment().format(dateFormat);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}: ERROR] ${message} \n`);
+        console.log('[' + d.toLocaleString() + '] [' 
+            + colours.red(`${this.service.name}: ERROR`) + '] ' + message);
+    }
 }

@@ -1,38 +1,38 @@
-const Logger = require('../../logger.js');
-
 const Sequelize = require('sequelize');
 
-let Service;
+let Logger;
 
-module.exports.init = async function(service) {
-    Service = service;
+module.exports.init = async function(logger) {
+    Logger = logger;
 
-    Logger.service(service.name, 'Connecting to SQLite Database');
+    Logger.info('Connecting to SQLite Database');
     module.exports.connection = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
         dialect: 'sqlite',
-        logging: Logger.database,
+        logging: logger.database,
         operatorsAliases: false,
         storage: 'storage/shorturl.sqlite',
     });
 
-    module.exports.UrlShort = module.exports.connection.define('UrlShort', {
+    module.exports.UrlShort = module.exports.connection.define('shorturl', {
         endpoint: {
             type: Sequelize.TEXT,
             primaryKey: true,
             unique: true
         },
-        target: Sequelize.TEXT
+        target: Sequelize.TEXT,
+        uses: Sequelize.BIGINT
     }, {
-        tableName: 'UrlShort'
+        tableName: 'shorturl'
     });
 
     try {
         await module.exports.connection.sync({force: false});
     } catch (e) {
-        Logger.serviceError(service.name,`Failed to connect ${service.name} to SQLite Database, error: ${e}`);
+        Logger.error(`Failed to connect shorturl to SQLite Database, error: ${e}`);
+        return;
     }
-    Logger.service(service.name, `Connected to SQLite Database`);
+    Logger.info(`Connected to SQLite Database`);
 }
 
 module.exports.newURL = async function(endpoint, url) {
@@ -45,7 +45,7 @@ module.exports.newURL = async function(endpoint, url) {
         });
         return Url;
     } catch (e) {
-        Logger.serviceError(Service.name, `An error occured while inserting ${endpoint} and ${url} into the UrlShort table: ${JSON.stringify(e.errors)}`);
+        Logger.info(`An error occured while inserting ${endpoint} and ${url} into the UrlShort table: ${JSON.stringify(e.errors)}`);
         return -1;
     }
 }
@@ -58,7 +58,32 @@ module.exports.getURLFromEndpoint = async function(endpoint) {
         if (ret == null) return -1;
         return ret;
     } catch (e) {
-        Logger.serviceError(Service.name, `An error occured while querying the UrlShort table with ${endpoint}: ${JSON.stringify(e.errors)}`);
+        Logger.error(`An error occured while querying the UrlShort table with ${endpoint}: ${JSON.stringify(e.errors)}`);
+        return -1;
+    }
+}
+
+module.exports.getEndpointFromURL = async function(url) {
+    let UrlShort = module.exports.UrlShort;
+    
+    try {
+        let ret = await UrlShort.findOne({where: {target: url}});
+        if (ret == null) return -1;
+        return ret;
+    } catch (e) {
+        Logger.error(`An error occured while querying the UrlShort table with ${url}: ${JSON.stringify(e.errors)}`);
+        return -1;
+    }
+}
+
+module.exports.incrementUses = async function(count, endpoint) {
+    let UrlShort = module.exports.UrlShort;
+
+    try {
+        UrlShort.update({uses: count}, {where: {endpoint: endpoint}});
+        return 1;
+    } catch (e) {
+        Logger.error(`An error occured while updating the UrlShort table with ${endpoint}: ${JSON.stringify(e.errors)}`);
         return -1;
     }
 }
