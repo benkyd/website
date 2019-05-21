@@ -1,9 +1,14 @@
 const Sequelize = require('sequelize');
 
+const fs = require('fs');
+
 let Logger;
 
 module.exports.init = async function(logger) {
     Logger = logger;
+
+    if (!fs.existsSync('./storage'))
+        fs.mkdirSync('./storage');
 
     Logger.info('Connecting to SQLite Database');
     module.exports.connection = new Sequelize('database', 'user', 'password', {

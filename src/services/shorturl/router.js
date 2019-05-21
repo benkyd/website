@@ -1,5 +1,6 @@
 const Database = require('./database.js');
 const Controller = require('./controller.js');
+const Cache = require('./cache.js');
 
 const express = require('express');
 const router = express.Router();
@@ -20,6 +21,17 @@ router.get('/:endpoint', async (req, res, next) => {
         next(); return;
     }
     res.redirect(301, endpoint.target);
+
+    let uses;
+
+    if (endpoint.uses == null) {
+        uses = 1;
+    } else {
+        uses = endpoint.uses + 1;
+    }
+
+    Database.incrementUses(uses, endpoint.endpoint);
+    
 });
 
 /**
@@ -31,9 +43,9 @@ router.post('/', async (req, res) => {
     let target = req.body.url;
 
     // Regex to validate URL
-    let reg = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/);
+    let regex = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/);
 
-    if (!reg.test(target)) {
+    if (!regex.test(target)) {
         res.send(JSON.stringify({ url: "Url Provided is not valid"}));
         return;
     }
