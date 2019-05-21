@@ -14,7 +14,7 @@ module.exports.init = async function(logger) {
         storage: 'storage/shorturl.sqlite',
     });
 
-    module.exports.UrlShort = module.exports.connection.define('UrlShort', {
+    module.exports.UrlShort = module.exports.connection.define('shorturl', {
         endpoint: {
             type: Sequelize.TEXT,
             primaryKey: true,
@@ -26,7 +26,7 @@ module.exports.init = async function(logger) {
         },
         uses: Sequelize.BIGINT
     }, {
-        tableName: 'UrlShort'
+        tableName: 'shorturl'
     });
 
     try {
@@ -44,7 +44,8 @@ module.exports.newURL = async function(endpoint, url) {
     try {
         let Url = await UrlShort.create({
             endpoint: endpoint,
-            target: url
+            target: url,
+            uses: 0
         });
         return Url;
     } catch (e) {

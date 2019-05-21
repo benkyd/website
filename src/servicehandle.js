@@ -3,7 +3,7 @@ const Server = require('./server.js');
 
 const fs = require('fs');
 
-module.exports.serviceRegisterPath = './services';
+module.exports.serviceRegisterPath = 'services';
 module.exports.registeredServices = {};
 module.exports.routers = {};
 
@@ -12,22 +12,36 @@ module.exports.init = async function() {
 }
 
 module.exports.registerServices = async function() {
-    const services = require(module.exports.serviceRegisterPath);
-    if (!services.serviceRegister) Logger.panic('There are no services in the register or it was not found');
+    let json;
+    if (!fs.existsSync(__dirname + '/' + module.exports.serviceRegisterPath + '/config.json')) {
+        fs.mkdirSync(__dirname + '/' + module.exports.serviceRegisterPath);
+        fs.writeFileSync(__dirname + '/' + module.exports.serviceRegisterPath + '/congfig.json', "{}");
+        Logger.panic('No service register found!');
+    }
+
+    try {
+        json = JSON.parse(fs.readFileSync(__dirname + '/' + module.exports.serviceRegisterPath + '/config.json'));
+    } catch (e) {
+        Logger.panic(`Loading service config failed: ${e}`)
+    }
+
+    let services = json; // require(module.exports.serviceRegisterPath);
+
+    if (!services) Logger.panic('There are no services in the register or it was not found');
     
-    for ([key, value] of Object.entries(services.serviceRegister)) {
+    for ([key, value] of Object.entries(services)) {
         Logger.info(`Loading registered service ${key}`);
 
         try {
             let location = value.location;
-            let entryPoint = module.exports.serviceRegisterPath + location + value.entryPoint;
+            let entryPoint = './' + module.exports.serviceRegisterPath + location + value.entryPoint;
     
             module.exports.registeredServices[key] = require(entryPoint);
             module.exports.routers[key] = {};
 
             // Setup router
             for ([key1, value1] of Object.entries(value.routes)) {
-                let routerLocation = module.exports.serviceRegisterPath + location  + value1.router;
+                let routerLocation = './' + module.exports.serviceRegisterPath + location  + value1.router;
                 let route = value1.route;
 
                 // indexed as [module][route]
