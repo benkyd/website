@@ -43,6 +43,11 @@ module.exports.init = async function(logger) {
     Logger.info(`Connected to SQLite Database`);
 }
 
+module.exports.getAll = async function() {
+    let UrlShort = module.exports.UrlShort;
+    return UrlShort.findAll();
+}
+
 module.exports.newURL = async function(endpoint, url) {
     let UrlShort = module.exports.UrlShort;
 

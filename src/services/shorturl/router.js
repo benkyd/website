@@ -16,14 +16,20 @@ router.get('/:endpoint', async (req, res, next) => {
     if (!e) {
         next(); return;
     }
+
+
     let endpoint = await Database.getURLFromEndpoint(e);
     if (endpoint == -1 || !endpoint) {
         next(); return;
     }
+    
+    
     res.redirect(301, endpoint.target);
 
+    
+    // The null check is for backwards compatability with the databases
+    // before cacheing new entries were stored with uses = null
     let uses;
-
     if (endpoint.uses == null) {
         uses = 1;
     } else {
@@ -31,7 +37,6 @@ router.get('/:endpoint', async (req, res, next) => {
     }
 
     Database.incrementUses(uses, endpoint.endpoint);
-    
 });
 
 /**
