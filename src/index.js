@@ -4,7 +4,6 @@ const Website = require('./website.js');
 const Services = require('./servicehandle.js');
 
 module.exports.main = async function() {
-
     Logger.init();
     Logger.SetLevel(Logger.VERBOSE_LOGS);
 

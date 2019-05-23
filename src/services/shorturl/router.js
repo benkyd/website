@@ -17,7 +17,6 @@ router.get('/:endpoint', async (req, res, next) => {
         next(); return;
     }
 
-
     let endpoint = await Database.getURLFromEndpoint(e);
     if (endpoint == -1 || !endpoint) {
         next(); return;
