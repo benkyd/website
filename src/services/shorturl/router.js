@@ -25,7 +25,6 @@ router.get('/:endpoint', async (req, res, next) => {
     
     res.redirect(301, endpoint.target);
 
-    
     // The null check is for backwards compatability with the databases
     // before cacheing new entries were stored with uses = null
     let uses;

@@ -59,7 +59,7 @@ module.exports.newURL = async function(endpoint, url) {
         });
         return Url;
     } catch (e) {
-        Logger.info(`An error occured while inserting ${endpoint} and ${url} into the UrlShort table: ${JSON.stringify(e.errors)}`);
+        Logger.error(`An error occured while inserting ${endpoint} and ${url} into the UrlShort table: ${JSON.stringify(e.errors)}`);
         return -1;
     }
 }

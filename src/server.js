@@ -15,7 +15,8 @@ module.exports.init = async function init(port) {
 
     try {
         module.exports.app.use(bodyParser.json());
-        module.exports.app.use(bodyParser.urlencoded({ extended: true }));
+        module.exports.app.use(bodyParser.json({limit: "500mb"}));
+        module.exports.app.use(bodyParser.urlencoded({limit: "500mb", extended: true, parameterLimit:50000}));
         module.exports.app.listen(port);
     } catch (e) {
         Logger.panic(`Could not open a connection on port ${port}, maybe the port is populated or permissions are not met`);
