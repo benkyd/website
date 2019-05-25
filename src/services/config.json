@@ -1,21 +1,5 @@
 
 {
-    "scHost": {
-        "name": "schost",
-        "author": "Ben",
-        "location": "/schost/",
-        "entryPoint": "index.js",
-        "routes": {
-            "image": {
-                "route": "/image",
-                "router": "router.js"
-            },
-            "screenshot": {
-                "route": "/screenshot",
-                "router": "router.js"
-            }
-        }
-    },
     "shortURL": {
         "name": "shorturl",
         "author": "Ben",
@@ -28,6 +12,22 @@
             },
             "page": {
                 "route": "/urlshort",
+                "router": "pagerouter.js"
+            }
+        }
+    },
+    "scHost": {
+        "name": "schost",
+        "author": "Ben",
+        "location": "/schost/",
+        "entryPoint": "index.js",
+        "routes": {
+            "image": {
+                "route": "/a",
+                "router": "router.js"
+            },
+            "page": {
+                "route": "/image",
                 "router": "pagerouter.js"
             }
         }
