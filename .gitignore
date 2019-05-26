@@ -2,4 +2,6 @@ node_modules/
 package-lock.json
 logs.log
 *.sqlite
-storage/
+storage/*.sqlite
+storage/schost/*.jpg
+storage/schost/*.png

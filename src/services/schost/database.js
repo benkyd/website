@@ -4,7 +4,7 @@ const fs = require('fs');
 
 let Logger;
 
-module.exports.imageStorage = 'storage/schost';
+module.exports.imageStorage = './storage/schost/';
 
 module.exports.init = async function(logger) {
     Logger = logger;
