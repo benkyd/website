@@ -20,8 +20,14 @@ router.post('/', async (req, res) => {
 
     let nName = await base64Img.imgSync(img, Database.imageStorage, name);
 
-    nName = nName.split('\\');
-    nName = nName.split('/');
+    
+    if (nName.includes('/')) {
+        nName = nName.split('/')
+    } else {
+        nName = nName.split('\\');
+    }
+
+    
     nName = nName[nName.length - 1]
 
     Database.newImage(nName);
