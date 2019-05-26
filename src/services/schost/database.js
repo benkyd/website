@@ -4,7 +4,7 @@ const fs = require('fs');
 
 let Logger;
 
-let imageStorage = './storage/schost';
+module.exports.imageStorage = 'storage/schost';
 
 module.exports.init = async function(logger) {
     Logger = logger;
@@ -12,8 +12,11 @@ module.exports.init = async function(logger) {
     if (!fs.existsSync('./storage'))
          fs.mkdirSync('./storage');
 
-    if (!fs.existsSync(imageStorage))
-         fs.mkdirSync(imageStorage);
+    if (!fs.existsSync(module.exports.imageStorage))
+         fs.mkdirSync(module.exports.imageStorage);
+
+
+    await fs.writeFileSync(module.exports.imageStorage + '/storageHelper.js', 'module.exports.path = __dirname;');
 
     Logger.info('Connecting to SQLite Database');
     module.exports.connection = new Sequelize('database', 'user', 'password', {
@@ -43,7 +46,7 @@ module.exports.init = async function(logger) {
     Logger.info(`Connected to SQLite Database`);
 }
 
-// Returns false if nothing is found
+// Returns false if nothing is found, true if something is
 module.exports.checkID = async function(id) {
     let ScHost = module.exports.ScHost;
 

@@ -1,12 +1,9 @@
+const Database = require('./database.js');
+
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 
-router.get('/', async (req, res) => {
-    // Lookup and serve image
-    // DO NOT serve as a download, image embed
-
-
-
-});
+router.use(express.static(require('../../../storage/schost/storageHelper.js').path));
 
 module.exports = router;

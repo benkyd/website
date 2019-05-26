@@ -20,7 +20,7 @@ module.exports.init = async function init(port) {
 
         module.exports.app.listen(port);
     } catch (e) {
-        Logger.panic(`Could not open a connection on port ${port}, maybe the port is populated or permissions are not met`);
+        Logger.panic(`Could not open a connection on port ${port}, maybe the port is populated or permissions are not met: ${e}`);
     }
     
     Logger.info(`HTTP service is listening at port ${port}`);

@@ -1,3 +1,6 @@
+const Database = require('./database.js');
+const Controller = require('./controller.js');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');''
@@ -13,8 +16,16 @@ router.post('/', async (req, res) => {
     let img = req.body.img;
     if (!img) return;
 
-    let filepath = await base64Img.imgSync(img, './storage' /* path */, '2' /* name */);
-    console.log(filepath)
+    let name = await Controller.genEndpoint();
+
+    let nName = await base64Img.imgSync(img, Database.imageStorage, name);
+
+    nName = nName.split('\\');
+    nName = nName[nName.length - 1]
+
+    Database.newImage(nName);
+
+    res.send(JSON.stringify({ url: nName }));
 });
 
 module.exports = router;

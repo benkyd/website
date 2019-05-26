@@ -130,7 +130,8 @@
                     res = await res.json();
 
                     url = res.url;
-
+                    console.log(url)
+                    window.location = window.location.protocol + '//' + window.location.hostname + '/a/' + url;
                 });
             }
             
