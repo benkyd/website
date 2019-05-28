@@ -12,11 +12,10 @@ module.exports.init = async function(logger) {
     if (!fs.existsSync('./storage'))
          fs.mkdirSync('./storage');
 
-    if (!fs.existsSync(module.exports.imageStorage))
-         fs.mkdirSync(module.exports.imageStorage);
-
-
-    await fs.writeFileSync(module.exports.imageStorage + '/storageHelper.js', 'module.exports.path = __dirname;');
+    if (!fs.existsSync(module.exports.imageStorage)) {
+        Logger.error('Can\'t find the storage helper in storage/schost/storageHelper.js, aborting');
+        return;
+    }
 
     Logger.info('Connecting to SQLite Database');
     module.exports.connection = new Sequelize('database', 'user', 'password', {

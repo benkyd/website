@@ -5,3 +5,5 @@ logs.log
 storage/*.sqlite
 storage/schost/*.jpg
 storage/schost/*.png
+schostclient/.vs/
+schostclient/out/
