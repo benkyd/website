@@ -4,7 +4,7 @@
 #include <iostream>
 #include <windows.h>
 
-#include "stb_image_write.h"
+#include "stb_image_write.hpp"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 struct pixel {
