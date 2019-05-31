@@ -112,26 +112,52 @@
             async function submitImages() {
                 if (file == null) return;
                 if (!validFileType(file)) return;
-                // progressBar.style.display = "block";
+                progressBar.style.display = "block";
                 
                 let imageb64 = await imageFromFile(file, async function(b64) {
                     
-                    let url = '/image';
-                    let data = { img: b64 };
+                    // let url = '/image';
+                    // let data = { img: b64 };
 
-                    let res = await fetch(url, {
-                        method: 'POST',
-                        body: JSON.stringify(data), 
-                        headers:{
-                            'Content-Type': 'application/json'
+                    // let res = await fetch(url, {
+                    //     method: 'POST',
+                    //     body: JSON.stringify(data), 
+                    //     headers:{
+                    //         'Content-Type': 'application/json'
+                    //     }
+                    // })
+
+                    // res = await res.json();
+
+                    let http = new XMLHttpRequest();
+                    let url = 'image';
+                    let params = JSON.stringify({ img: b64 });
+                    http.open('POST', url, true);
+
+                    //Send the proper header information along with the request
+                    http.setRequestHeader('Content-type', 'application/json');
+
+                    http.onreadystatechange = function() { //Call a function when the state changes.
+                        if(http.readyState == 4 && http.status == 200) {
+                            let res = JSON.parse(http.responseText);
+                            url = res.url;
+                            window.location = window.location.protocol + '//' + window.location.hostname + '/a/' + url;
                         }
-                    })
+                    }
+                    http.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            progressBar.max = e.total;
+                            progressBar.value = e.loaded;
+                        }
+                    };
+                    http.onloadstart = function(e) {
+                        progressBar.value = 0;
+                    };
+                    http.onloadend = function(e) {
+                        progressBar.value = e.loaded;
+                    };
 
-                    res = await res.json();
-
-                    url = res.url;
-                    console.log(url)
-                    window.location = window.location.protocol + '//' + window.location.hostname + '/a/' + url;
+                    http.send(params);      
                 });
             }
             

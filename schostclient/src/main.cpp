@@ -11,7 +11,7 @@ struct pixel {
 	unsigned char* r, g, b, a;
 };
 
-void ScreenShot(char* BmpName) {
+pixel* ScreenShot(char* BmpName) {
 	HWND DesktopHwnd = GetDesktopWindow();
 	RECT DesktopParams;
 	HDC DevC = GetDC(DesktopHwnd);
