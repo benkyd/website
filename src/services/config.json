@@ -31,6 +31,17 @@
                 "router": "pagerouter.js"
             }
         }
+    },
+    "lazyHarry": {
+        "name": "lazyHarry",
+        "author": "Ben",
+        "location": "/harryislazy/",
+        "entryPoint": "index.js",
+        "routes": {
+            "armaxml": {
+                "route": "/armaxml",
+                "router": "router.js"
+            }
+        }
     }
 }
-    
