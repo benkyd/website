@@ -61,7 +61,7 @@
                     let lineText = linesArray[i].split('@')[0];
 
                     if (headings[lineText]) {
-                        output += `<t color='${headings[lineText]}>${lineText}</t><br/>'`;
+                        output += `<t color='${headings[lineText]}'>${lineText}</t><br/>\n`;
                     } else if (lineText == "") {
                         // Do nothing - afterthought lol
                     } else {
