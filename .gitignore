@@ -7,3 +7,6 @@ storage/schost/*.jpg
 storage/schost/*.png
 schostclient/.vs/
 schostclient/out/
+client/log.csv
+client/log.pdf
+
