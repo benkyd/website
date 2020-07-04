@@ -43,5 +43,17 @@
                 "router": "router.js"
             }
         }
+    },
+    "private": {
+        "name": "veryprivate",
+        "author": "Ben",
+        "location": "/privateservice/",
+        "entryPoint": "index.js",
+        "routes": {
+            "private": {
+                "route": "/private",
+                "router": "router.js"
+            }
+        }
     }
 }

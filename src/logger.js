@@ -137,7 +137,7 @@ module.exports.ServiceLogger = class {
         fs.appendFileSync(logPath, `[${d.toLocaleString()}] [Service: SQLITE] ${message} \n`);
         if (LogLevel > 0) return; 
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.magenta(`Service: SQLITE`) + '] ' + message);
+            + colours.magenta(`Services: SQLITE`) + '] ' + message);
     }
 
     error(message) {

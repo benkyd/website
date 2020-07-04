@@ -11,6 +11,7 @@ module.exports.init = async function() {
     Logger.info('Initialized service handle')
 }
 
+// TODO: This function needs a good ol' referactor
 module.exports.registerServices = async function() {
     let json;
     if (!fs.existsSync(__dirname + '/' + module.exports.serviceRegisterPath + '/config.json')) {
@@ -30,7 +31,7 @@ module.exports.registerServices = async function() {
     if (!services) Logger.panic('There are no services in the register or it was not found');
     
     for ([key, value] of Object.entries(services)) {
-        Logger.info(`Loading registered service ${key}`);
+        Logger.info(`Loading registered service ${value.name}`);
 
         try {
             let location = value.location;
@@ -48,11 +49,12 @@ module.exports.registerServices = async function() {
                 
                 // indexed as [module][route]
                 module.exports.routers[key][key1] = require(routerLocation);
+                // MODULES MUST EXPORT THE EXPRESS.ROUTER
                 Server.app.use(route, module.exports.routers[key][key1]);
             } 
             
-            // Calls main of the module
-            await  module.exports.registeredServices[key].main(value, serviceLogger);
+            // Calls main of the module with the module, the services logger and
+            await module.exports.registeredServices[key].main(value, serviceLogger);
         } catch (e) {
             Logger.error(`Service ${key} failed to load: ${e}`);
         }
