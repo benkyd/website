@@ -8,7 +8,7 @@ module.exports.registeredServices = {};
 module.exports.routers = {};
 
 module.exports.init = async function() {
-    Logger.info('Initialized service handle')
+    Logger.info('Initializing service handle')
 }
 
 // TODO: This function needs a good ol' referactor
@@ -59,6 +59,7 @@ module.exports.registerServices = async function() {
             Logger.error(`Service ${key} failed to load: ${e}`);
         }
     }
+    Logger.info('Services initialized');
 }
 
 module.exports.reloadServices = async function() {

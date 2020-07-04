@@ -44,12 +44,12 @@ module.exports.database = function(message) {
         + colours.magenta(Dialect) + '] ' + message);
 }
 
-module.exports.middleware = function(message) {
+module.exports.middleware = function(origin, message) {
     let d = moment().format(dateFormat);
-    fs.appendFileSync(logPath, `[${d.toLocaleString()}] [MIDDLEWARE] ${message} \n`);
+    fs.appendFileSync(logPath, `[${d.toLocaleString()}] [MIDDLEWARE: ${origin}] ${message} \n`);
     if (LogLevel > 0) return; 
     console.log('[' + d.toLocaleString() + '] [' 
-        + colours.blue('MIDDLEWARE') + '] ' + message);
+        + colours.yellow(`MIDDLEWARE: ${origin}`) + '] ' + message);
 }
 
 module.exports.debug = function(message) {
@@ -116,34 +116,34 @@ module.exports.ServiceLogger = class {
 
     info(message) {
         let d = moment().format(dateFormat);
-        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}] ${message} \n`);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [SERVICE: ${this.service.name}] ${message} \n`);
         if (LogLevel > 2) return; 
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.blue(this.service.name) + '] ' + message);
+            + colours.blue('SERVICE: ' + this.service.name) + '] ' + message);
     }
 
     debug(message) {
         let d = moment().format(dateFormat);
-        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}: DEBUG] ${message} \n`);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [SERVICE: ${this.service.name}: DEBUG] ${message} \n`);
         if (LogLevel > 1) return; 
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.cyan(`${this.service.name}: DEBUG`) + '] ' + message);
+            + colours.cyan(`SERVICE: ${this.service.name}: DEBUG`) + '] ' + message);
     }
 
     // This is so weird because Sqelize does some weird ass shit
     // with contexts
     database(message) {
         let d = moment().format(dateFormat);
-        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [Service: SQLITE] ${message} \n`);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [SERVICES: SQLITE] ${message} \n`);
         if (LogLevel > 0) return; 
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.magenta(`Services: SQLITE`) + '] ' + message);
+            + colours.magenta(`SERVICES: SQLITE`) + '] ' + message);
     }
 
     error(message) {
         let d = moment().format(dateFormat);
-        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [${this.service.name}: ERROR] ${message} \n`);
+        fs.appendFileSync(logPath, `[${d.toLocaleString()}] [SERVICE: ${this.service.name}: ERROR] ${message} \n`);
         console.log('[' + d.toLocaleString() + '] [' 
-            + colours.red(`${this.service.name}: ERROR`) + '] ' + message);
+            + colours.red(`SERVICE: ${this.service.name}: ERROR`) + '] ' + message);
     }
 }

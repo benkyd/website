@@ -1,6 +1,7 @@
 const Logger = require('./logger.js');
 const Server = require('./server.js');
 const Website = require('./website.js');
+const Middleware = require('./middlewares/middleware.js');
 const Services = require('./servicehandle.js');
 
 module.exports.main = async function() {
@@ -10,6 +11,8 @@ module.exports.main = async function() {
     Logger.info('Webservice starting up');
 
     await Server.init(80);
+
+    await Middleware.init();
 
     Website.init('./client/');
     
