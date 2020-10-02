@@ -55,5 +55,17 @@
                 "router": "router.js"
             }
         }
+    },
+    "thecharts": {
+        "name": "thecharts",
+        "author": "Ben",
+        "location": "/thecharts/",
+        "entryPoint": "index.js",
+        "routes": {
+            "cbt": {
+                "route": "/cbt",
+                "router": "router.js"
+            }
+        }
     }
 }
