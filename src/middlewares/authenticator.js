@@ -12,7 +12,5 @@ module.exports.init = async function() {
 module.exports.authenticator = async function(req, res, next) {
     Logger.middleware('auth', 'New authentication request');
 
-    // middlewear here
-
     next();
 }
