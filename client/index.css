@@ -2,9 +2,59 @@
 body {
     font-family: 'Dosis', sans-serif;
     font-weight: lighter;
-    
     color: #F1F1F1;
     background: #1A1A1A;
+}
+
+.nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    background: #fff;
+}
+
+.nav li {
+    list-style: none;
+    display: inline-block;
+}
+
+.nav .link {
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 11px;
+    font-family: Sans-serif;
+    color: #333;
+    margin: 0 10px;
+}
+
+.blocks {
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.picture {
+    border-radius: 50%;
+    width: 10%;
+    padding: 0;
+}
+
+.blocks:nth-child(1) {
+    background: green;
+}
+.blocks:nth-child(2) {
+    background: blue;
+}
+.blocks:nth-child(3) {
+    background: pink;
+}
+.blocks:nth-child(4) {
+    background: yellow;
+}
+.blocks:nth-child(5) {
+    background: black;
 }
 
 .table {
@@ -21,6 +71,14 @@ body {
     right: 50%;
     font-size: 500%;
     font-weight: lighter;
+    font-style: normal;
+}
+
+.subtitle {
+    left: 50%;
+    right: 50%;
+    font-size: 150%;
+    font-weight: 600;
     font-style: normal;
 }
 
