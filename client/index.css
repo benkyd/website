@@ -1,9 +1,13 @@
+html {
+    height: 100%;
+}
 
 body {
     font-family: 'Dosis', sans-serif;
     font-weight: lighter;
     color: #F1F1F1;
-    background: #1A1A1A;
+    height: 100%;
+    margin: 0;
 }
 
 .nav {
@@ -17,23 +21,27 @@ body {
 
 .nav ul {
     display: flex;
+    flex-direction: row;
 }
 
 .nav li {
-    list-style: none;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding-left: 10px;
 }
 
-.nav .link {
-    text-transform: uppercase;
-    text-decoration: none;
-    font-size: 20px;
-    font-family: Sans-serif;
-    color: #1A1A1A;
-    margin: 0 10px;
+.nav .emptyli {
+    padding-left: 90px;
 }
 
 .link {
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 18px;
+    color: #1A1A1A;
+    margin: 0 10px;
+
     text-decoration: none;
     border-bottom: 2px solid rgba(26, 26, 26, 0);
     -webkit-transition: border 600ms ease;
@@ -47,6 +55,12 @@ body {
     border-bottom: 2px solid rgba(26, 26, 26, 1);
 }
 
+.picture {
+    position: absolute;
+    border-radius: 50%;
+    width: 70px;
+}
+
 
 .blocks {
     width: 100%;
@@ -54,18 +68,16 @@ body {
     overflow: hidden;
 }
 
-.picture {
-    border-radius: 50%;
-    width: 7%;
-    padding: 0;
-}
-
 .blocks:nth-child(1) {
     background: green;
 }
 .blocks:nth-child(2) {
-    background: blue;
+    background: rgb(0,0,0);
+    background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgb(31, 31, 31) 100%) no-repeat;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
+
 .blocks:nth-child(3) {
     background: pink;
 }
