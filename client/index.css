@@ -3,10 +3,10 @@ html {
 }
 
 body {
+    height: 100%;
     font-family: 'Dosis', sans-serif;
     font-weight: lighter;
     color: #F1F1F1;
-    height: 100%;
     margin: 0;
 }
 
@@ -68,9 +68,7 @@ body {
     overflow: hidden;
 }
 
-.blocks:nth-child(1) {
-    background: green;
-}
+/* selects from second child for some reason, so 2 is the "home page" */
 .blocks:nth-child(2) {
     background: rgb(0,0,0);
     background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgb(31, 31, 31) 100%) no-repeat;
@@ -79,14 +77,18 @@ body {
 }
 
 .blocks:nth-child(3) {
-    background: pink;
+    background: rgb(236, 152, 152);
 }
 .blocks:nth-child(4) {
-    background: yellow;
+    background: rgb(208, 236, 152);
 }
 .blocks:nth-child(5) {
-    background: black;
+    background: rgb(100, 193, 184);
 }
+.blocks:nth-child(6) {
+    background: rgb(237, 232, 204);
+}
+
 
 .titletable {
     margin: 0;
