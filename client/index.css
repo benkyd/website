@@ -15,6 +15,10 @@ body {
     background: #fff;
 }
 
+.nav ul {
+    display: flex;
+}
+
 .nav li {
     list-style: none;
     display: inline-block;
@@ -23,11 +27,26 @@ body {
 .nav .link {
     text-transform: uppercase;
     text-decoration: none;
-    font-size: 11px;
+    font-size: 20px;
     font-family: Sans-serif;
-    color: #333;
+    color: #1A1A1A;
     margin: 0 10px;
 }
+
+.link {
+    text-decoration: none;
+    border-bottom: 2px solid rgba(26, 26, 26, 0);
+    -webkit-transition: border 600ms ease;
+    -moz-transition: border 600 ease;
+    -ms-transition: border 600ms ease;
+    -o-transition: border 600ms ease;
+    transition: border 600ms ease; 
+}
+
+.link:hover {
+    border-bottom: 2px solid rgba(26, 26, 26, 1);
+}
+
 
 .blocks {
     width: 100%;
@@ -37,7 +56,7 @@ body {
 
 .picture {
     border-radius: 50%;
-    width: 10%;
+    width: 7%;
     padding: 0;
 }
 
@@ -57,7 +76,7 @@ body {
     background: black;
 }
 
-.table {
+.titletable {
     margin: 0;
     position: absolute;
     top: 50%;
