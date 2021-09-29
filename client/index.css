@@ -73,7 +73,6 @@ body {
 }
 
 .aligner {
-    /* background: red; */
     padding-top: 60px;
     height: 100%;
     width: 1000px;
@@ -82,6 +81,13 @@ body {
 
 .center-text {
     text-align: center;
+}
+
+.center-other {
+    margin: 0 auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .light-text {
@@ -148,8 +154,30 @@ h1 {
     background: rgb(236, 152, 152);
 }
 
+.contact-table {
+    padding-top: 200px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.contact-element {
+    flex: 2 1 250px;
+}
+
 .contact-method-image {
-    width: 5%;
+    flex-direction: column;
+    width: 30%;
+}
+
+.contact-type {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+
+.contact-detail {
+    flex-direction: column;
 }
 
 .blocks:nth-child(4) {
