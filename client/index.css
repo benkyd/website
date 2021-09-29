@@ -1,3 +1,7 @@
+.debug-table {
+    border: 2px red solid;
+}
+
 html {
     height: 100%;
 }
@@ -68,6 +72,35 @@ body {
     overflow: hidden;
 }
 
+.aligner {
+    /* background: red; */
+    padding-top: 60px;
+    height: 100%;
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.light-text {
+    color: rgba(240, 240, 240, 1);
+}
+
+.dark-text {
+    color: rgba(26, 26, 26, 1);
+}
+
+.underline-text {
+    text-decoration: underline 5px;
+}
+
+h1 {
+    font-size: 80px;
+    font-weight: 100;
+}
+
 /* selects from second child for some reason, so 2 is the "home page" */
 .blocks:nth-child(2) {
     background: rgb(0,0,0);
@@ -76,21 +109,7 @@ body {
     background-attachment: fixed;
 }
 
-.blocks:nth-child(3) {
-    background: rgb(236, 152, 152);
-}
-.blocks:nth-child(4) {
-    background: rgb(208, 236, 152);
-}
-.blocks:nth-child(5) {
-    background: rgb(100, 193, 184);
-}
-.blocks:nth-child(6) {
-    background: rgb(237, 232, 204);
-}
-
-
-.titletable {
+.title-table {
     margin: 0;
     position: absolute;
     top: 50%;
@@ -99,7 +118,7 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.title {
+.main-title {
     left: 50%;
     right: 50%;
     font-size: 500%;
@@ -107,7 +126,7 @@ body {
     font-style: normal;
 }
 
-.subtitle {
+.main-subtitle {
     left: 50%;
     right: 50%;
     font-size: 150%;
@@ -123,4 +142,22 @@ body {
     width: 50%;
     height: auto;
     fill: #F1F1F1;
+}
+
+.blocks:nth-child(3) {
+    background: rgb(236, 152, 152);
+}
+
+.contact-method-image {
+    width: 5%;
+}
+
+.blocks:nth-child(4) {
+    background: rgb(208, 236, 152);
+}
+.blocks:nth-child(5) {
+    background: rgb(100, 193, 184);
+}
+.blocks:nth-child(6) {
+    background: rgb(237, 232, 204);
 }
