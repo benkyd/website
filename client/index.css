@@ -1,3 +1,10 @@
+.copyright {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    color: #1A1A1A;
+}
+
 .debug-table {
     border: 2px red solid;
 }
@@ -66,6 +73,7 @@ body {
 }
 
 
+
 .blocks {
     width: 100%;
     min-height: 100%;
@@ -73,9 +81,10 @@ body {
 }
 
 .aligner {
+    position: static;
     padding-top: 60px;
     height: 100%;
-    width: 1000px;
+    width: 1100px;
     margin: 0 auto;
 }
 
@@ -95,17 +104,48 @@ body {
 }
 
 .dark-text {
-    color: rgba(26, 26, 26, 1);
+    color: rgb(38, 38, 38);
 }
 
 .underline-text {
-    text-decoration: underline 5px;
+    text-decoration: underline 2px;
 }
 
 h1 {
     font-size: 80px;
-    font-weight: 100;
+    font-weight: 900;
 }
+
+.infront-text {    
+    position:absolute;
+    top:200px;
+    left:500px;
+    z-index: 2;
+    
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: none;
+    letter-spacing: 0;
+}
+
+.behind-text {
+    position: relative;
+    z-index: 1;
+    font-family: 'Exo', sans-serif;
+    font-size: 400px;
+    font-style: italic;
+    letter-spacing: -20px;
+    font-weight: 900;
+    color: rgb(255, 84, 166);
+    /* text-shadow: 
+    25px 25px, 25px 25px, 25px 25px,
+    30px 30px 0px #eb452b, 
+    35px 35px 0px #efa032, 
+    40px 40px 0px #46b59b, 
+    45px 45px 0px #017e7f, 
+    50px 50px 0px #052939; */
+}
+
+
 
 /* selects from second child for some reason, so 2 is the "home page" */
 .blocks:nth-child(2) {
@@ -154,8 +194,12 @@ h1 {
     background: rgb(236, 152, 152);
 }
 
+#contact {
+    font-family: 'Montserrat', sans-serif;
+}
+
 .contact-table {
-    padding-top: 200px;
+    padding-top: 400px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
