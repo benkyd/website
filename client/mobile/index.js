@@ -11,6 +11,6 @@ $(document).ready(function() {
     });
 });
 
-if ((navigator.userAgent.match(/(iphone)|(ipod)|(ipad)|(android)|(blackberry)|(windows phone)|(symbian)/i))){
-  location.replace(`${window.location}/mobile`);
+if (!(navigator.userAgent.match(/(iphone)|(ipod)|(ipad)|(android)|(blackberry)|(windows phone)|(symbian)/i))){
+  location.replace(`${window.location}`);
 }

@@ -181,12 +181,14 @@ h1 {
 }
 
 .gh {
+    position: absolute;
     display: block;
     margin-left: auto;
     margin-right: auto;
     padding-top: 30px;
+    padding-left: 25%;
     width: 50%;
-    height: auto;
+    /* height: auto; */
     fill: #F1F1F1;
 }
 
