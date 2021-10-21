@@ -9,6 +9,7 @@
     border: 2px red solid;
 }
 
+
 html {
     height: 100%;
 }
@@ -195,32 +196,6 @@ h1 {
 .blocks:nth-child(3) {
     background: rgb(236, 152, 152);
 }
-
-#contact {
-    font-family: 'Montserrat', sans-serif;
-}
-
-.contact-table {
-    padding-top: 400px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.contact-element {
-    flex: 2 1 250px;
-}
-
-.contact-method-image {
-    flex-direction: column;
-    width: 30%;
-}
-
-.contact-type {
-    font-size: 30px;
-    font-weight: 600;
-}
-
 
 .contact-detail {
     flex-direction: column;
