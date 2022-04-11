@@ -11,6 +11,7 @@ module.exports.main = async function() {
     Logger.info('Webservice starting up');
 
     await Server.init(80);
+    await Server.initNet(2082);
 
     await Middleware.init();
 
