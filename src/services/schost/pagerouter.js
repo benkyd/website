@@ -13,6 +13,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+    console.log(req.body)
     let img = req.body.img;
     if (!img) return;
 
@@ -20,7 +21,6 @@ router.post('/', async (req, res) => {
 
     let nName = await base64Img.imgSync(img, Database.imageStorage, name);
 
-    
     if (nName.includes('/')) {
         nName = nName.split('/')
     } else {
@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
 
     Database.newImage(nName);
 
-    res.send(JSON.stringify({ url: nName }));
+    res.send(JSON.stringify({ url: nName + '.png' }));
 });
 
 module.exports = router;
