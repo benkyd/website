@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Harry is lazy</title>
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Raleway', sans-serif;
+            }
+            input {
+                width: 200px;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="https://mczak.com/code/colorpicker/css/colorpicker.css" />
+        <script src="https://mczak.com/code/colorpicker/js/colorpicker.js"></script>
+    </head>
+    <body>
+        <!-- <div id="color-picker" class="cp-default"></div> -->
+        Added: <span id="added" style="color: #00ff00"><b>#00ff00</b></b></span> <br> <br>
+        Updated: <span id="updated" style="color: #f0f000"><b>#f0f000</b></span> <br> <br>
+        Fixed: <span id="fixed" style="color: #f19902"><b>#f19902</b></span> <br> <br>
+        Removed: <span id="removed" style="color: #ff0000"><b>#ff0000</b></span> <br> <br>
+        
+        <textarea name="input" id="input" cols="30" rows="10"></textarea>
+
+        <br><input class="button" type="submit" id="submit" value="Submit">
+
+        <br><div id="output"></div>
+
+        <script>
+            // ColorPicker(
+            // document.getElementById('color-picker'),
+            // function(hex, hsv, rgb) {
+            //     console.log(hex);
+            //     document.body.style.backgroundColor = hex;        // #HEX
+            // });
+        </script>
+        <script>
+            document.getElementById('submit').addEventListener('click', process, false);
+
+            let textArea = document.getElementById('input');
+            let outputArea = document.getElementById('output');
+            
+            // Also an afterthought smh
+            let headings = [];
+            headings['Added'] = '#00ff00';
+            headings['Updated'] = '#f0f000';
+            headings['Fixed'] = '#f19902';
+            headings['Removed'] = '#ff0000';
+
+            function process(e) {
+                let text = textArea.value;
+
+                let linesArray = text.split('\n');
+
+                let output = '"';
+                for (let i = 0; i < linesArray.length; i++) {
+                    let lineText = linesArray[i].split('@')[0];
+
+                    if (headings[lineText]) {
+                        output += `<t color='${headings[lineText]}'>${lineText}</t><br/>\n`;
+                    } else if (lineText == "") {
+                        // Do nothing - afterthought lol
+                    } else {
+                        output += ' - ';
+                        output += lineText + '<br/>';
+                        if (headings[linesArray[i + 1]]) {
+                            console.log('extra')
+                            output += '<br/>';   
+                        }
+                        output += '\n';
+                    }
+                }
+                output += '"';
+                outputArea.innerText = output;
+            }
+
+
+        </script>
+    </body>
+</html>

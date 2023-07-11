@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Bens amazing screenshot host</title>
+        <style> 
+            body {
+                font-family: 'Raleway', sans-serif;
+            }
+            .overlay{
+                opacity:0.8;
+                background-color: #fafafa;
+                position:fixed;
+                width:100%;
+                height:100%;
+                top:0px;
+                left:0px;
+                z-index:1000;
+            }
+            p {
+                margin-top: 0;
+            }
+            .form {
+                margin-bottom: 10px;
+            }
+            .button:hover {
+                background: #ddd;
+            }
+            #previewImage img {
+                width: 150px;
+                margin-bottom: 10px;
+                margin-right: 10px;
+                vertical-align: middle;
+            }
+            #fileElem {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div class="overlay" id="dropArea">
+            <p>Upload an image here or by dragging it onto the page</p>
+            <input type="file" id="fileElem" accept="image/*" onchange="handleSelect(this.files[0])">
+            <label class="button" for="fileElem">Select image</label>
+            <div id="selectedImage"></div>
+            <div id="previewImage"></div>
+            <br><input class="button" type="submit" id="submit" value="Submit">
+            <br><progress id="progressBar" max=100 value=0></progress>
+        </div>
+        
+        <script>
+            let submitButton = document.getElementById('submit');
+            submitButton.addEventListener('click', submitImages, false);
+
+            let selectedImage = document.getElementById('selectedImage');
+
+            let previewImage = document.getElementById('previewImage');
+
+            let progressBar = document.getElementById('progressBar');
+            progressBar.style.display = "none";
+
+            let dropArea = document.getElementById('dropArea');
+            dropArea.addEventListener('dragenter', handleDrag, false);
+            dropArea.addEventListener('dragleave', handleDrag, false);
+            dropArea.addEventListener('dragover', handleDrag, false);
+            dropArea.addEventListener('drop', handleDrag, false);
+            dropArea.addEventListener('drop', handleDrop, false);
+        
+            document.onpaste = function(event){
+                let items = (event.clipboardData || event.originalEvent.clipboardData).items;
+                var blob = null;
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf("image") === 0) {
+                    blob = items[i].getAsFile();
+                    }
+                }
+                handleSelect(blob);
+            }
+ 
+            let file = null;
+
+            function handleDrag(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function handleDrop(e) {
+                let dt = e.dataTransfer;
+               file = dt.files[0];
+                updateSelected();
+            }
+
+            function handleSelect(images) {
+               file = images;
+                updateSelected();
+            }
+
+            function updateSelected() {
+                selectedImage.innerText = 'Selected image: ' + file.name;
+                let reader = new FileReader()
+                reader.readAsDataURL(file)
+                reader.onloadend = function() {
+                    let img = document.createElement('img');
+                    img.src = reader.result;
+                    previewImage.append(img);
+                }
+            }
+
+            async function submitImages() {
+                if (file == null) return;
+                if (!validFileType(file)) return;
+                progressBar.style.display = "block";
+                
+                let imageb64 = await imageFromFile(file, async function(b64) {
+                    
+                    // let url = '/image';
+                    // let data = { img: b64 };
+
+                    // let res = await fetch(url, {
+                    //     method: 'POST',
+                    //     body: JSON.stringify(data), 
+                    //     headers:{
+                    //         'Content-Type': 'application/json'
+                    //     }
+                    // })
+
+                    // res = await res.json();
+
+                    let http = new XMLHttpRequest();
+                    let url = 'image';
+                    let params = JSON.stringify({ img: b64 });
+                    http.open('POST', url, true);
+
+                    //Send the proper header information along with the request
+                    http.setRequestHeader('Content-type', 'application/json');
+
+                    http.onreadystatechange = function() { //Call a function when the state changes.
+                        if(http.readyState == 4 && http.status == 200) {
+                            let res = JSON.parse(http.responseText);
+                            url = res.url;
+                            window.location = window.location.protocol + '//' + window.location.hostname + '/a/' + url;
+                        }
+                    }
+                    http.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            progressBar.max = e.total;
+                            progressBar.value = e.loaded;
+                        }
+                    };
+                    http.onloadstart = function(e) {
+                        progressBar.value = 0;
+                    };
+                    http.onloadend = function(e) {
+                        progressBar.value = e.loaded;
+                    };
+
+                    http.send(params);      
+                });
+            }
+            
+            async function imageFromFile(file, callback) {
+                let reader = new FileReader()
+                reader.readAsDataURL(file)
+                reader.onloadend = function() {
+                    callback(reader.result);
+                }
+            }
+            
+            let fileTypes = [
+                    'image/jpeg',
+                    'image/pjpeg',
+                    'image/png'
+            ]
+
+            function validFileType(filet) {
+                for(var i = 0; i < fileTypes.length; i++) {
+                    if(filet.type === fileTypes[i]) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,71 @@
+
+{
+    "shortURL": {
+        "name": "shorturl",
+        "author": "Ben",
+        "location": "/shorturl/",
+        "entryPoint": "index.js",
+        "routes": {
+            "url": {
+                "route": "/url",
+                "router": "router.js"
+            },
+            "page": {
+                "route": "/urlshort",
+                "router": "pagerouter.js"
+            }
+        }
+    },
+    "scHost": {
+        "name": "schost",
+        "author": "Ben",
+        "location": "/schost/",
+        "entryPoint": "index.js",
+        "routes": {
+            "image": {
+                "route": "/a",
+                "router": "router.js"
+            },
+            "page": {
+                "route": "/image",
+                "router": "pagerouter.js"
+            }
+        }
+    },
+    "lazyHarry": {
+        "name": "lazyHarry",
+        "author": "Ben",
+        "location": "/harryislazy/",
+        "entryPoint": "index.js",
+        "routes": {
+            "armaxml": {
+                "route": "/armaxml",
+                "router": "router.js"
+            }
+        }
+    },
+    "private": {
+        "name": "veryprivate",
+        "author": "Ben",
+        "location": "/privateservice/",
+        "entryPoint": "index.js",
+        "routes": {
+            "private": {
+                "route": "/private",
+                "router": "router.js"
+            }
+        }
+    },
+    "thecharts": {
+        "name": "thecharts",
+        "author": "Ben",
+        "location": "/thecharts/",
+        "entryPoint": "index.js",
+        "routes": {
+            "cbt": {
+                "route": "/cbt",
+                "router": "router.js"
+            }
+        }
+    }
+}

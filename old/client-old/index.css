@@ -1,0 +1,198 @@
+.copyright {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    color: #1A1A1A;
+}
+
+.debug-table {
+    border: 2px red solid;
+}
+
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    font-family: 'Dosis', sans-serif;
+    font-weight: lighter;
+    color: #F1F1F1;
+    margin: 0;
+}
+
+
+nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    background: #F1F1F1;
+}
+
+nav ul {
+    display: flex;
+    flex-direction: row;
+}
+
+nav li {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding-left: 10px;
+}
+
+nav .emptyli {
+    padding-left: 90px;
+}
+
+.link {
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 18px;
+    color: #1A1A1A;
+    margin: 0 10px;
+
+    text-decoration: none;
+    border-bottom: 2px solid rgba(26, 26, 26, 0);
+    -webkit-transition: border 600ms ease;
+    -moz-transition: border 600 ease;
+    -ms-transition: border 600ms ease;
+    -o-transition: border 600ms ease;
+    transition: border 600ms ease; 
+}
+
+.link:hover {
+    border-bottom: 2px solid rgba(26, 26, 26, 1);
+}
+
+.picture {
+    position: absolute;
+    border-radius: 50%;
+    width: 70px;
+}
+
+
+
+.blocks {
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.aligner {
+    position: static;
+    padding-top: 60px;
+    height: 100%;
+    width: 1100px;
+    margin: 0 auto;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.center-other {
+    margin: 0 auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.light-text {
+    color: rgba(240, 240, 240, 1);
+}
+
+.dark-text {
+    color: rgb(38, 38, 38);
+}
+
+.underline-text {
+    text-decoration: underline 2px;
+}
+
+h1 {
+    font-size: 80px;
+    font-weight: 900;
+}
+
+
+/* Home */
+/* Very weird bug - nav for some reason counts as a chid of blocks */
+.blocks:nth-child(2) {
+    background: rgb(0,0,0);
+    background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgb(31, 31, 31) 100%) no-repeat;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.title-table {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+}
+
+.main-title {
+    left: 50%;
+    right: 50%;
+    font-size: 500%;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+.main-subtitle {
+    left: 50%;
+    right: 50%;
+    font-size: 150%;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.gh {
+    position: absolute;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 30px;
+    padding-left: 25%;
+    width: 50%;
+    /* height: auto; */
+    fill: #F1F1F1;
+}
+
+/* Contact */
+.blocks:nth-child(3) {
+    background: rgb(236, 152, 152);
+}
+
+.contact-table {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.contact-element {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 50px;
+    flex-direction: column;
+}
+
+.contact-image {
+    image-rendering: crisp-edges;
+    width: 100pt;
+}
+
+.blocks:nth-child(4) {
+    background: rgb(208, 236, 152);
+}
+.blocks:nth-child(5) {
+    background: rgb(100, 193, 184);
+}
+.blocks:nth-child(6) {
+    background: rgb(237, 232, 204);
+}
