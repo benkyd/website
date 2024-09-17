@@ -21,7 +21,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
     "prettier": "^3.2.5",
-    "vite": "^5.2.11",
+    "vite": "^5.4.6",
     "vite-plugin-vue-devtools": "^7.0.25",
     "vue-cli-plugin-mdb5": "~2.1.0"
   },
