@@ -2,18 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Bens Website</title>
-    <link>http://localhost:42129/posts/</link>
+    <link>https://benkyd.co.uk/posts/</link>
     <description>Recent content in Posts on Bens Website</description>
     <generator>Hugo</generator>
     <language>en-GB</language>
-    <lastBuildDate>Sat, 15 Feb 2025 19:06:50 +0000</lastBuildDate>
-    <atom:link href="http://localhost:42129/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>My First Post</title>
-      <link>http://localhost:42129/posts/my-first-post/</link>
-      <pubDate>Sat, 15 Feb 2025 19:06:50 +0000</pubDate>
-      <guid>http://localhost:42129/posts/my-first-post/</guid>
-      <description>&lt;p&gt;Body&lt;/p&gt;</description>
-    </item>
+    <lastBuildDate></lastBuildDate>
+    <atom:link href="https://benkyd.co.uk/posts/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

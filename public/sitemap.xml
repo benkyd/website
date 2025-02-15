@@ -2,17 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:42129/</loc>
+    <loc>https://benkyd.co.uk/</loc>
     <lastmod>2025-02-15T19:06:50+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:42129/posts/my-first-post/</loc>
+    <loc>https://benkyd.co.uk/posts/</loc>
     <lastmod>2025-02-15T19:06:50+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:42129/posts/</loc>
-    <lastmod>2025-02-15T19:06:50+00:00</lastmod>
+    <loc>https://benkyd.co.uk/categories/</loc>
   </url><url>
-    <loc>http://localhost:42129/categories/</loc>
-  </url><url>
-    <loc>http://localhost:42129/tags/</loc>
+    <loc>https://benkyd.co.uk/tags/</loc>
   </url>
 </urlset>
