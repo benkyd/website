@@ -6,13 +6,10 @@ theme: "hugo-xmin"
 ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
 footnotereturnlinkcontents: "↩"
 
-# Date format
-date:
-  format: "02/01/2006"
 
 permalinks:
   note: "/note/:day/:month/:year/:slug/"
-  post: "/note/:day/:month/:year/:slug/"
+  post: "/post/:day/:month/:year/:slug/"
 
 menu:
   main:
@@ -23,12 +20,12 @@ menu:
       url: "about/"
       weight: 2
     - name: Posts
-      url: "posts/"
+      url: "post/"
       weight: 3
 
 params:
   description: "Bens Website"
-  footer: "&copy; [Ben Kyd](https://benkyd.co.uk) 2016 -- {Year} (All Rights Reserved) | [Github](https://github.com/benkyd)"
+  footer: "&copy;[Ben Kyd](https://benkyd.co.uk) 2016 -- {Year} (All Rights Reserved) | [Github](https://github.com/benkyd) | [Twitter](https://twitter.com/Ben_Kyd) | [LinkedIn](https://www.linkedin.com/in/benjamin-kyd-954269173/) "
 
 markup:
   highlight:
