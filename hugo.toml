@@ -1,0 +1,41 @@
+baseURL = 'benkyd.co.uk'
+languageCode = 'en-GB'
+theme = 'hugo-bearcub'
+title = 'bens website'
+copyright = '2016-2025 ©Copyright, Ben Kyd (All Rights Reserved)'
+
+enableRobotsTXT = true
+
+[markup]
+    [markup.highlight]
+        lineNos = true
+        lineNumbersInTable = false
+
+[params]
+    description = "Bens Website"
+
+    favicon = "images/favicon.png"
+
+# These images will show up when services want to generate a preview of a link
+# to your site. Ignored if `generateSocialCard = true`. For more information
+# about previews, see https://gohugo.io/templates/internal#twitter-cards and
+# https://gohugo.io/templates/internal#open-graph
+# images = ["images/share.webp"]
+    generateSocialCard = true
+
+    title = "Bens Website"
+
+    dateFormat = "01-02-2006"
+
+    hideUntranslated = false
+
+    themeStyle = "original"
+
+
+    [params.social]
+        twitter = "Ben_Kyd" # Twitter handle (without '@')
+        github = "BenKyd" # GitHub username
+
+    [params.author]
+        name = "Ben Kyd"
+        email = "benjaminkyd@gmail.com"
