@@ -1,5 +1,5 @@
 body {
-    max-width: 800px;
+    max-width: 1000px;
     margin: auto;
     padding: 1em;
     line-height: 1.5;
@@ -16,6 +16,12 @@ a:hover {
     color: #0099ff;
     text-decoration: underline;
     font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    margin: 0;
 }
 
 /* header and footer areas */
@@ -41,12 +47,19 @@ footer {
     text-align: center;
 }
 
+.article-meta {
+    font-size: 1.3em;
+    display: inline-block;
+    text-align: left;
+}
+
 .title {
     font-size: 1.1em;
+    font-style: italic;
 }
 
 .date {
-    font-size: 1em;
+    font-size: .8em;
     font-weight: 200;
 }
 
@@ -55,9 +68,10 @@ footer {
     font-weight: 200;
 }
 
-.article-meta {
-    display: inline-block;
-    text-align: left;
+
+.subtitle {
+    font-size: 1.1em;
+    font-weight: 300;
 }
 
 footer a {
@@ -94,6 +108,14 @@ video {
 
 main {
     hyphens: auto;
+    max-width: 80%;
+    margin: auto;
+}
+
+@media (max-width: 600px) {
+    main {
+        max-width: 100%;
+    }
 }
 
 blockquote {
