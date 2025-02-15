@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: benkyd.co.uk/sitemap.xml
+Sitemap: //localhost:36759/sitemap.xml

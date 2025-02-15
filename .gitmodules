@@ -4,3 +4,9 @@
 [submodule "themes/hugo-bearcub"]
 	path = themes/hugo-bearcub
 	url = https://github.com/clente/hugo-bearcub
+[submodule "themes/smol"]
+	path = themes/smol
+	url = https://github.com/colorchestra/smol
+[submodule "themes/hugo-xmin"]
+	path = themes/hugo-xmin
+	url = https://github.com/yihui/hugo-xmin/

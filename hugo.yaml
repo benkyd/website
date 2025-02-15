@@ -1,0 +1,50 @@
+languageCode: 'en-GB'
+title: 'Bens Website'
+
+baseurl: "https://benkyd.co.uk/"  # please update this to your actual URL
+theme: "hugo-xmin"
+ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
+footnotereturnlinkcontents: "↩"
+
+# Date format
+date:
+  format: "02/01/2006"
+
+permalinks:
+  note: "/note/:day/:month/:year/:slug/"
+  post: "/note/:day/:month/:year/:slug/"
+
+menu:
+  main:
+    - name: Home
+      url: ""
+      weight: 1
+    - name: About
+      url: "about/"
+      weight: 2
+    - name: Posts
+      url: "posts/"
+      weight: 3
+
+params:
+  description: "Bens Website"
+  footer: "&copy; [Ben Kyd](https://benkyd.co.uk) 2016 -- {Year} (All Rights Reserved) | [Github](https://github.com/benkyd)"
+
+markup:
+  highlight:
+    codeFences: false
+  goldmark:
+    renderer:
+      unsafe: true
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block:
+          - - \[
+            - \]
+          - - $$
+            - $$
+          inline:
+          - - \(
+            - \)
