@@ -1,7 +1,0 @@
-name: Deploy to VPS
-
-on:
-  push:
-    branches:
-      - main
-
