@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -11,14 +11,14 @@
 <meta name="author" content="Ben Kyd">
 <link rel="canonical" href="https://benkyd.co.uk/posts/fm-demod">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.deac6b2cb0524a632e34245f9304e297a3be102728fb4e2b8f35870b1f65c8b1.css" integrity="sha256-3qxrLLBSSmMuNCRfkwTil6O&#43;ECco&#43;04rjzWHCx9lyLE=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="icon" href="https://benkyd.co.uk/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://benkyd.co.uk/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://benkyd.co.uk/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://benkyd.co.uk/apple-touch-icon.png">
+<link rel="mask-icon" href="https://benkyd.co.uk/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/fm-demod/">
+<link rel="alternate" hreflang="en" href="https://benkyd.co.uk/posts/fm-demod/">
 <noscript>
     <style>
         #theme-toggle,
@@ -69,7 +69,7 @@
 
   
 
-<meta property="og:url" content="http://localhost:1313/posts/fm-demod/">
+<meta property="og:url" content="https://benkyd.co.uk/posts/fm-demod/">
   <meta property="og:site_name" content="Ben Kyd // Engineering Notes">
   <meta property="og:title" content="Practical DSP, FM Demodulation on the RTL-SDR">
   <meta property="og:description" content="Exploring the basics of DSP in the context of FM modulation">
@@ -82,9 +82,9 @@
     <meta property="article:tag" content="C&#43;&#43;">
     <meta property="article:tag" content="Programming">
     <meta property="article:tag" content="SDR">
-      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+      <meta property="og:image" content="https://benkyd.co.uk/images/papermod-cover.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:image" content="https://benkyd.co.uk/images/papermod-cover.png">
 <meta name="twitter:title" content="Practical DSP, FM Demodulation on the RTL-SDR">
 <meta name="twitter:description" content="Exploring the basics of DSP in the context of FM modulation">
 
@@ -98,13 +98,13 @@
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "http://localhost:1313/posts/"
+      "item": "https://benkyd.co.uk/posts/"
     }, 
     {
       "@type": "ListItem",
       "position":  2 ,
       "name": "Practical DSP, FM Demodulation on the RTL-SDR",
-      "item": "http://localhost:1313/posts/fm-demod/"
+      "item": "https://benkyd.co.uk/posts/fm-demod/"
     }
   ]
 }
@@ -122,7 +122,7 @@
   "articleBody": "There are few things that I have put off learning more than Digital Signal Processing (DSP), namely because it sounded really hard, and really maths-heavy. But recently I have been learning the basics alongside some projects involving the RTL-SDR, the $40 USB Dongle to explore the spectrum.\nThe unfortunate truth is that there is some amount of maths that is unavoidable in DSP, the main prerequisite being the intuitive understanding of complex numbers, it really helps with wrapping your head around.\nIf you just want to explore the spectrum, and mess with your SDR, software like SDR++ exists for just that, it implements all of these DSP elements so that you can play with your Software Defined Radio as if it were a radio.\nThe Complex Wave Sampling Due to the fact that we live in the real world, we must convert continuous-time signals into discrete-time samples because digital systems can only process time- and amplitude-quantized data. That means sampling an analog wave with an ADC millions of times per second.\nI/Q In DSP, a wave is usually represented as a series of samples with 2 components,\nI: In-phase component (aligned with the reference oscillator) Q: Quadrature component (90° phase-shifted) Any sinusoidal waveform, modulated in amplitude, frequency, or phase, can be represented using I/Q samples. When you treat them together as a single complex number:\n$$ z[n]=I[n]+jQ[n] $$…you can represent both the amplitude and phase of the signal at each point in time. This complex representation is referred to as the complex baseband - meaning the signal has been shifted down from its radio frequency (RF) carrier to a lower frequency centered around DC (0 Hz). Processing a signal at a complex baseband dramatically simplifies things.\nA nice way to gain a more intuitive understanding of the I/Q elements of a wave, and how meaning (modulation) can be derived is through a phasor diagram, where we simply plot I and Q values directly to a graph. You can imagine a single frequency of wave would spin around the graph.\nFM: Changes in frequency make the point speed up or slow down. AM: The point still rotates, but its distance from the origin varies. Phasor Diagram taken from https://www.todo-sdr.com/funcionamiento-sdr/\nNow we can express amplitude, frequency, and phase all in a single term. This makes modulation and demodulation (especially FM/PM) much easier to reason about and implement. I/Q as Real and Imaginary\nIn this complex signal, the real part is the in-phase (I) component, and the imaginary part is the quadrature (Q) component. $$ z(t)=I(t)+jQ(t) $$From this, we can recover:\nAmplitude (envelope): \\(\\sqrt{I^2+Q^2}\\) Phase: \\(θ(t)=tan^{−1}(Q/I)\\) Frequency (for FM): The rate of change of phase, i.e. \\(\\frac{dθ}{dt}\\) Sampling the SDR A device like the RTL-SDR connects to the computer via USB and has it’s own library for interacting with the hardware. We can very quickly and easily query the hardware for a device handle, and tune the SDR and output I/Q samples to a buffer.\nrtlsdr_dev_t* dev = NULL; rtlsdr_open(\u0026dev, 0); rtlsdr_set_center_freq(dev, 96700000); // Heart FM rtlsdr_set_sample_rate(dev, DEFAULT_SAMPLE_RATE); // 2.4Ms/s rtlsdr_set_tuner_gain_mode(dev, 1); // Manual gain mode rtlsdr_set_tuner_gain(dev, 400); // 40dB gain Then, when we are ready to request samples from the device\nuint8_t rtl_buf[RTL_FM_DEMOD_BUF_LEN]; int n_read; rtlsdr_read_sync(dev, rtl_buf, RTL_FM_DEMOD_BUF_LEN, \u0026n_read); So, now we have n_read / 2 samples in the buffer, each 8-bit unsigned, interlaced I then Q, these represent complex baseband samples captured from the RF spectrum around your tuned frequency.\nThe I/Q in code To process these samples, we first convert the unsigned bytes into signed values centered around zero. This is necessary because RF signals swing positive and negative around the carrier. Then we compute the phase angle of each complex sample using atan2():\nfor (int i = 0; i \u003c n_samples; i++) { int8_t i_sample = rtl_buf[2 * i] - 127; int8_t q_sample = rtl_buf[2 * i + 1] - 127; phase[i] = atan2(q_sample, i_sample); } Imagine plotting the complex number \\(z[n]=I[n]+jQ[n]\\) as a point on a 2D plane, x-axis = I (real part) y-axis = Q (imaginary part). Now draw a line from the origin to that point. The angle that line makes with the x-axis is the phase of the signal, and that’s exactly what \\(atan2(q, i)\\) gives you, a simple geometric intuition.\nNow we have a new buffer, representing the phase angle of each sample, now what?\nDemodulation For frequency modulation, the sound waves are encoded in how fast the phase is changing. The more rapidly the signal’s phasor rotates, the higher the frequency, and thus the higher the pitch of the demodulated audio. So to demodulate FM then, all we need to do is take the difference in phase between successive samples and we will be left with the audio!\nstatic float prev_phase = 0; for (int i = 0; i \u003c n_samples; i++) { float dphi = iq_buf[i] - prev_phase; // keep dphi within -pi and pi (as phase is circular) if (dphi \u003e M_PI) dphi -= 2 * M_PI; if (dphi \u003c -M_PI) dphi += 2 * M_PI; iq_buf[i] = dphi; prev_phase = iq_buf[i]; } Audio recovery To recover the audio as the broadcaster intended, a few more things need to take place before you can just send ALSA those samples, We have audio-ish data, but it’s: Noisy, Too fast (e.g., 2.4Ms/s) and raw. So we need to clean it up and bring it down to a usable rate like 48 kHz:\nLow-pass filter - to isolate the audio frequencies Decimate - downsample the filtered signal (e.g., by a factor of 50), You could do this yourself with a FIR filter and a decimation loop, or use something like libresample to handle it. (or do as I did, and simply discard 49/50ths of the samples!) Radio stations also emphasise the high-frequency components of the sound, so applying a de-emphasis filter is also necessary. The pre-emphasis curve is standardized (e.g. 50µs in Europe, 75µs in the US), your deemphasis filter should match that exactly.\nSo… You’ve done all that, and your audio sounds like this…\nAudio Link\nWell that’s not right?\nThe answer lies in many areas that we have glossed over here, most notably that we are applying demodulation to the entire 2.4MHz sample range, that means we are probably hearing a bunch of other radio stations, and a few megahertz of the noise floor, channel filtering before demodulation is essential. Perhaps filtering is a topic for another day?\nAudio Link\nThat’s what the same station should have sounded like… Thanks SDR++\nFootnotes When I wrote that the RTL-SDR gives samples of the baseband, that was a simplification, the RTL-SDR performs quadrature sampling with a tunable IF, not true DC baseband. The signal is typically centered near 0 Hz in software, but depending on tuner settings, the actual hardware may shift it to a low IF like 1 MHz. (Although for RTL2832U with direct sampling, it can be closer to baseband.) The real DC offset of the RTL-SDR is not 127, it’s closer to 127.4 When I say “baseband”, I mean complex baseband (centered around 0 Hz), not real baseband (as in regular AM audio). When I wrote \\(θ(t)=tan^{−1}(Q/I)\\), I used tan as a simplification, you use atan2 because it accounts for quadrant ambiguity. Check out the code for this on My GitHub\n",
   "wordCount" : "1210",
   "inLanguage": "en",
-  "image": "http://localhost:1313/images/papermod-cover.png","datePublished": "2025-07-08T18:13:54Z",
+  "image": "https://benkyd.co.uk/images/papermod-cover.png","datePublished": "2025-07-08T18:13:54Z",
   "dateModified": "2025-07-08T18:13:54Z",
   "author":{
     "@type": "Person",
@@ -130,14 +130,14 @@
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "http://localhost:1313/posts/fm-demod/"
+    "@id": "https://benkyd.co.uk/posts/fm-demod/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "Ben Kyd // Engineering Notes",
     "logo": {
       "@type": "ImageObject",
-      "url": "http://localhost:1313/favicon.ico"
+      "url": "https://benkyd.co.uk/favicon.ico"
     }
   }
 }
@@ -159,7 +159,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Ben Kyd // Engineering Notes (Alt + H)">Ben Kyd // Engineering Notes</a>
+            <a href="https://benkyd.co.uk/" accesskey="h" title="Ben Kyd // Engineering Notes (Alt + H)">Ben Kyd // Engineering Notes</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -185,17 +185,17 @@
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/" title="Home">
+                <a href="https://benkyd.co.uk/" title="Home">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/posts/" title="Blog">
+                <a href="https://benkyd.co.uk/posts/" title="Blog">
                     <span>Blog</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/about/" title="About Me">
+                <a href="https://benkyd.co.uk/about/" title="About Me">
                     <span>About Me</span>
                 </a>
             </li>
@@ -206,7 +206,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://benkyd.co.uk/">Home</a>&nbsp;»&nbsp;<a href="https://benkyd.co.uk/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       Practical DSP, FM Demodulation on the RTL-SDR
     </h1>
@@ -346,13 +346,13 @@ $$<p>From this, we can recover:</p>
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/tags/rf/">RF</a></li>
-      <li><a href="http://localhost:1313/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
-      <li><a href="http://localhost:1313/tags/programming/">Programming</a></li>
-      <li><a href="http://localhost:1313/tags/sdr/">SDR</a></li>
+      <li><a href="https://benkyd.co.uk/tags/rf/">RF</a></li>
+      <li><a href="https://benkyd.co.uk/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="https://benkyd.co.uk/tags/programming/">Programming</a></li>
+      <li><a href="https://benkyd.co.uk/tags/sdr/">SDR</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="http://localhost:1313/posts/first/">
+  <a class="prev" href="https://benkyd.co.uk/posts/first/">
     <span class="title">« Prev</span>
     <br>
     <span>Welcome</span>
@@ -363,7 +363,7 @@ $$<p>From this, we can recover:</p>
 <ul class="share-buttons">
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Practical DSP, FM Demodulation on the RTL-SDR on x"
-            href="https://x.com/intent/tweet/?text=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffm-demod%2f&amp;hashtags=RF%2cC%2b%2b%2cProgramming%2cSDR">
+            href="https://x.com/intent/tweet/?text=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;url=https%3a%2f%2fbenkyd.co.uk%2fposts%2ffm-demod%2f&amp;hashtags=RF%2cC%2b%2b%2cProgramming%2cSDR">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -372,7 +372,7 @@ $$<p>From this, we can recover:</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Practical DSP, FM Demodulation on the RTL-SDR on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffm-demod%2f&amp;title=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;summary=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2ffm-demod%2f">
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fbenkyd.co.uk%2fposts%2ffm-demod%2f&amp;title=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;summary=Practical%20DSP%2c%20FM%20Demodulation%20on%20the%20RTL-SDR&amp;source=https%3a%2f%2fbenkyd.co.uk%2fposts%2ffm-demod%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -386,7 +386,7 @@ $$<p>From this, we can recover:</p>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/">Ben Kyd // Engineering Notes</a></span> · 
+        <span>&copy; 2025 <a href="https://benkyd.co.uk/">Ben Kyd // Engineering Notes</a></span> · 
 
     <span>
         Powered by

@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Test on Ben Kyd // Engineering Notes</title>
-    <link>http://localhost:1313/tags/test/</link>
+    <link>https://benkyd.co.uk/tags/test/</link>
     <description>Recent content in Test on Ben Kyd // Engineering Notes</description>
     <image>
       <title>Ben Kyd // Engineering Notes</title>
-      <url>http://localhost:1313/images/papermod-cover.png</url>
-      <link>http://localhost:1313/images/papermod-cover.png</link>
+      <url>https://benkyd.co.uk/images/papermod-cover.png</url>
+      <link>https://benkyd.co.uk/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.148.0</generator>
     <language>en-GB</language>
     <lastBuildDate>Wed, 09 Jul 2025 12:00:00 +0100</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/test/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://benkyd.co.uk/tags/test/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Welcome</title>
-      <link>http://localhost:1313/posts/first/</link>
+      <link>https://benkyd.co.uk/posts/first/</link>
       <pubDate>Wed, 09 Jul 2025 12:00:00 +0100</pubDate>
-      <guid>http://localhost:1313/posts/first/</guid>
+      <guid>https://benkyd.co.uk/posts/first/</guid>
       <description>&lt;p&gt;This is where I dump notes and ideas about embedded systems, firmware, and hardware acceleration.&lt;/p&gt;
 &lt;p&gt;No tutorials, no preaching, just the stuff I actually work on.&lt;/p&gt;
 &lt;p&gt;If that’s your thing, cool.&lt;/p&gt;</description>
