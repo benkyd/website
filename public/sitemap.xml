@@ -25,5 +25,20 @@
   </url><url>
     <loc>https://benkyd.co.uk/about/</loc>
     <lastmod>2025-07-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://benkyd.co.uk/tags/c&#43;&#43;/</loc>
+    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+  </url><url>
+    <loc>https://benkyd.co.uk/posts/fm-demod/</loc>
+    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+  </url><url>
+    <loc>https://benkyd.co.uk/tags/programming/</loc>
+    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+  </url><url>
+    <loc>https://benkyd.co.uk/tags/rf/</loc>
+    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+  </url><url>
+    <loc>https://benkyd.co.uk/tags/sdr/</loc>
+    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
   </url>
 </urlset>

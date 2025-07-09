@@ -20,5 +20,33 @@
       <guid>https://benkyd.co.uk/tags/test/</guid>
       <description></description>
     </item>
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>https://benkyd.co.uk/tags/c&#43;&#43;/</link>
+      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Programming</title>
+      <link>https://benkyd.co.uk/tags/programming/</link>
+      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/programming/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>RF</title>
+      <link>https://benkyd.co.uk/tags/rf/</link>
+      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/rf/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>SDR</title>
+      <link>https://benkyd.co.uk/tags/sdr/</link>
+      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/sdr/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
