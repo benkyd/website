@@ -38,3 +38,5 @@ Or if you're curious about the services I offer, reach out here instead.
 
 [ben@ben-labs.co.uk](mailto:ben@ben-labs.co.uk)
 
+![amature photograph](/photo.jpg)
+
