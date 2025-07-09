@@ -2,43 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://benkyd.co.uk/</loc>
+    <loc>http://localhost:1313/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/categories/blog/</loc>
+    <loc>http://localhost:1313/categories/blog/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/categories/</loc>
+    <loc>http://localhost:1313/categories/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/posts/</loc>
+    <loc>http://localhost:1313/posts/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/</loc>
+    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/test/</loc>
+    <loc>http://localhost:1313/tags/test/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/posts/first/</loc>
+    <loc>http://localhost:1313/posts/first/</loc>
     <lastmod>2025-07-09T12:00:00+01:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/about/</loc>
+    <loc>http://localhost:1313/about/</loc>
     <lastmod>2025-07-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/c&#43;&#43;/</loc>
-    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+    <loc>http://localhost:1313/tags/c&#43;&#43;/</loc>
+    <lastmod>2025-07-08T18:13:54+00:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/posts/fm-demod/</loc>
-    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+    <loc>http://localhost:1313/posts/fm-demod/</loc>
+    <lastmod>2025-07-08T18:13:54+00:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/programming/</loc>
-    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+    <loc>http://localhost:1313/tags/programming/</loc>
+    <lastmod>2025-07-08T18:13:54+00:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/rf/</loc>
-    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+    <loc>http://localhost:1313/tags/rf/</loc>
+    <lastmod>2025-07-08T18:13:54+00:00</lastmod>
   </url><url>
-    <loc>https://benkyd.co.uk/tags/sdr/</loc>
-    <lastmod>2020-09-15T11:30:03+00:00</lastmod>
+    <loc>http://localhost:1313/tags/sdr/</loc>
+    <lastmod>2025-07-08T18:13:54+00:00</lastmod>
   </url>
 </urlset>

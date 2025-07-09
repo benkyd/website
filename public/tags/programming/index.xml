@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Programming on Ben Kyd // Engineering Notes</title>
-    <link>https://benkyd.co.uk/tags/programming/</link>
+    <link>http://localhost:1313/tags/programming/</link>
     <description>Recent content in Programming on Ben Kyd // Engineering Notes</description>
     <image>
       <title>Ben Kyd // Engineering Notes</title>
-      <url>https://benkyd.co.uk/images/papermod-cover.png</url>
-      <link>https://benkyd.co.uk/images/papermod-cover.png</link>
+      <url>http://localhost:1313/images/papermod-cover.png</url>
+      <link>http://localhost:1313/images/papermod-cover.png</link>
     </image>
-    <generator>Hugo -- 0.147.8</generator>
+    <generator>Hugo -- 0.148.0</generator>
     <language>en-GB</language>
-    <lastBuildDate>Tue, 15 Sep 2020 11:30:03 +0000</lastBuildDate>
-    <atom:link href="https://benkyd.co.uk/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 08 Jul 2025 18:13:54 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/programming/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>FM Demodulation in C&#43;&#43;</title>
-      <link>https://benkyd.co.uk/posts/fm-demod/</link>
-      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>https://benkyd.co.uk/posts/fm-demod/</guid>
+      <title>FM Radio Demodulation in C&#43;&#43;</title>
+      <link>http://localhost:1313/posts/fm-demod/</link>
+      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>http://localhost:1313/posts/fm-demod/</guid>
       <description>Exploring the basics of DSP</description>
     </item>
   </channel>

@@ -2,50 +2,50 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on Ben Kyd // Engineering Notes</title>
-    <link>https://benkyd.co.uk/tags/</link>
+    <link>http://localhost:1313/tags/</link>
     <description>Recent content in Tags on Ben Kyd // Engineering Notes</description>
     <image>
       <title>Ben Kyd // Engineering Notes</title>
-      <url>https://benkyd.co.uk/images/papermod-cover.png</url>
-      <link>https://benkyd.co.uk/images/papermod-cover.png</link>
+      <url>http://localhost:1313/images/papermod-cover.png</url>
+      <link>http://localhost:1313/images/papermod-cover.png</link>
     </image>
-    <generator>Hugo -- 0.147.8</generator>
+    <generator>Hugo -- 0.148.0</generator>
     <language>en-GB</language>
     <lastBuildDate>Wed, 09 Jul 2025 12:00:00 +0100</lastBuildDate>
-    <atom:link href="https://benkyd.co.uk/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Test</title>
-      <link>https://benkyd.co.uk/tags/test/</link>
+      <link>http://localhost:1313/tags/test/</link>
       <pubDate>Wed, 09 Jul 2025 12:00:00 +0100</pubDate>
-      <guid>https://benkyd.co.uk/tags/test/</guid>
+      <guid>http://localhost:1313/tags/test/</guid>
       <description></description>
     </item>
     <item>
       <title>C&#43;&#43;</title>
-      <link>https://benkyd.co.uk/tags/c&#43;&#43;/</link>
-      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/c&#43;&#43;/</guid>
+      <link>http://localhost:1313/tags/c&#43;&#43;/</link>
+      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>http://localhost:1313/tags/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
       <title>Programming</title>
-      <link>https://benkyd.co.uk/tags/programming/</link>
-      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/programming/</guid>
+      <link>http://localhost:1313/tags/programming/</link>
+      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>http://localhost:1313/tags/programming/</guid>
       <description></description>
     </item>
     <item>
       <title>RF</title>
-      <link>https://benkyd.co.uk/tags/rf/</link>
-      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/rf/</guid>
+      <link>http://localhost:1313/tags/rf/</link>
+      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>http://localhost:1313/tags/rf/</guid>
       <description></description>
     </item>
     <item>
       <title>SDR</title>
-      <link>https://benkyd.co.uk/tags/sdr/</link>
-      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/sdr/</guid>
+      <link>http://localhost:1313/tags/sdr/</link>
+      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>http://localhost:1313/tags/sdr/</guid>
       <description></description>
     </item>
   </channel>
