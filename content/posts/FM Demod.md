@@ -1,6 +1,6 @@
 ---
 title: "Practical DSP, FM Demodulation on the RTL-SDR"
-date: 2025-07-08T18:13:54Z
+date: 2025-07-10T18:13:54Z
 tags: ["RF", "C++", "Programming", "SDR"]
 author: "Ben Kyd"
 showToc: true
@@ -92,7 +92,7 @@ So, now we have `n_read / 2` samples in the buffer, each 8-bit unsigned, interla
 
 ## The I/Q in code
 
-To process these samples, we first convert the unsigned bytes into signed values centered around zero. This is necessary because RF signals swing positive and negative around the carrier. Then we compute the phase angle of each complex sample using atan2():
+To process these samples, we first convert the unsigned bytes into signed values centered around zero. This is necessary because RF signals swing positive and negative around the carrier. Then we compute the phase angle of each complex sample using `atan2()`:
 
 ```cpp
 for (int i = 0; i < n_samples; i++)
@@ -128,11 +128,11 @@ for (int i = 0; i < n_samples; i++)
 
 ## Audio recovery
 
-To recover the audio as the broadcaster intended, a few more things need to take place before you can just send ALSA those samples, We have audio-ish data, but it’s: Noisy, Too fast (e.g., 2.4Ms/s) and raw. So we need to clean it up and bring it down to a usable rate like 48 kHz:
+To recover the audio as the broadcaster intended, a few more things need to take place before you can just send ALSA those samples, We have audio-ish data, but it’s: noisy, too fast (e.g., 2.4Ms/s) and raw. So we need to clean it up and bring it down to a usable rate like 48 kHz:
 - Low-pass filter - to isolate the audio frequencies
 - Decimate - downsample the filtered signal (e.g., by a factor of 50), You could do this yourself with a FIR filter and a decimation loop, or use something like libresample to handle it. (or do as I did, and simply discard 49/50ths of the samples!)
 
-Radio stations also emphasise the high-frequency components of the sound, so applying a de-emphasis filter is also necessary. The pre-emphasis curve is standardized (e.g. 50µs in Europe, 75µs in the US), your deemphasis filter should match that exactly.
+Radio stations also emphasise the high-frequency components of the sound, so applying a de-emphasis filter is also necessary. The pre-emphasis curve is standardised (e.g. 50µs in Europe, 75µs in the US), your deemphasis filter should match that exactly.
 
 So... You've done all that, and your audio sounds like this...
 
@@ -151,7 +151,7 @@ That's what the same station should have sounded like... Thanks [SDR++](https://
 * When I wrote that the RTL-SDR gives samples of the baseband, that was a simplification, the RTL-SDR performs quadrature sampling with a tunable IF, not true DC baseband. The signal is typically centered near 0 Hz in software, but depending on tuner settings, the actual hardware may shift it to a low IF like 1 MHz. (Although for RTL2832U with direct sampling, it can be closer to baseband.)
 * The [real](https://github.com/AlexandreRouma/SDRPlusPlus/blob/master/source_modules/rtl_sdr_source/src/main.cpp#L535) DC offset of the RTL-SDR is not 127, it's closer to 127.4
 * When I say "baseband", I mean complex baseband (centered around 0 Hz), not real baseband (as in regular AM audio).
-* When I wrote \(θ(t)=tan^{−1}(Q/I)\), I used `tan` as a simplification, you use atan2 because it accounts for quadrant ambiguity.
+* When I wrote \(θ(t)=tan^{−1}(Q/I)\), I used `tan` as a simplification, you use `atan2` because it accounts for quadrant ambiguity.
 
 Check out the code for this on [My GitHub](https://github.com/benkyd/dsp/blob/master/fm/src/main.cpp)
 
