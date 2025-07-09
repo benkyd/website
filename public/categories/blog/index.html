@@ -5,12 +5,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Tags | Ben Kyd // Engineering Notes</title>
+<title>Blog | Ben Kyd // Engineering Notes</title>
 <meta name="keywords" content="">
 <meta name="description" content="Blog">
 <meta name="author" content="Ben Kyd">
-<link rel="canonical" href="http://localhost:1313/tags/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.deac6b2cb0524a632e34245f9304e297a3be102728fb4e2b8f35870b1f65c8b1.css" integrity="sha256-3qxrLLBSSmMuNCRfkwTil6O&#43;ECco&#43;04rjzWHCx9lyLE=" rel="preload stylesheet" as="style">
+<link rel="canonical" href="http://localhost:1313/categories/blog/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.c2f1403d5c14d797f1e0d9085cbf6ab511fb8352fc9532d292c5b6a5cca3798d.css" integrity="sha256-wvFAPVwU15fx4NkIXL9qtRH7g1L8lTLSksW2pcyjeY0=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -18,8 +18,8 @@
 <link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/index.xml">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/categories/blog/index.xml">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/categories/blog/">
 <noscript>
     <style>
         #theme-toggle,
@@ -70,16 +70,16 @@
 
   
 
-<meta property="og:url" content="http://localhost:1313/tags/">
+<meta property="og:url" content="http://localhost:1313/categories/blog/">
   <meta property="og:site_name" content="Ben Kyd // Engineering Notes">
-  <meta property="og:title" content="Tags">
+  <meta property="og:title" content="Blog">
   <meta property="og:description" content="Blog">
   <meta property="og:locale" content="en-GB">
   <meta property="og:type" content="website">
       <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
-<meta name="twitter:title" content="Tags">
+<meta name="twitter:title" content="Blog">
 <meta name="twitter:description" content="Blog">
 
 </head>
@@ -142,16 +142,36 @@
         </ul>
     </nav>
 </header>
-<main class="main">
-<header class="page-header">
-    <h1>Tags</h1>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/categories/">Categories</a></div>
+  <h1>
+    Blog
+    <a href="/categories/blog/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
 </header>
 
-<ul class="terms-tags">
-    <li>
-        <a href="http://localhost:1313/tags/test/">Test <sup><strong><sup>1</sup></strong></sup> </a>
-    </li>
-</ul>
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">My First Post
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Welcome to my new minimal blog! This is my first post.
+This is an inline \(a^*=x-b^*\) equation.
+These are block equations:
+\[a^*=x-b^*\]\[ a^*=x-b^* \]\[ a^*=x-b^* \]These are block equations using alternate delimiters:
+$$a^*=x-b^*$$$$ a^*=x-b^* $$$$ a^*=x-b^* $$class FaderController { public: FaderController(int index, FaderIO&amp; io, SafteyStrategy&amp; safety_strategy); ~FaderController() = default; void task(const FaderSensorData&amp; data, uint32_t mills); void calibrate(); // Calibrate the fader position and the PID controller, will restart // routine if the fader is not in a safe state or is touched bool is_calibrated() const; void seek(uint8_t position, uint8_t rate = 255); // rate is max speed void stop(); uint8_t get_position() const; // Returns the current position (0-255) (smoothed) bool is_idle() const; // Returns true if the fader is idle (not moving) private: enum class State { Idle, Calibrating, Seeking, Stopping, Touched, Fault } _state = State::Idle; FaderSensorData _last; int _index; // Fader index in the bank FaderIO&amp; _io; SafteyStrategy&amp; _saftey; PIDController _pid; KalmanFilter _kalman; uint32_t _last_millis = 0; void is_safe(); private: bool _calib_waiting = false; int _calib_step = 0; std::vector&lt;float&gt; _calib_samples; uint32_t _calib_start_time; }; </p>
+  </div>
+  <footer class="entry-footer"><span title='2025-07-09 12:00:00 +0100 BST'>July 9, 2025</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;Ben Kyd</footer>
+  <a class="entry-link" aria-label="post link to My First Post" href="http://localhost:1313/posts/first/"></a>
+</article>
     </main>
     
 <footer class="footer">

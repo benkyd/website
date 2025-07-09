@@ -1,0 +1,11 @@
+@import url('https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+  font-family: 'Noto Serif', serif;
+}
+
+code {
+  font-family: 'JetBrains Mono';
+}
+
