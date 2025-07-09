@@ -11,12 +11,12 @@
     </image>
     <generator>Hugo -- 0.148.0</generator>
     <language>en-GB</language>
-    <lastBuildDate>Tue, 08 Jul 2025 18:13:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 09 Jul 2025 18:13:54 +0000</lastBuildDate>
     <atom:link href="https://benkyd.co.uk/tags/rf/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Practical DSP, FM Demodulation on the RTL-SDR</title>
       <link>https://benkyd.co.uk/posts/fm-demod/</link>
-      <pubDate>Tue, 08 Jul 2025 18:13:54 +0000</pubDate>
+      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
       <guid>https://benkyd.co.uk/posts/fm-demod/</guid>
       <description>Exploring the basics of DSP in the context of FM modulation</description>
     </item>

@@ -1,6 +1,6 @@
 ---
 title: "Practical DSP, FM Demodulation on the RTL-SDR"
-date: 2025-07-10T18:13:54Z
+date: 2025-07-09T18:13:54Z
 tags: ["RF", "C++", "Programming", "SDR"]
 author: "Ben Kyd"
 showToc: true
@@ -151,7 +151,7 @@ That's what the same station should have sounded like... Thanks [SDR++](https://
 * When I wrote that the RTL-SDR gives samples of the baseband, that was a simplification, the RTL-SDR performs quadrature sampling with a tunable IF, not true DC baseband. The signal is typically centered near 0 Hz in software, but depending on tuner settings, the actual hardware may shift it to a low IF like 1 MHz. (Although for RTL2832U with direct sampling, it can be closer to baseband.)
 * The [real](https://github.com/AlexandreRouma/SDRPlusPlus/blob/master/source_modules/rtl_sdr_source/src/main.cpp#L535) DC offset of the RTL-SDR is not 127, it's closer to 127.4
 * When I say "baseband", I mean complex baseband (centered around 0 Hz), not real baseband (as in regular AM audio).
-* When I wrote \(θ(t)=tan^{−1}(Q/I)\), I used `tan` as a simplification, you use `atan2` because it accounts for quadrant ambiguity.
+* When I wrote \(θ(t)=tan^{−1}(Q/I)\), I used `tan` as a simplification, you use atan2 because it accounts for quadrant ambiguity.
 
 Check out the code for this on [My GitHub](https://github.com/benkyd/dsp/blob/master/fm/src/main.cpp)
 
