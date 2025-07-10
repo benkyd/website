@@ -6,6 +6,7 @@ defaultContentLanguage: "en"
 enableRobotsTXT: true
 googlefonts: [ "Noto Sans" ]
 fontbody: "Noto Sans"
+googleAnalytics: "G-J2M8RXRC9P"
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
