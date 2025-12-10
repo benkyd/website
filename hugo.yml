@@ -46,16 +46,13 @@ params:
   homeInfoParams:
     Title: "Ben Kyd"
     Content: >
-      Hardware, Firmware, FPGAs and Framebuffers
+      Kernel Drivers @  - Hardware, Firmware, FPGAs and Framebuffers
 
 
   socialIcons:
     - name: github
       title: GitHub
       url: "https://github.com/BenKyd"
-    - name: X
-      title: X
-      url: "https://x.com/ben_kyd"
     - name: YouTube
       title: YouTube
       url: "https://youtube.com/@benkyd7874"

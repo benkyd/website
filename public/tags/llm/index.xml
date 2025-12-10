@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Programming on Ben Kyd // Engineering Notes</title>
-    <link>https://benkyd.co.uk/tags/programming/</link>
-    <description>Recent content in Programming on Ben Kyd // Engineering Notes</description>
+    <title>LLM on Ben Kyd // Engineering Notes</title>
+    <link>https://benkyd.co.uk/tags/llm/</link>
+    <description>Recent content in LLM on Ben Kyd // Engineering Notes</description>
     <generator>Hugo</generator>
     <language>en-GB</language>
     <lastBuildDate>Wed, 23 Jul 2025 18:13:54 +0000</lastBuildDate>
-    <atom:link href="https://benkyd.co.uk/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://benkyd.co.uk/tags/llm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>ChatGPT Detox and the harm of LLMs in engineering</title>
       <link>https://benkyd.co.uk/posts/chatgpt_detox/</link>
       <pubDate>Wed, 23 Jul 2025 18:13:54 +0000</pubDate>
       <guid>https://benkyd.co.uk/posts/chatgpt_detox/</guid>
       <description>&lt;p&gt;When high performance LLMs first landed, it was a novel technology that we all messed with, tried to break,&lt;/p&gt;&#xA;&lt;p&gt;We were very quick to incorporate them into our development workflow, with tools like GitHub Copilot and Amazon CodeWhisperer, they were immediately in our IDEs, for instant and immediate use, one hotkey to accept the code suggestion and one hotkey for a code review.&lt;/p&gt;&#xA;&lt;p&gt;Our reliance and dependency on these tools grew, and it grew very quickly. It seemed like it was overnight that the &amp;ldquo;tech bro&amp;rdquo; meta for engineering had completely shifted from &amp;ldquo;10x developers&amp;rdquo; to &amp;ldquo;vibe coders&amp;rdquo;. It was the great democratisation of engineering, all of a sudden, everybody was of the same calibre of engineer, an expert on everything and able to propose solutions immediately.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Practical DSP, FM Demodulation on the RTL-SDR</title>
-      <link>https://benkyd.co.uk/posts/fm-demod/</link>
-      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
-      <guid>https://benkyd.co.uk/posts/fm-demod/</guid>
-      <description>&lt;p&gt;There are few things that I have put off learning more than Digital Signal Processing (DSP), namely because it sounded &lt;em&gt;really&lt;/em&gt; hard, and &lt;em&gt;really&lt;/em&gt; maths-heavy. But recently I have been learning the basics alongside some projects involving the &lt;a href=&#34;https://www.rtl-sdr.com/&#34;&gt;RTL-SDR&lt;/a&gt;, the $40 USB Dongle to explore the spectrum.&lt;/p&gt;&#xA;&lt;p&gt;The unfortunate truth is that there is some amount of maths that is unavoidable in DSP, the main prerequisite being the intuitive understanding of complex numbers, it really helps with wrapping your head around.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

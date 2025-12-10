@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Ben Kyd // Engineering Notes</title>
     <link>https://benkyd.co.uk/tags/</link>
     <description>Recent content in Tags on Ben Kyd // Engineering Notes</description>
-    <image>
-      <title>Ben Kyd // Engineering Notes</title>
-      <url>https://benkyd.co.uk/images/papermod-cover.png</url>
-      <link>https://benkyd.co.uk/images/papermod-cover.png</link>
-    </image>
-    <generator>Hugo -- 0.147.8</generator>
+    <generator>Hugo</generator>
     <language>en-GB</language>
-    <lastBuildDate>Wed, 09 Jul 2025 18:13:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 23 Jul 2025 18:13:54 +0000</lastBuildDate>
     <atom:link href="https://benkyd.co.uk/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>C&#43;&#43;</title>
-      <link>https://benkyd.co.uk/tags/c&#43;&#43;/</link>
-      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/c&#43;&#43;/</guid>
+      <title>LLM</title>
+      <link>https://benkyd.co.uk/tags/llm/</link>
+      <pubDate>Wed, 23 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/llm/</guid>
       <description></description>
     </item>
     <item>
       <title>Programming</title>
       <link>https://benkyd.co.uk/tags/programming/</link>
-      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
+      <pubDate>Wed, 23 Jul 2025 18:13:54 +0000</pubDate>
       <guid>https://benkyd.co.uk/tags/programming/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>https://benkyd.co.uk/tags/c&#43;&#43;/</link>
+      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
