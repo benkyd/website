@@ -5,7 +5,7 @@ tags: ["Programming", "LLM"]
 author: "Ben Kyd"
 showToc: true
 TocOpen: false
-draft: false
+draft: true
 hidemeta: false
 comments: false
 description: "Many engineers rely on ChatGPT to function"

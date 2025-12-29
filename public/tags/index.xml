@@ -11,27 +11,20 @@
     </image>
     <generator>Hugo -- 0.153.3</generator>
     <language>en-GB</language>
-    <lastBuildDate>Wed, 23 Jul 2025 18:13:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 09 Jul 2025 18:13:54 +0000</lastBuildDate>
     <atom:link href="https://benkyd.co.uk/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>LLM</title>
-      <link>https://benkyd.co.uk/tags/llm/</link>
-      <pubDate>Wed, 23 Jul 2025 18:13:54 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/llm/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Programming</title>
-      <link>https://benkyd.co.uk/tags/programming/</link>
-      <pubDate>Wed, 23 Jul 2025 18:13:54 +0000</pubDate>
-      <guid>https://benkyd.co.uk/tags/programming/</guid>
-      <description></description>
-    </item>
     <item>
       <title>C&#43;&#43;</title>
       <link>https://benkyd.co.uk/tags/c&#43;&#43;/</link>
       <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
       <guid>https://benkyd.co.uk/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Programming</title>
+      <link>https://benkyd.co.uk/tags/programming/</link>
+      <pubDate>Wed, 09 Jul 2025 18:13:54 +0000</pubDate>
+      <guid>https://benkyd.co.uk/tags/programming/</guid>
       <description></description>
     </item>
     <item>
