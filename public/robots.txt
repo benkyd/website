@@ -1,1 +1,3 @@
 User-agent: *
+Disallow:
+Sitemap: https://benkyd.co.uk/sitemap.xml
