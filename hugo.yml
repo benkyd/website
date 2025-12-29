@@ -46,12 +46,7 @@ params:
   homeInfoParams:
     Title: "Ben Kyd"
     Content: >
-      Kernel Drivers @
-      <svg viewBox="0 0 814 1000" height="1em" style="vertical-align: -0.15em">
-        <path fill="currentColor"
-          d="M788 339c-5-4-91-51-91-151 0-86 74-130 78-133-43-62-109-71-133-72-57-6-112 34-141 34-29 0-74-33-122-32-63 1-121 37-153 94-65 113-17 280 47 372 31 45 69 96 118 94 47-2 65-31 122-31s73 31 123 30c51-1 84-46 115-91 35-51 49-100 50-103-1-1-96-37-97-151zM578 114c26-31 44-74 39-114-38 1-84 25-111 56-24 28-45 72-39 113 43 3 85-22 111-55z"/>
-      </svg>
-      – Hardware, Firmware, FPGAs and Framebuffers
+      GPU Kernel Drivers @ Apple – Hardware Acceleration & Graphics
 
   socialIcons:
     - name: github
