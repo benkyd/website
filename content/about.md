@@ -8,9 +8,9 @@ disableShare: true
 ---
 
 ## Ben Kyd
-**GPU Kernel Software Engineer**
+**GPU Kernel Driver Software Engineer**
 
-I write GPU kernel software. Most of my background is embedded: firmware, drivers, hardware acceleration and FPGA toolchains, at Apple, Intel and ChamSys, and through my own consultancy, Ben Labs Ltd.
+I write GPU kernel driver software. Most of my background is embedded: firmware, drivers, hardware acceleration and FPGA toolchains, at Apple, Intel and ChamSys, and through my own consultancy, Ben Labs Ltd.
 
 Outside work I mostly build low-level things for fun: a RISC-V emulator, game engines, a couple of operating systems. I've contributed to Zephyr, Meshtastic and SDR++, and whatever I'm working on now is on [GitHub](https://github.com/benkyd).
 

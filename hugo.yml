@@ -48,7 +48,7 @@ params:
   homeInfoParams:
     Title: "Ben Kyd"
     Content: >
-      GPU Kernel Software Engineer / Amateur Photographer
+      GPU Kernel Driver Software Engineer / Amateur Photographer
 
   socialIcons:
     - name: github

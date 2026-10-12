@@ -7,7 +7,7 @@ categories: ["Blog"]
 draft: false
 ---
 
-I'm Ben. I write GPU kernel software for a living, and this site is where the rest of it ends up: embedded systems, firmware, and whichever side project has taken over my evenings lately.
+I'm Ben. I write GPU kernel driver software for a living, and this site is where the rest of it ends up: embedded systems, firmware, and whichever side project has taken over my evenings lately.
 
 It's also home to my [photography](/photography/), a mix of film and digital, mostly from trips and walks.
 
