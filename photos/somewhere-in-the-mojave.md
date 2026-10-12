@@ -1,6 +1,6 @@
 ---
 alt: "Somewhere in the Mojave"
-date: 2025-08-02
+date: 2025-08-04
 image: "somewhere-in-the-mojave.jpg"
 location: "Mojave National Preserve, USA"
 camera: "Nikon FG"

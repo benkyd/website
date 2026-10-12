@@ -1,6 +1,6 @@
 ---
 alt: "Side by Side"
-date: 2025-08-01
+date: 2025-08-03
 image: "side-by-side.jpg"
 location: "San Francisco, USA"
 camera: "Nikon FA"

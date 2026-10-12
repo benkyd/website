@@ -1,6 +1,6 @@
 ---
 alt: "Road to Nowhere"
-date: 2025-08-01
+date: 2025-08-02
 image: "road-to-nowhere.jpg"
 location: "Death Valley, USA"
 camera: "Sony A7CII"
