@@ -277,6 +277,24 @@ h2{font-size:1.15rem;margin:2.25rem 0 1rem}
 label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
 label:first-child{margin-top:0}
 .hint{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+.card-wide{max-width:760px}
+.btn-small{font:inherit;font-size:.85rem;padding:.35rem .8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer}
+.btn-small:hover{border-color:var(--accent);color:var(--accent)}
+.crop-stage{position:relative;display:inline-block;max-width:calc(100% - 16px);margin:.6rem 8px .8rem;line-height:0;touch-action:none;user-select:none}
+.crop-shade{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.crop-hole{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.55)}
+.crop-img{display:block;max-width:100%;max-height:60vh;width:auto;height:auto}
+.crop-box{position:absolute;outline:1px solid rgba(255,255,255,.9);cursor:move}
+.crop-box::before,.crop-box::after{content:"";position:absolute;inset:0;pointer-events:none;border:0 solid rgba(255,255,255,.35)}
+.crop-box::before{left:33.33%;right:33.33%;border-left-width:1px;border-right-width:1px}
+.crop-box::after{top:33.33%;bottom:33.33%;border-top-width:1px;border-bottom-width:1px}
+.crop-h{position:absolute;width:14px;height:14px;background:#fff;border:1px solid rgba(0,0,0,.35);border-radius:3px;z-index:1}
+.crop-h[data-h=nw]{left:-7px;top:-7px;cursor:nwse-resize}.crop-h[data-h=ne]{right:-7px;top:-7px;cursor:nesw-resize}
+.crop-h[data-h=sw]{left:-7px;bottom:-7px;cursor:nesw-resize}.crop-h[data-h=se]{right:-7px;bottom:-7px;cursor:nwse-resize}
+.crop-h[data-h=n]{left:calc(50% - 7px);top:-7px;cursor:ns-resize}.crop-h[data-h=s]{left:calc(50% - 7px);bottom:-7px;cursor:ns-resize}
+.crop-h[data-h=w]{top:calc(50% - 7px);left:-7px;cursor:ew-resize}.crop-h[data-h=e]{top:calc(50% - 7px);right:-7px;cursor:ew-resize}
+.crop-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.crop-info{font-size:.8rem;color:var(--muted)}
 label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
 label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
 .gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
@@ -351,6 +369,18 @@ TEMPLATE = """<!DOCTYPE html>
 <form method="post" action="/admin/upload" enctype="multipart/form-data" class="card">
 <label>Image (jpg / png / webp)</label>
 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required/>
+<div class="crop" data-src="">
+<div class="crop-stage" hidden><img class="crop-img" alt=""><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-box">
+<span class="crop-h" data-h="nw"></span><span class="crop-h" data-h="n"></span><span class="crop-h" data-h="ne"></span>
+<span class="crop-h" data-h="e"></span><span class="crop-h" data-h="se"></span><span class="crop-h" data-h="s"></span>
+<span class="crop-h" data-h="sw"></span><span class="crop-h" data-h="w"></span></div></div>
+<div class="crop-tools" hidden>
+<button type="button" class="btn-small" data-act="auto">Remove border</button>
+<button type="button" class="btn-small" data-act="reset">Reset crop</button>
+<span class="crop-info"></span>
+</div>
+<input type="hidden" name="crop" value="">
+</div>
 """ + FIELDS_HTML + """
 <button class="btn" type="submit">Publish</button>
 </form>
@@ -369,7 +399,112 @@ TEMPLATE = """<!DOCTYPE html>
 <button class="btn btn-ghost" type="submit">Sign Out</button>
 </form>
 {% endif %}
-</div></body></html>"""
+</div>
+<script>
+// Crop view: a draggable box over the upright original. The box is kept as
+// fractions (left, top, right, bottom) in the hidden "crop" input.
+document.querySelectorAll(".crop").forEach(function (root) {
+  var stage = root.querySelector(".crop-stage"), img = root.querySelector(".crop-img");
+  var box = root.querySelector(".crop-box"), tools = root.querySelector(".crop-tools");
+  var input = root.querySelector("input[name=crop]"), info = root.querySelector(".crop-info");
+  var hole = root.querySelector(".crop-hole");
+  var form = root.closest("form"), file = form.querySelector("input[type=file]");
+  var c = parse(input.value) || [0, 0, 1, 1], MIN = 0.05;
+
+  function parse(v) {
+    var a = (v || "").split(",").map(Number);
+    return a.length === 4 && a.every(function (x) { return x >= 0 && x <= 1; }) ? a : null;
+  }
+  function render() {
+    [box, hole].forEach(function (el) {
+      el.style.left = c[0] * 100 + "%"; el.style.top = c[1] * 100 + "%";
+      el.style.width = (c[2] - c[0]) * 100 + "%"; el.style.height = (c[3] - c[1]) * 100 + "%";
+    });
+    var full = c[0] <= 0.0001 && c[1] <= 0.0001 && c[2] >= 0.9999 && c[3] >= 0.9999;
+    input.value = full ? "" : c.map(function (x) { return x.toFixed(4); }).join(",");
+    info.textContent = full ? "Not cropped" : "Keeping " + Math.round((c[2] - c[0]) * 100) + "% × " + Math.round((c[3] - c[1]) * 100) + "% of the original";
+  }
+  function show(src, keep) {
+    if (!keep) c = [0, 0, 1, 1];
+    img.onload = function () { stage.hidden = false; tools.hidden = false; render(); };
+    img.src = src;
+  }
+
+  var drag = null;
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.target !== box && !e.target.classList.contains("crop-h")) return;
+    e.preventDefault();
+    box.setPointerCapture(e.pointerId);
+    drag = { h: e.target.dataset.h || "move", x: e.clientX, y: e.clientY, start: c.slice() };
+  });
+  box.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var r = img.getBoundingClientRect(), dx = (e.clientX - drag.x) / r.width, dy = (e.clientY - drag.y) / r.height;
+    var s = drag.start, n = s.slice();
+    if (drag.h === "move") {
+      var w = s[2] - s[0], h = s[3] - s[1];
+      n[0] = Math.min(Math.max(0, s[0] + dx), 1 - w); n[2] = n[0] + w;
+      n[1] = Math.min(Math.max(0, s[1] + dy), 1 - h); n[3] = n[1] + h;
+    } else {
+      if (drag.h.indexOf("w") >= 0) n[0] = Math.min(Math.max(0, s[0] + dx), s[2] - MIN);
+      if (drag.h.indexOf("e") >= 0) n[2] = Math.max(Math.min(1, s[2] + dx), s[0] + MIN);
+      if (drag.h.indexOf("n") >= 0) n[1] = Math.min(Math.max(0, s[1] + dy), s[3] - MIN);
+      if (drag.h.indexOf("s") >= 0) n[3] = Math.max(Math.min(1, s[3] + dy), s[1] + MIN);
+    }
+    c = n; render();
+  });
+  box.addEventListener("pointerup", function () { drag = null; });
+  box.addEventListener("pointercancel", function () { drag = null; });
+
+  // Find a uniform border (white mount, black film rebate, scanner bed) on
+  // each side and crop just inside it.
+  function autoBorder() {
+    var W = Math.min(480, img.naturalWidth), H = Math.round(img.naturalHeight * W / img.naturalWidth);
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+    var d = ctx.getImageData(0, 0, W, H).data;
+    function lum(x, y) { var i = (y * W + x) * 4; return 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; }
+    function line(pos, vertical) {
+      var out = [], n = vertical ? H : W;
+      for (var k = 0; k < n; k++) out.push(vertical ? lum(pos, k) : lum(k, pos));
+      return out;
+    }
+    function median(a) { var b = a.slice().sort(function (p, q) { return p - q; }); return b[b.length >> 1]; }
+    // A border is a near-white or near-black band, almost perfectly uniform,
+    // ending in a sharp step - so bright skies, mist or snow don't count.
+    function frac(pos, vertical, ref) {
+      var vals = line(pos, vertical), hit = 0;
+      for (var j = 0; j < vals.length; j++) if (Math.abs(vals[j] - ref) < 12) hit++;
+      return hit / vals.length;
+    }
+    function scan(vertical, fromEnd) {
+      var n = vertical ? W : H, at = function (k) { return fromEnd ? n - 1 - k : k; };
+      var ref = median(line(at(0), vertical));
+      if (ref > 28 && ref < 232) return 0;
+      var k = 0;
+      while (k < n * 0.12 && frac(at(k), vertical, ref) >= 0.97) k++;
+      if (k === 0 || k >= n * 0.12) return 0;
+      return frac(at(Math.min(n - 1, k + 2)), vertical, ref) < 0.75 ? k : 0;
+    }
+    var inset = 0.004;
+    var l = scan(true, false) / W, r = scan(true, true) / W, t = scan(false, false) / H, b = scan(false, true) / H;
+    c = [l ? l + inset : 0, t ? t + inset : 0, r ? 1 - r - inset : 1, b ? 1 - b - inset : 1];
+    render();
+    if (!l && !r && !t && !b) info.textContent = "No border found";
+  }
+
+  tools.addEventListener("click", function (e) {
+    var act = e.target.dataset.act;
+    if (act === "auto") autoBorder();
+    if (act === "reset") { c = [0, 0, 1, 1]; render(); }
+  });
+  if (file) file.addEventListener("change", function () {
+    if (file.files[0]) show(URL.createObjectURL(file.files[0]), false);
+  });
+  if (root.dataset.src) show(root.dataset.src, true);
+});
+</script>
+</body></html>"""
 
 EDIT_TEMPLATE = """<!DOCTYPE html>
 <html><head>
@@ -379,8 +514,21 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
 <p class="topbar"><a href="/admin">&lsaquo; All photos</a><a href="/photography/{{ p.slug }}/">View on site</a></p>
 <h1>Edit photo</h1>
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<img class="preview" src="{{ p.thumb }}" alt=""/>
-<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="card">
+<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="card card-wide">
+<label>Crop</label>
+<p class="hint">Drag the box or its handles. The original file is kept - this only changes what's shown.</p>
+<div class="crop" data-src="/admin/source/{{ p.slug }}.jpg?v={{ p.mtime }}">
+<div class="crop-stage" hidden><img class="crop-img" alt=""><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-box">
+<span class="crop-h" data-h="nw"></span><span class="crop-h" data-h="n"></span><span class="crop-h" data-h="ne"></span>
+<span class="crop-h" data-h="e"></span><span class="crop-h" data-h="se"></span><span class="crop-h" data-h="s"></span>
+<span class="crop-h" data-h="sw"></span><span class="crop-h" data-h="w"></span></div></div>
+<div class="crop-tools" hidden>
+<button type="button" class="btn-small" data-act="auto">Remove border</button>
+<button type="button" class="btn-small" data-act="reset">Reset crop</button>
+<span class="crop-info"></span>
+</div>
+<input type="hidden" name="crop" value="{{ p.crop }}">
+</div>
 <label>Replace image (optional)</label>
 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"/>
 """ + FIELDS_HTML + """
@@ -390,10 +538,115 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
       onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
 <button class="btn btn-danger" type="submit">Delete this photo</button>
 </form>
-</div></body></html>"""
+</div>
+<script>
+// Crop view: a draggable box over the upright original. The box is kept as
+// fractions (left, top, right, bottom) in the hidden "crop" input.
+document.querySelectorAll(".crop").forEach(function (root) {
+  var stage = root.querySelector(".crop-stage"), img = root.querySelector(".crop-img");
+  var box = root.querySelector(".crop-box"), tools = root.querySelector(".crop-tools");
+  var input = root.querySelector("input[name=crop]"), info = root.querySelector(".crop-info");
+  var hole = root.querySelector(".crop-hole");
+  var form = root.closest("form"), file = form.querySelector("input[type=file]");
+  var c = parse(input.value) || [0, 0, 1, 1], MIN = 0.05;
+
+  function parse(v) {
+    var a = (v || "").split(",").map(Number);
+    return a.length === 4 && a.every(function (x) { return x >= 0 && x <= 1; }) ? a : null;
+  }
+  function render() {
+    [box, hole].forEach(function (el) {
+      el.style.left = c[0] * 100 + "%"; el.style.top = c[1] * 100 + "%";
+      el.style.width = (c[2] - c[0]) * 100 + "%"; el.style.height = (c[3] - c[1]) * 100 + "%";
+    });
+    var full = c[0] <= 0.0001 && c[1] <= 0.0001 && c[2] >= 0.9999 && c[3] >= 0.9999;
+    input.value = full ? "" : c.map(function (x) { return x.toFixed(4); }).join(",");
+    info.textContent = full ? "Not cropped" : "Keeping " + Math.round((c[2] - c[0]) * 100) + "% × " + Math.round((c[3] - c[1]) * 100) + "% of the original";
+  }
+  function show(src, keep) {
+    if (!keep) c = [0, 0, 1, 1];
+    img.onload = function () { stage.hidden = false; tools.hidden = false; render(); };
+    img.src = src;
+  }
+
+  var drag = null;
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.target !== box && !e.target.classList.contains("crop-h")) return;
+    e.preventDefault();
+    box.setPointerCapture(e.pointerId);
+    drag = { h: e.target.dataset.h || "move", x: e.clientX, y: e.clientY, start: c.slice() };
+  });
+  box.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var r = img.getBoundingClientRect(), dx = (e.clientX - drag.x) / r.width, dy = (e.clientY - drag.y) / r.height;
+    var s = drag.start, n = s.slice();
+    if (drag.h === "move") {
+      var w = s[2] - s[0], h = s[3] - s[1];
+      n[0] = Math.min(Math.max(0, s[0] + dx), 1 - w); n[2] = n[0] + w;
+      n[1] = Math.min(Math.max(0, s[1] + dy), 1 - h); n[3] = n[1] + h;
+    } else {
+      if (drag.h.indexOf("w") >= 0) n[0] = Math.min(Math.max(0, s[0] + dx), s[2] - MIN);
+      if (drag.h.indexOf("e") >= 0) n[2] = Math.max(Math.min(1, s[2] + dx), s[0] + MIN);
+      if (drag.h.indexOf("n") >= 0) n[1] = Math.min(Math.max(0, s[1] + dy), s[3] - MIN);
+      if (drag.h.indexOf("s") >= 0) n[3] = Math.max(Math.min(1, s[3] + dy), s[1] + MIN);
+    }
+    c = n; render();
+  });
+  box.addEventListener("pointerup", function () { drag = null; });
+  box.addEventListener("pointercancel", function () { drag = null; });
+
+  // Find a uniform border (white mount, black film rebate, scanner bed) on
+  // each side and crop just inside it.
+  function autoBorder() {
+    var W = Math.min(480, img.naturalWidth), H = Math.round(img.naturalHeight * W / img.naturalWidth);
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+    var d = ctx.getImageData(0, 0, W, H).data;
+    function lum(x, y) { var i = (y * W + x) * 4; return 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; }
+    function line(pos, vertical) {
+      var out = [], n = vertical ? H : W;
+      for (var k = 0; k < n; k++) out.push(vertical ? lum(pos, k) : lum(k, pos));
+      return out;
+    }
+    function median(a) { var b = a.slice().sort(function (p, q) { return p - q; }); return b[b.length >> 1]; }
+    // A border is a near-white or near-black band, almost perfectly uniform,
+    // ending in a sharp step - so bright skies, mist or snow don't count.
+    function frac(pos, vertical, ref) {
+      var vals = line(pos, vertical), hit = 0;
+      for (var j = 0; j < vals.length; j++) if (Math.abs(vals[j] - ref) < 12) hit++;
+      return hit / vals.length;
+    }
+    function scan(vertical, fromEnd) {
+      var n = vertical ? W : H, at = function (k) { return fromEnd ? n - 1 - k : k; };
+      var ref = median(line(at(0), vertical));
+      if (ref > 28 && ref < 232) return 0;
+      var k = 0;
+      while (k < n * 0.12 && frac(at(k), vertical, ref) >= 0.97) k++;
+      if (k === 0 || k >= n * 0.12) return 0;
+      return frac(at(Math.min(n - 1, k + 2)), vertical, ref) < 0.75 ? k : 0;
+    }
+    var inset = 0.004;
+    var l = scan(true, false) / W, r = scan(true, true) / W, t = scan(false, false) / H, b = scan(false, true) / H;
+    c = [l ? l + inset : 0, t ? t + inset : 0, r ? 1 - r - inset : 1, b ? 1 - b - inset : 1];
+    render();
+    if (!l && !r && !t && !b) info.textContent = "No border found";
+  }
+
+  tools.addEventListener("click", function (e) {
+    var act = e.target.dataset.act;
+    if (act === "auto") autoBorder();
+    if (act === "reset") { c = [0, 0, 1, 1]; render(); }
+  });
+  if (file) file.addEventListener("change", function () {
+    if (file.files[0]) show(URL.createObjectURL(file.files[0]), false);
+  });
+  if (root.dataset.src) show(root.dataset.src, true);
+});
+</script>
+</body></html>"""
 
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
-         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "featured": ""}
+         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "featured": "", "crop": ""}
 
 
 def client_ip():
@@ -424,6 +677,7 @@ def admin_photos():
         q = dict(EMPTY, **{k: v for k, v in p.items() if isinstance(v, str)})
         q["month"] = p.get("date", "")[:7]
         q["thumb"] = photos.variant_url(p, "thumb", "webp")
+        q["mtime"] = p["mtime"]
         out.append(q)
     return out
 
@@ -472,7 +726,14 @@ def form_data(existing_date=""):
         "iso": (f.get("iso") or "").strip().removeprefix("ISO").strip(),
         "filmStock": (f.get("film_stock") or "").strip(),
         "featured": "true" if f.get("featured") else "",
+        "crop": clean_crop(f.get("crop")),
     }, None
+
+
+def clean_crop(value):
+    """The crop box from the form, normalised, or "" for none."""
+    box = photos.parse_crop(value or "")
+    return ",".join(f"{x:.4f}" for x in box) if box else ""
 
 
 def save_upload(file, slug):
@@ -564,6 +825,19 @@ def upload():
     return render_index(f'Published: <a href="{link}">{escape(SITE_URL + link)}</a>{note}', ok=True)
 
 
+@app.route("/admin/source/<slug>.jpg")
+def admin_source(slug):
+    """The uncropped original (upright, downsized) for the crop view."""
+    if not require_login():
+        abort(403)
+    p = photos.load(slug)
+    if not p:
+        abort(404)
+    resp = send_file(photos.uncropped_preview(p), mimetype="image/jpeg", max_age=0)
+    resp.headers["Cache-Control"] = "private, no-store"
+    return resp
+
+
 @app.route("/admin/edit/<slug>")
 def edit_form(slug):
     if not require_login():
@@ -592,6 +866,8 @@ def edit_save(slug):
             os.remove(p["src"])
         data["image"] = name
         photos.purge_cache(slug)
+    elif data["crop"] != p.get("crop", ""):
+        photos.purge_cache(slug)  # old crop's derivatives are no longer used
 
     photos.write(slug, data, p.get("body", ""))
     note = commit_push(slug, f"Edit photo: {data['alt']}")

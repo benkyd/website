@@ -5,6 +5,7 @@ server (derivatives are generated on first request and cached under cache/).
 """
 import base64
 import glob
+import hashlib
 import io
 import os
 import re
@@ -19,7 +20,7 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 # Front matter keys, in the order they're written.
 FIELDS = ["alt", "date", "image", "location", "camera", "lens",
-          "focalLength", "aperture", "shutter", "iso", "filmStock", "featured"]
+          "focalLength", "aperture", "shutter", "iso", "filmStock", "featured", "crop"]
 
 # Derivative sizes: (axis, pixels). A fixed set, so the cache stays bounded.
 VARIANTS = {
@@ -68,6 +69,10 @@ def load(slug):
         return None
     photo["src"] = src
     photo["mtime"] = int(os.path.getmtime(src))
+    photo["cropbox"] = parse_crop(photo.get("crop", ""))
+    # version for cache keys and URLs: changes when the file or the crop does
+    photo["ver"] = str(photo["mtime"]) + (
+        "-" + hashlib.sha1(photo["crop"].encode()).hexdigest()[:8] if photo["cropbox"] else "")
     return photo
 
 
@@ -95,6 +100,27 @@ def write(slug, data, body=""):
         f.write(text)
 
 
+def parse_crop(value):
+    """"left,top,right,bottom" as fractions of the (upright) original, or None.
+
+    The crop is stored in the photo's markdown and applied whenever a
+    derivative is made - the original file is never modified."""
+    try:
+        l, t, r, b = (float(x) for x in value.split(","))
+    except (ValueError, AttributeError):
+        return None
+    if not (0 <= l < r <= 1 and 0 <= t < b <= 1) or r - l < 0.05 or b - t < 0.05:
+        return None
+    if (l, t, r, b) == (0, 0, 1, 1):
+        return None
+    return (l, t, r, b)
+
+
+def crop_pixels(box, w, h):
+    l, t, r, b = box
+    return (round(l * w), round(t * h), round(r * w), round(b * h))
+
+
 def source_path(photo):
     name = os.path.basename(photo.get("image", ""))
     path = os.path.join(PHOTOS_DIR, name)
@@ -113,8 +139,17 @@ def source_size(photo):
     return _size_cache[key]
 
 
-def variant_size(photo, variant):
+def display_size(photo):
+    """Size of the original after orientation and crop."""
     w, h = source_size(photo)
+    if photo.get("cropbox"):
+        l, t, r, b = crop_pixels(photo["cropbox"], w, h)
+        return r - l, b - t
+    return w, h
+
+
+def variant_size(photo, variant):
+    w, h = display_size(photo)
     axis, n = VARIANTS[variant]
     if axis == "w":
         return (w, h) if w <= n else (n, max(1, round(h * n / w)))
@@ -122,7 +157,7 @@ def variant_size(photo, variant):
 
 
 def variant_url(photo, variant, ext):
-    return f"/photography/img/{photo['slug']}/{variant}.{ext}?v={photo['mtime']}"
+    return f"/photography/img/{photo['slug']}/{variant}.{ext}?v={photo['ver']}"
 
 
 def variant_file(photo, variant, ext):
@@ -131,16 +166,21 @@ def variant_file(photo, variant, ext):
     Re-encoding drops all metadata from the output (EXIF, including any GPS
     position), so what's served never leaks more than the picture itself.
     """
-    out = os.path.join(CACHE_DIR, f"{photo['slug']}-{variant}-{photo['mtime']}.{ext}")
+    out = os.path.join(CACHE_DIR, f"{photo['slug']}-{variant}-{photo['ver']}.{ext}")
     if os.path.exists(out):
         return out
     os.makedirs(CACHE_DIR, exist_ok=True)
     tw, th = variant_size(photo, variant)
     fmt, _, opts = FORMATS[ext]
+    box = photo.get("cropbox")
     with Image.open(photo["src"]) as im:
         rotated = im.getexif().get(0x0112, 1) in (5, 6, 7, 8)
-        im.draft("RGB", (th, tw) if rotated else (tw, th))  # fast JPEG downscale
+        # fast JPEG downscale - to whatever still leaves enough pixels after cropping
+        dw, dh = (tw, th) if not box else (round(tw / (box[2] - box[0])), round(th / (box[3] - box[1])))
+        im.draft("RGB", (dh, dw) if rotated else (dw, dh))
         im = ImageOps.exif_transpose(im).convert("RGB")
+        if box:
+            im = im.crop(crop_pixels(box, *im.size))
         if im.size != (tw, th):
             im = im.resize((tw, th), Image.Resampling.LANCZOS)
         tmp = f"{out}.{os.getpid()}.tmp"
@@ -151,11 +191,13 @@ def variant_file(photo, variant, ext):
 
 def placeholder(photo):
     """A ~24px-wide JPEG as a data: URI - shown blurred while the real image loads."""
-    key = (photo["src"], photo["mtime"])
+    key = (photo["src"], photo["ver"])
     if key not in _placeholder_cache:
         with Image.open(photo["src"]) as im:
-            im.draft("RGB", (64, 64))
+            im.draft("RGB", (256, 256))
             im = ImageOps.exif_transpose(im).convert("RGB")
+            if photo.get("cropbox"):
+                im = im.crop(crop_pixels(photo["cropbox"], *im.size))
             im.thumbnail((24, 24))
             buf = io.BytesIO()
             im.save(buf, "JPEG", quality=60)
@@ -167,6 +209,22 @@ def gear_chips(photo):
     """Camera, lens, settings and film as separate labels."""
     return [x for x in (photo.get("camera"), photo.get("lens"),
                         settings_line(photo), photo.get("filmStock")) if x]
+
+
+def uncropped_preview(photo, width=1600):
+    """Upright, uncropped JPEG for the admin crop view."""
+    out = os.path.join(CACHE_DIR, f"{photo['slug']}-source-{photo['mtime']}.jpg")
+    if os.path.exists(out):
+        return out
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with Image.open(photo["src"]) as im:
+        im.draft("RGB", (width, width))
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        im.thumbnail((width, width), Image.Resampling.LANCZOS)
+        tmp = f"{out}.{os.getpid()}.tmp"
+        im.save(tmp, "JPEG", quality=85)
+    os.replace(tmp, out)
+    return out
 
 
 def purge_cache(slug):
