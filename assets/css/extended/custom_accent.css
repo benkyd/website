@@ -83,3 +83,46 @@ body,
 .main {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* finer details: accent text selection, underlines that clear descenders */
+::selection {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+a {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+/* post cards: the title picks up the accent on hover */
+.post-entry .entry-header h2 {
+  transition: color 0.15s ease;
+}
+.post-entry:hover .entry-header h2 {
+  color: var(--accent);
+}
+
+/* section headings on the home page share one quiet style */
+.home-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 8px 0 12px;
+}
+.home-section-title h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+.home-section-title a {
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+.home-section-title a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .post-entry .entry-header h2 {
+    font-size: 22px;
+    line-height: 1.25;
+  }
+}

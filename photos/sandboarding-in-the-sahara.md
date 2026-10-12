@@ -1,7 +1,7 @@
 ---
-alt: "Sandboarding in the Sahra"
+alt: "Sandboarding in the Sahara"
 date: 2026-10-01
-image: "sandboarding-in-the-sahra.jpg"
+image: "sandboarding-in-the-sahara.jpg"
 location: "Merzouga, Morocco"
 camera: "Sony A7CII"
 lens: "Tamron E 28-75mm F2.8"

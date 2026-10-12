@@ -54,3 +54,27 @@
   --theme: rgb(250, 249, 246);
   --entry: rgb(253, 252, 250);
 }
+
+/* back-to-top: the theme lifts it an extra 5rem on list pages under 900px,
+   which put it a third of the way up a phone screen. Pin it to the corner
+   (clear of the iOS home bar) on every page, and give it a softer look. */
+.top-link,
+.list .top-link {
+  transform: none;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  right: 20px;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  color: var(--secondary);
+}
+.top-link:hover {
+  color: var(--accent);
+}
+@media (max-width: 768px) {
+  .top-link,
+  .list .top-link {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+}

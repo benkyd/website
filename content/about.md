@@ -8,7 +8,7 @@ disableShare: true
 ---
 
 ## Ben Kyd  
-**Embedded Acceleration & Kernel Engineer**
+**GPU Kernel Software Engineer**
 
 I'm a programmer, engineer, amateur photographer and nature lover.
 

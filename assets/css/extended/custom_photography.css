@@ -208,3 +208,23 @@ body:has(.photo-single-figure) .nav {
 .photo-teaser-strip a:hover img {
   transform: scale(1.04);
 }
+
+/* photos sit on the page without a frame - just a soft radius and shadow */
+.photo-tile,
+.photo-teaser-strip a {
+  border: 0;
+  background: var(--code-bg);
+}
+.photo-single-figure img {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+body.dark .photo-single-figure img {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+.photo-single-alt {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.photo-teaser-strip a:hover img {
+  filter: brightness(1.04);
+}
