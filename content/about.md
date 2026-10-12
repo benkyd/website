@@ -7,33 +7,21 @@ hideMeta: true
 disableShare: true
 ---
 
-## Ben Kyd  
+## Ben Kyd
 **GPU Kernel Software Engineer**
 
-I'm a programmer, engineer, amateur photographer and nature lover.
+I write GPU kernel software. Most of my background is embedded: firmware, drivers, hardware acceleration and FPGA toolchains, at Apple, Intel and ChamSys, and through my own consultancy, Ben Labs Ltd.
 
-I work across embedded systems, electrical engineering, hardware acceleration, and graphics. I’m interested in the kind of problems that sit close to the metal-firmware, FPGAs, real-time performance, and systems where software and hardware are tightly coupled.
+Outside work I mostly build low-level things for fun: a RISC-V emulator, game engines, a couple of operating systems. Ive contributed to Zephyr, Meshtastic and SDR++, and whatever I\m working on now is on [GitHub](https://github.com/benkyd).
 
-I’ve worked in roles spanning firmware engineering, embedded acceleration, open hardware development, and FPGA toolchains, with experience at companies like Apple, Intel and ChamSys, as well as through my own consultancy, Ben Labs Ltd.
+### What I work with
 
-A lot of my best work happens outside of work. I spend significant time on open source, low-level personal projects, and experiments-from building my own RISC-V emulator to writing game engines and custom operating systems.
+- C, C++ and Rust, on bare metal and RTOSes
+- Graphics: real-time ray tracing and software rendering
+- Taking hardware from schematic through to working software
 
-My GitHub is the best place to find what I’m currently working on: [github.com/benkyd](https://github.com/benkyd)
+I also take photos, on film and digital. They're [here](/photography/).
 
----
+You can email me at [ben@benkyd.co.uk](mailto:ben@benkyd.co.uk).
 
-### Highlights
-
-- Firmware, RTOS, DMA, bare-metal drivers (C/C++, Rust)
-- Graphics pipelines, modern real-time ray-tracing, software rendering
-- Open source contributor (Zephyr, Meshtastic, SDR++)
-- Systems integration: from schematic to silicon to software
-
----
-
-If you're curious about what I do, the problems I solve, or just want to chat, feel free to reach out.
-
-[ben@benkyd.co.uk](mailto:ben@benkyd.co.uk)
-
-![amature photograph](/photo.jpg)
-
+![A lake beneath steep mountains](/photo.jpg)
