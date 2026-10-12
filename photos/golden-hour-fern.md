@@ -1,6 +1,6 @@
 ---
 alt: "Golden Hour Fern"
-date: 2026-06-02
+date: 2026-06-03
 image: "golden-hour-fern.jpg"
 location: "The New Forest, England"
 camera: "Sony A7CII"
