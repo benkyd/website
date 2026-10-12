@@ -11,10 +11,10 @@
 */
 
 :root {
-  --accent: rgb(168, 87, 44);
+  --accent: rgb(184, 64, 106);
 }
 body.dark {
-  --accent: rgb(224, 140, 97);
+  --accent: rgb(238, 143, 177);
 }
 
 /* Links inside actual content/copy get the accent; nav and social icons

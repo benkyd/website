@@ -266,8 +266,8 @@ def photo_image(slug, variant, ext):
 
 STYLE = """@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Regular.woff2) format("woff2");font-weight:400}
 @font-face{font-family:Libron;src:url(/fonts/libron/Libron-Bold.woff2) format("woff2");font-weight:700}
-:root{--bg:#faf9f6;--card:#fdfcfa;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#a8572c;--on-accent:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#2e2e33;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#232427;--accent:#e08c61;--on-accent:#1d1e20}}
+:root{--bg:#faf9f6;--card:#fdfcfa;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#b8406a;--on-accent:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#2e2e33;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#232427;--accent:#ee8fb1;--on-accent:#1d1e20}}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:Libron,Georgia,serif;padding:1.5rem;min-height:100vh;line-height:1.5}
 .wrap{max-width:900px;margin:0 auto}

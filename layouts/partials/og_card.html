@@ -12,5 +12,5 @@
 {{- $size := cond (gt (len $title) 48) 58 72 }}
 {{- $img := (resources.Get "images/og-base.png").Filter
   (images.Text $title (dict "font" $bold "size" $size "color" "#1e1e1e" "x" 80 "y" 110 "linespacing" 14))
-  (images.Text $sub (dict "font" $reg "size" 30 "color" "#a8572c" "x" 80 "y" 520)) }}
+  (images.Text $sub (dict "font" $reg "size" 30 "color" "#b8406a" "x" 80 "y" 520)) }}
 {{- return $img }}
