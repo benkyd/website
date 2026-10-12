@@ -24,6 +24,10 @@ I also take photos, on film and digital. They're [here](/photography/).
 
 ### Enquiries
 
-For collaboration, photography and general enquiries, please contact [ben@benkyd.co.uk](mailto:ben@benkyd.co.uk).
+For collaboration and general enquiries, please get in touch by email.
+
+**Email:** [ben@benkyd.co.uk](mailto:ben@benkyd.co.uk)\
+**GitHub:** [github.com/benkyd](https://github.com/benkyd)\
+**LinkedIn:** [Ben Kyd](https://uk.linkedin.com/in/ben-kyd-954269173)
 
 ![A lake beneath steep mountains](/photo.jpg)
