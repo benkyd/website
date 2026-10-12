@@ -185,3 +185,56 @@
     draw();
   });
 })();
+
+// Single photo page: click the photo to view it full screen over a greyed
+// background. Click, Esc or the close button exits. Full screen persists
+// while moving between photos with the arrow keys or swipes.
+(function () {
+  var photo = document.querySelector(".photo-frame img");
+  if (!photo) return;
+  var KEY = "photo-lightbox", box = null;
+  function store(on) { try { on ? sessionStorage.setItem(KEY, "1") : sessionStorage.removeItem(KEY); } catch (e) {} }
+  function stored() { try { return sessionStorage.getItem(KEY) === "1"; } catch (e) { return false; } }
+
+  function open(instant) {
+    if (box) return;
+    box = document.createElement("div");
+    box.className = "lightbox" + (instant ? " open instant" : "");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", photo.alt);
+    var img = document.createElement("img");
+    img.src = photo.currentSrc || photo.src;
+    img.alt = photo.alt;
+    var close = document.createElement("button");
+    close.type = "button"; close.className = "lightbox-close"; close.setAttribute("aria-label", "Close");
+    close.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    box.appendChild(img); box.appendChild(close);
+    document.body.appendChild(box);
+    document.documentElement.classList.add("lightbox-on");
+    box.addEventListener("click", shut);
+    if (!instant) requestAnimationFrame(function () { box.classList.add("open"); });
+    close.focus({ preventScroll: true });
+    store(true);
+  }
+  function shut() {
+    if (!box) return;
+    var b = box; box = null;
+    b.classList.remove("open", "instant");
+    document.documentElement.classList.remove("lightbox-on");
+    setTimeout(function () { b.remove(); }, 200);
+    store(false);
+    photo.focus({ preventScroll: true });
+  }
+
+  photo.classList.add("zoomable");
+  photo.tabIndex = 0;
+  photo.addEventListener("click", function () { open(false); });
+  photo.addEventListener("keydown", function (e) { if (e.key === "Enter") open(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") shut(); });
+
+  // came here from another photo while in full screen: reopen straight away
+  function restore() { if (stored()) open(true); }
+  if (document.prerendering) document.addEventListener("prerenderingchange", restore, { once: true });
+  else restore();
+})();
