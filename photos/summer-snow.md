@@ -1,6 +1,6 @@
 ---
 alt: "Summer Snow"
-date: 2026-06-02
+date: 2026-06-03
 image: "summer-snow.jpg"
 location: "Sonora Pass, USA"
 camera: "Sony A7CII"
