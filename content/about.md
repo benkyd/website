@@ -22,7 +22,7 @@ Outside work I mostly build low-level things for fun: a RISC-V emulator, game en
 
 I also take photos, on film and digital. They're [here](/photography/).
 
-Every photo on this site is my own, shot and edited by me without generative AI. I'd rather show what was actually there, and the work of getting it, than something a model made up.
+I believe in human creativity. None of the photographs on this site have been, or ever will be, generated or touched up with generative AI.
 
 ### Enquiries
 
