@@ -97,7 +97,7 @@ GALLERY_TMPL = """<header class="page-header">
 {% if photos %}
 <div class="photo-grid">
 {% for p in photos %}
-<a href="/photography/{{ p.slug }}/" class="photo-tile photo-ph reveal" style="--ph:url({{ p.ph }})" aria-label="View full size: {{ p.alt }}">
+<a href="/photography/{{ p.slug }}/" class="photo-tile photo-ph reveal" style="--ph:url({{ p.ph }});--a:{{ p.ratio }}" aria-label="View full size: {{ p.alt }}">
 <picture>
 <source type="image/webp" srcset="{{ p.thumb_webp }} 1x, {{ p.thumb2x_webp }} 2x">
 <img src="{{ p.thumb_jpg }}" srcset="{{ p.thumb_jpg }} 1x, {{ p.thumb2x_jpg }} 2x" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}" style="view-transition-name:p-{{ p.slug }}"
@@ -186,6 +186,7 @@ def gallery():
     for p in all_photos:
         w, h = photos.variant_size(p, "thumb")
         items.append(dict(slug=p["slug"], alt=p["alt"], when=when_line(p), w=w, h=h,
+                          ratio=round(w / h, 4),
                           ph=photos.placeholder(p),
                           thumb_webp=photos.variant_url(p, "thumb", "webp"),
                           thumb_jpg=photos.variant_url(p, "thumb", "jpg"),

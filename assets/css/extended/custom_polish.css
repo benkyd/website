@@ -69,6 +69,11 @@ body.dark::before {
 .js .photo-ph img:not(.loaded) {
   opacity: 0;
 }
+/* once the photo is in, drop the blurred placeholder entirely so it can
+   never show through a repaint */
+.photo-ph:has(img.loaded)::before {
+  content: none;
+}
 
 /* single photo: the frame shrink-wraps the image and carries the shadow */
 .photo-frame {
