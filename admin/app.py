@@ -116,7 +116,7 @@ PHOTO_TMPL = """<figure class="photo-single-figure">
 <span class="photo-frame photo-ph" style="--ph:url({{ ph }})">
 <picture>
 <source type="image/webp" srcset="{{ full_webp }}">
-<img src="{{ full_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
+<img src="{{ full_jpg }}" data-max="{{ max_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
 </picture>
 </span>
 <figcaption class="photo-single-caption">
@@ -221,6 +221,7 @@ def photo_page(slug):
         paragraphs=[x.strip() for x in p.get("body", "").split("\n\n") if x.strip()],
         full_webp=photos.variant_url(p, "full", "webp"),
         full_jpg=photos.variant_url(p, "full", "jpg"),
+        max_jpg=photos.variant_url(p, "max", "jpg"),
         newer=ordered[i - 1] if i > 0 else None,
         older=ordered[i + 1] if i + 1 < len(ordered) else None)
     return render_page(main, p["alt"], describe(p), f"/photography/{slug}/", image_meta(p, "article"))

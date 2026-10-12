@@ -31,19 +31,32 @@ VARIANTS = {
     "full": ("w", 2200),    # single photo page
     "hero": ("w", 1600),    # homepage banner
     "og": ("w", 1200),      # link previews
+    "max": ("w", 100000),   # the original's full resolution (never upscaled) -
+                            # fetched in the background once a photo page has shown
 }
 # Large sizes get a small visible watermark drawn into the pixels; every size
 # carries copyright/artist tags. Bump WATERMARK_VERSION after changing either
 # so browsers and the CDN fetch the new images.
 WATERMARK = "\u00a9 Ben Kyd"
-WATERMARKED = {"full", "og"}
-WATERMARK_VERSION = "w1"
+WATERMARKED = {"full", "og", "max"}
+WATERMARK_VERSION = "w2"
+QUALITY_VERSION = "q2"
 WATERMARK_FONT = os.path.join(REPO, "assets", "fonts", "Libron-Regular.ttf")
 ARTIST = "Ben Kyd"
 COPYRIGHT = "Copyright Ben Kyd. All rights reserved. benkyd.co.uk"
 
-FORMATS = {"webp": ("WEBP", "image/webp", {"quality": 80}),
-           "jpg": ("JPEG", "image/jpeg", {"quality": 84, "optimize": True, "progressive": True})}
+FORMATS = {"webp": ("WEBP", "image/webp"), "jpg": ("JPEG", "image/jpeg")}
+
+
+def encode_options(variant, ext):
+    """Photography first: visually lossless everywhere, full chroma (4:4:4)
+    for JPEG. The max size is near-lossless JPEG - the originals are already
+    JPEGs, so lossless re-encoding would only multiply the size."""
+    if ext == "jpg":
+        q = 97 if variant == "max" else 95 if variant in ("full", "og", "hero") else 92
+        return {"quality": q, "subsampling": 0, "optimize": True, "progressive": True}
+    q = 95 if variant in ("full", "hero") else 90
+    return {"quality": q, "method": 6}
 
 _FM_RE = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
 _LINE_RE = re.compile(r'^(\w+):\s*(?:"((?:[^"\\]|\\.)*)"|(\S.*?))\s*$', re.M)
@@ -167,7 +180,7 @@ def variant_size(photo, variant):
 
 
 def variant_ver(photo, variant):
-    return photo["ver"] + "-" + WATERMARK_VERSION if variant in WATERMARKED else photo["ver"] + "-m1"
+    return f"{photo['ver']}-{QUALITY_VERSION}" + (f"-{WATERMARK_VERSION}" if variant in WATERMARKED else "")
 
 
 def variant_url(photo, variant, ext):
@@ -175,19 +188,25 @@ def variant_url(photo, variant, ext):
 
 
 def watermark(im):
-    """Small translucent mark in the bottom-right corner, sized to the image."""
+    """Small translucent mark in the bottom-right corner, sized to the image.
+    Only the corner is composited, so full-resolution images stay cheap."""
     w, h = im.size
     size = max(14, round(min(w, h) * 0.022))
     font = ImageFont.truetype(WATERMARK_FONT, size)
-    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    l, t, r, b = d.textbbox((0, 0), WATERMARK, font=font)
+    l, t, r, b = ImageDraw.Draw(im).textbbox((0, 0), WATERMARK, font=font)
     margin = round(min(w, h) * 0.025)
-    x, y = w - margin - (r - l) - l, h - margin - (b - t) - t
+    pad = size  # room for the shadow and glyph overhang
+    cw, ch = (r - l) + 2 * pad, (b - t) + 2 * pad
+    cx, cy = max(0, w - margin - (r - l) - pad), max(0, h - margin - (b - t) - pad)
+    corner = im.crop((cx, cy, min(w, cx + cw), min(h, cy + ch))).convert("RGBA")
+    layer = Image.new("RGBA", corner.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    x, y = pad - l, pad - t
     shadow = max(1, size // 18)
     d.text((x + shadow, y + shadow), WATERMARK, font=font, fill=(0, 0, 0, 70))
     d.text((x, y), WATERMARK, font=font, fill=(255, 255, 255, 165))
-    return Image.alpha_composite(im.convert("RGBA"), layer).convert("RGB")
+    im.paste(Image.alpha_composite(corner, layer).convert("RGB"), (cx, cy))
+    return im
 
 
 def rights_exif():
@@ -209,13 +228,12 @@ def variant_file(photo, variant, ext):
         return out
     os.makedirs(CACHE_DIR, exist_ok=True)
     tw, th = variant_size(photo, variant)
-    fmt, _, opts = FORMATS[ext]
+    fmt = FORMATS[ext][0]
     box = photo.get("cropbox")
     with Image.open(photo["src"]) as im:
-        rotated = im.getexif().get(0x0112, 1) in (5, 6, 7, 8)
-        # fast JPEG downscale - to whatever still leaves enough pixels after cropping
-        dw, dh = (tw, th) if not box else (round(tw / (box[2] - box[0])), round(th / (box[3] - box[1])))
-        im.draft("RGB", (dh, dw) if rotated else (dw, dh))
+        # keep the colour profile (e.g. Display P3) so colours aren't flattened
+        # to sRGB; no JPEG draft-mode shortcut - it softens the result
+        icc = im.info.get("icc_profile")
         im = ImageOps.exif_transpose(im).convert("RGB")
         if box:
             im = im.crop(crop_pixels(box, *im.size))
@@ -224,7 +242,8 @@ def variant_file(photo, variant, ext):
         if variant in WATERMARKED:
             im = watermark(im)
         tmp = f"{out}.{os.getpid()}.tmp"
-        im.save(tmp, fmt, exif=rights_exif(), **opts)
+        extra = {"icc_profile": icc} if icc else {}
+        im.save(tmp, fmt, exif=rights_exif(), **extra, **encode_options(variant, ext))
     os.replace(tmp, out)
     return out
 

@@ -193,6 +193,38 @@
   var photo = document.querySelector(".photo-frame img");
   if (!photo) return;
   var KEY = "photo-lightbox", box = null;
+
+  // Full resolution, mipmap-style: the page shows a 2200px image first; once
+  // that's up, the original-resolution image loads in the background and is
+  // swapped in (same framing, so nothing moves). Full screen uses it too.
+  var maxSrc = photo.dataset.max, maxReady = null;
+  function loadMax() {
+    if (!maxSrc) return Promise.resolve(null);
+    if (!maxReady) maxReady = new Promise(function (resolve) {
+      var i = new Image();
+      i.onload = function () { (i.decode ? i.decode() : Promise.resolve()).then(function () { resolve(maxSrc); }, function () { resolve(maxSrc); }); };
+      i.onerror = function () { resolve(null); };
+      i.src = maxSrc;
+    });
+    return maxReady;
+  }
+  function upgradePage() {
+    loadMax().then(function (src) {
+      if (!src) return;
+      var pic = photo.closest("picture");
+      if (pic) pic.querySelectorAll("source").forEach(function (el) { el.remove(); });
+      photo.src = src;
+    });
+  }
+  function whenActive(fn) {
+    if (document.prerendering) document.addEventListener("prerenderingchange", fn, { once: true });
+    else fn();
+  }
+  var saveData = navigator.connection && navigator.connection.saveData;
+  if (!saveData) whenActive(function () {
+    var go = function () { setTimeout(upgradePage, 250); };
+    if (document.readyState === "complete") go(); else window.addEventListener("load", go, { once: true });
+  });
   function store(on) { try { on ? sessionStorage.setItem(KEY, "1") : sessionStorage.removeItem(KEY); } catch (e) {} }
   function stored() { try { return sessionStorage.getItem(KEY) === "1"; } catch (e) { return false; } }
 
@@ -206,6 +238,7 @@
     var img = document.createElement("img");
     img.src = photo.currentSrc || photo.src;
     img.alt = photo.alt;
+    if (img.src !== maxSrc) loadMax().then(function (src) { if (src) img.src = src; });
     var close = document.createElement("button");
     close.type = "button"; close.className = "lightbox-close"; close.setAttribute("aria-label", "Close");
     close.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
