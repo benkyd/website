@@ -108,15 +108,26 @@ body.dark .photo-frame {
 /* Full-bleed photo behind the intro. A bottom-weighted scrim keeps the
    white text readable on any photo, bright snow included. Only styled
    when scripts run (html.js) and a photo is coming (not .no-photo). */
-body {
-  overflow-x: clip; /* the 100vw hero must not add a sideways scroll */
+/* The home page's main column goes full width so the hero can simply fill
+   it; everything else is re-centred at the normal reading width. (100vw
+   would include a visible scrollbar, pushing the photo off-centre and
+   short of the right edge.) */
+.main:has(> .home-hero) {
+  max-width: none;
+  padding-inline: 0;
+}
+.main:has(> .home-hero) > :not(.home-hero) {
+  width: calc(100% - 24px);
+  /* same text column as every other page: main width + gaps - padding */
+  max-width: calc(var(--main-width) + var(--gap) * 2 - 24px);
+  margin-inline: auto;
 }
 .js .home-hero:not(.no-photo) {
   position: relative;
   display: flex;
   align-items: flex-end;
   min-height: min(78vh, 780px);
-  margin: -12px calc(50% - 50vw) 36px;
+  margin: -12px 0 36px;
   overflow: hidden;
   isolation: isolate;
   background: rgb(43, 38, 34);
