@@ -1,6 +1,6 @@
 ---
 alt: "Last Lift Up"
-date: 2026-10-01
+date: 2024-12-01
 image: "last-lift-up.jpg"
 location: "Serre-Chevalier, France"
 camera: "Nikon FG"
