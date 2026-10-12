@@ -113,10 +113,10 @@ GALLERY_TMPL = """<header class="page-header">
 {% endif %}"""
 
 PHOTO_TMPL = """<figure class="photo-single-figure">
-<span class="photo-frame photo-ph" style="--ph:url({{ ph }})">
+<span class="photo-frame photo-ph" style="--ph:url({{ ph }});--ar:{{ w }}/{{ h }};width:min(100%, calc(max(320px, 100svh - 210px) * {{ w }} / {{ h }}))">
 <picture>
-<source type="image/webp" srcset="{{ full_webp }}">
-<img src="{{ full_jpg }}" data-max="{{ max_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
+<source type="image/webp" srcset="{{ mid_webp }}">
+<img src="{{ mid_jpg }}" data-full="{{ full_webp }}" data-max="{{ max_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
 </picture>
 </span>
 <figcaption class="photo-single-caption">
@@ -222,6 +222,8 @@ def photo_page(slug):
         full_webp=photos.variant_url(p, "full", "webp"),
         full_jpg=photos.variant_url(p, "full", "jpg"),
         max_jpg=photos.variant_url(p, "max", "jpg"),
+        mid_webp=photos.variant_url(p, "thumb2x", "webp"),
+        mid_jpg=photos.variant_url(p, "thumb2x", "jpg"),
         newer=ordered[i - 1] if i > 0 else None,
         older=ordered[i + 1] if i + 1 < len(ordered) else None)
     return render_page(main, p["alt"], describe(p), f"/photography/{slug}/", image_meta(p, "article"))

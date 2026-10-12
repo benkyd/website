@@ -208,12 +208,25 @@
     });
     return maxReady;
   }
+  function preload(src) {
+    return new Promise(function (resolve) {
+      var i = new Image();
+      i.onload = function () { (i.decode ? i.decode() : Promise.resolve()).then(function () { resolve(src); }, function () { resolve(src); }); };
+      i.onerror = function () { resolve(null); };
+      i.src = src;
+    });
+  }
+  function swap(src) {
+    if (!src) return;
+    var pic = photo.closest("picture");
+    if (pic) pic.querySelectorAll("source").forEach(function (el) { el.remove(); });
+    photo.src = src;
+  }
+  // 1280px (on the page from the start) -> 2200px -> full resolution
   function upgradePage() {
-    loadMax().then(function (src) {
-      if (!src) return;
-      var pic = photo.closest("picture");
-      if (pic) pic.querySelectorAll("source").forEach(function (el) { el.remove(); });
-      photo.src = src;
+    var full = photo.dataset.full;
+    (full ? preload(full).then(swap) : Promise.resolve()).then(function () {
+      return loadMax().then(swap);
     });
   }
   function whenActive(fn) {
@@ -222,8 +235,7 @@
   }
   var saveData = navigator.connection && navigator.connection.saveData;
   if (!saveData) whenActive(function () {
-    var go = function () { setTimeout(upgradePage, 250); };
-    if (document.readyState === "complete") go(); else window.addEventListener("load", go, { once: true });
+    upgradePage();
   });
   function store(on) { try { on ? sessionStorage.setItem(KEY, "1") : sessionStorage.removeItem(KEY); } catch (e) {} }
   function stored() { try { return sessionStorage.getItem(KEY) === "1"; } catch (e) { return false; } }

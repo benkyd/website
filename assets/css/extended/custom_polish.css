@@ -556,3 +556,21 @@ html.lightbox-on {
   font-size: 0.8rem;
 }
 
+
+/* never show alt text over a photo that's still loading (Firefox draws it
+   on top of the blurred placeholder) */
+.photo-ph img,
+.lightbox img {
+  color: transparent;
+}
+/* single photo: the frame is sized from the photo's aspect ratio (inline
+   style), so the image fills it before a single byte has arrived */
+.photo-frame {
+  aspect-ratio: var(--ar);
+}
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
