@@ -1,6 +1,6 @@
 ---
 alt: "Very Golden, Golden Gate @x_.in3s._x"
-date: 2025-08-01
+date: 2025-08-02
 image: "very-golden-golden-gate-x-in3s-x.jpg"
 location: "San Francisco, USA"
 camera: "Minolta X-300"
