@@ -1,0 +1,157 @@
+/* photography pages get extra breathing room: wider column, wider side margins */
+.main:has(.photo-grid),
+.main:has(.photo-single-figure) {
+  max-width: calc(1400px + var(--gap) * 6);
+  padding-left: calc(var(--gap) * 2);
+  padding-right: calc(var(--gap) * 2);
+}
+
+/*
+  --- masonry (CSS multi-column) ---
+  Photos here are a mix of square film scans and rectangular frames, so
+  nothing forces a uniform crop: each tile keeps the photo's own aspect
+  ratio and tiles flow into columns, like a contact sheet.
+*/
+.photo-grid {
+  columns: 4 220px;
+  column-gap: 10px;
+  margin: 20px 0 32px;
+}
+
+.photo-tile {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+}
+
+.photo-tile img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.photo-tile:hover img,
+.photo-tile:focus-visible img {
+  transform: scale(1.04);
+}
+
+/* --- single photo page --- */
+.photo-single-figure {
+  margin: 20px 0 14px;
+  text-align: center;
+}
+
+.photo-single-figure img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 80dvh;
+  border-radius: var(--radius);
+  display: inline-block;
+}
+
+.photo-single-caption {
+  margin-top: 12px;
+}
+
+.photo-single-alt {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--primary);
+}
+
+.photo-single-when {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+
+.photo-single-exif {
+  display: block;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.photo-single-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 32px;
+  font-size: 0.9rem;
+}
+
+.photo-single-up {
+  color: var(--secondary);
+}
+
+.photo-single-prev,
+.photo-single-next {
+  flex: 0 0 auto;
+}
+
+.photo-single-next {
+  margin-inline-start: auto;
+}
+
+/* --- homepage photography teaser --- */
+.photo-teaser {
+  margin: 10px 0 40px;
+}
+
+.photo-teaser-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.photo-teaser-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.photo-teaser-header a {
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+
+.photo-teaser-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.photo-teaser-strip a {
+  display: block;
+  height: 130px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.photo-teaser-strip img {
+  height: 100%;
+  width: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .photo-teaser-strip a {
+    height: 180px;
+  }
+}
+
+.photo-teaser-strip a:hover img {
+  transform: scale(1.04);
+}

@@ -1,0 +1,87 @@
+/*
+  A small UI polish pass: the theme ships with no accent color at all
+  (links are plain --primary, same as body text) and every card/tile is
+  a flat 1px border with no depth. This adds one restrained accent and
+  some very light elevation/hover feedback, without changing layout.
+
+  Dark mode here toggles via a .dark class on <body> (not a data-theme
+  attribute - themes/PaperMod/assets/css/core/theme-vars.css), so every
+  dark-mode override below targets body.dark, a descendant of :root,
+  which is what actually wins the cascade for anything rendered inside.
+*/
+
+:root {
+  --accent: rgb(168, 87, 44);
+}
+body.dark {
+  --accent: rgb(224, 140, 97);
+}
+
+/* Links inside actual content/copy get the accent; nav and social icons
+   stay neutral by default (icons use currentColor, so this is scoped
+   away from them) and only pick up the accent on hover/focus, so the
+   page doesn't turn into a wall of orange. */
+.post-content a,
+.post-description a,
+.entry-content a,
+.page-footer a,
+.pagination a,
+.breadcrumbs a,
+.photo-single-up,
+.photo-teaser-header a {
+  color: var(--accent);
+}
+.post-content a:hover,
+.entry-content a:hover {
+  text-decoration: underline;
+}
+
+#menu .active {
+  border-bottom-color: var(--accent);
+}
+
+.social-icons a,
+.photo-single-prev,
+.photo-single-next {
+  transition: color 0.15s ease;
+}
+.social-icons a:hover,
+.photo-single-prev:hover,
+.photo-single-next:hover {
+  color: var(--accent);
+}
+
+/* Very light elevation on cards/tiles instead of a flat border only -
+   barely visible at rest, a touch more present on hover. Skipped in
+   dark mode, where shadows read as murk rather than depth; the border
+   already does the job there. */
+.post-entry,
+.first-entry,
+.photo-tile {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.post-entry:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.photo-tile:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+body.dark .post-entry,
+body.dark .photo-tile {
+  box-shadow: none;
+}
+body.dark .post-entry:hover,
+body.dark .photo-tile:hover {
+  box-shadow: none;
+}
+
+/* Smooth the light/dark toggle instead of an abrupt flip. */
+body,
+.post-entry,
+.first-entry,
+.photo-tile,
+.main {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}

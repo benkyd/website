@@ -1,0 +1,29 @@
+/* tighter outer padding site-wide than PaperMod's default 24px */
+.main {
+  padding: 12px;
+}
+
+/* PaperMod gives list-kind pages (home, section lists) a grey tint in
+   light mode (.dark.list already neutralizes this for dark mode) -
+   keep all pages on the same background. */
+.list {
+  background: var(--theme);
+}
+
+/* home-info (title/tagline/social icons intro) inherits .first-entry's
+   min-height:320px, meant for a featured post card with a cover image -
+   our intro is much shorter, so it was leaving a large empty gap before
+   whatever comes next on the home page. */
+.home-info {
+  min-height: auto;
+}
+
+/* off-white instead of pure white in light mode. This theme toggles dark
+   mode via a .dark class on <body> (themes/PaperMod/assets/css/core/theme-vars.css),
+   not a data-theme attribute, so overriding at :root (the default/light
+   baseline) is correctly superseded by the theme's own .dark block for
+   anything rendered inside body.dark. */
+:root {
+  --theme: rgb(250, 249, 246);
+  --entry: rgb(253, 252, 250);
+}

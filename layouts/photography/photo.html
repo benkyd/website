@@ -1,0 +1,75 @@
+{{- define "main" }}
+
+<header class="page-header">
+  {{- partial "breadcrumbs.html" . }}
+</header>
+
+{{- $img := resources.Get .Params.photoFile }}
+{{- if $img }}
+
+{{- $viewWebp := $img.Resize "2200x webp q82" }}
+{{- $viewJpg := $img.Resize "2200x jpg q84" }}
+{{- $alt := .Params.alt | default .Title }}
+
+{{- /*
+  Gear is manual-entry only (front matter), not auto-read from EXIF -
+  simpler and more reliable than trying to detect/parse real camera
+  metadata, and the admin form already asks for this directly.
+*/}}
+{{- $camera := .Params.camera | default "" }}
+{{- $lens := .Params.lens | default "" }}
+{{- $settings := partial "format_settings.html" (dict "focal" (.Params.focalLength | default "") "aperture" (.Params.aperture | default "") "shutter" (.Params.shutter | default "") "iso" (.Params.iso | default "")) }}
+{{- $filmStock := .Params.filmStock | default "" }}
+{{- $location := .Params.location | default "" }}
+{{- $hasGear := or $camera (or $lens (or $settings $filmStock)) }}
+
+<figure class="photo-single-figure">
+  <picture>
+    <source type="image/webp" srcset="{{ $viewWebp.RelPermalink }}">
+    <img src="{{ $viewJpg.RelPermalink }}" alt="{{ $alt }}" loading="eager" fetchpriority="high"
+      decoding="async" width="{{ $viewJpg.Width }}" height="{{ $viewJpg.Height }}">
+  </picture>
+  <figcaption class="photo-single-caption">
+    <span class="photo-single-alt">{{ $alt }}</span>
+    {{- if or $location .Date }}
+    <span class="photo-single-when">
+      {{- if $location }}{{ $location }}{{- end }}
+      {{- if not .Date.IsZero }}{{ if $location }}&nbsp;&middot;&nbsp;{{ end }}{{ .Date.Format "January 2006" }}{{- end }}
+    </span>
+    {{- end }}
+    {{- if $hasGear }}
+    <span class="photo-single-exif">
+      {{- if $camera }}{{ $camera }}{{- end }}
+      {{- if $lens }}{{ if $camera }}&nbsp;&bull;&nbsp;{{ end }}{{ $lens }}{{- end }}
+      {{- if $settings }}{{ if or $camera $lens }}&nbsp;&bull;&nbsp;{{ end }}{{ $settings }}{{- end }}
+      {{- if $filmStock }}{{ if or $camera $lens $settings }}&nbsp;&bull;&nbsp;{{ end }}{{ $filmStock }}{{- end }}
+    </span>
+    {{- end }}
+  </figcaption>
+</figure>
+{{- end }}
+
+{{- /*
+  Prev/Next follow display order (newest first, same as the gallery
+  grid) rather than Hugo's weight-based .PrevInSection/.NextInSection -
+  photos are ordered purely by date now. "Next" = next OLDER photo (the
+  one you'd see scrolling down the gallery from here); "Previous" = next
+  NEWER one (back up towards the top).
+*/}}
+{{- $siblings := .CurrentSection.RegularPages.ByDate.Reverse }}
+{{- $pos := -1 }}
+{{- range $i, $p := $siblings }}
+  {{- if eq $p $ }}{{ $pos = $i }}{{ end }}
+{{- end }}
+
+<nav class="photo-single-nav">
+  {{- if gt $pos 0 }}
+  <a class="photo-single-prev" href="{{ (index $siblings (sub $pos 1)).Permalink }}">&lsaquo;&nbsp;Previous</a>
+  {{- end }}
+  <a class="photo-single-up" href="{{ .CurrentSection.Permalink }}">Back to {{ .CurrentSection.Title }}</a>
+  {{- if and (ge $pos 0) (lt $pos (sub (len $siblings) 1)) }}
+  <a class="photo-single-next" href="{{ (index $siblings (add $pos 1)).Permalink }}">Next&nbsp;&rsaquo;</a>
+  {{- end }}
+</nav>
+
+{{- end }}

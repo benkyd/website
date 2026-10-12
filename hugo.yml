@@ -1,19 +1,20 @@
 baseURL: "https://benkyd.co.uk/"
 languageCode: "en-GB"
-title: "Ben Kyd // Engineering Notes"
+title: "Ben Kyd"
 theme: "PaperMod"
 defaultContentLanguage: "en"
 enableRobotsTXT: true
-googlefonts: [ "Noto Sans" ]
-fontbody: "Noto Sans"
+fonts: [ "Libron" ] # self-hosted, see assets/css/extended/custom_fonts.css
+fontbody: "Libron"
 googleAnalytics: "G-J2M8RXRC9P"
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  mainSections: ["posts"]
   description: "Blog"
   author: Ben Kyd
 
-  defaultTheme: auto
+  defaultTheme: light
   ShowShareButtons: true
   ShowReadingTime: true
   disableSpecial1stPost: true
@@ -46,7 +47,7 @@ params:
   homeInfoParams:
     Title: "Ben Kyd"
     Content: >
-      GPU Kernel Drivers @ Apple – Hardware Acceleration & Graphics
+      GPU Kernel Software Engineer / Amateur Photographer
 
   socialIcons:
     - name: github
@@ -55,20 +56,30 @@ params:
     - name: YouTube
       title: YouTube
       url: "https://youtube.com/@benkyd7874"
+    - name: linkedin
+      title: LinkedIn
+      url: "https://uk.linkedin.com/in/ben-kyd-954269173"
+    - name: instagram
+      title: Instagram
+      url: "https://instagram.com/ben_kyd"
 menu:
   main:
     - identifier: "home"
       name: "Home"
       url: "/"
       weight: 1
+    - identifier: "photography"
+      name: "Photography"
+      url: "/photography/"
+      weight: 2
     - identifier: "blog"
       name: "Blog"
       url: "/posts/"
-      weight: 2
+      weight: 3
     - identifier: "about"
       name: "About Me"
       url: "/about/"
-      weight: 3
+      weight: 4
 
 markup:
   goldmark:

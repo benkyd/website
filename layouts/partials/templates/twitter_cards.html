@@ -1,0 +1,47 @@
+{{- /*
+  Site override of PaperMod's templates/twitter_cards.html, purely to
+  handle "photo" layout pages: their image is a Hugo Pipes resource
+  (assets/), not a page resource, so the theme's own
+  get-page-images/.Params.cover.image lookups never find it and this
+  partial would otherwise fall back to card=summary with no image. Every
+  other page kind falls through to the theme's original logic unchanged.
+*/}}
+{{- if eq .Layout "photo" }}
+  {{- $img := resources.Get .Params.photoFile }}
+  {{- with $img }}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ (.Resize "1200x jpg q82").Permalink }}">
+  {{- end }}
+{{- else }}
+  {{- if .Params.cover.image -}}
+<meta name="twitter:card" content="summary_large_image">
+  {{- if (ne $.Params.cover.relative true) }}
+<meta name="twitter:image" content="{{ .Params.cover.image | absURL }}">
+  {{- else }}
+<meta name="twitter:image" content="{{ (path.Join .RelPermalink .Params.cover.image ) | absURL }}">
+  {{- end}}
+  {{- else }}
+  {{- $images := partial "templates/_funcs/get-page-images" . -}}
+  {{- with index $images 0 -}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ .Permalink }}">
+  {{- else -}}
+<meta name="twitter:card" content="summary">
+  {{- end -}}
+  {{- end }}
+{{- end }}
+<meta name="twitter:title" content="{{ .Title }}">
+<meta name="twitter:description" content="{{ with .Description }}{{ . }}{{ else }}{{if .IsPage}}{{ .Summary }}{{ else }}{{ with site.Params.description }}{{ . }}{{ end }}{{ end }}{{ end -}}">
+
+{{- $twitterSite := "" }}
+{{- with site.Params.social }}
+  {{- if reflect.IsMap . }}
+    {{- with .twitter }}
+      {{- $content := . }}
+      {{- if not (strings.HasPrefix . "@") }}
+        {{- $content = printf "@%v" . }}
+      {{- end }}
+<meta name="twitter:site" content="{{ $content }}">
+    {{- end }}
+  {{- end }}
+{{- end }}

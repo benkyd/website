@@ -6,5 +6,31 @@
     {{ partialCached "math.html" . }}
   {{ end }}
 
-{{ template "_internal/google_analytics.html" . }}
+{{- /*
+  Rich embeds (Slack/iMessage/Twitter/etc. link previews) for individual
+  photo pages. PaperMod's own opengraph.html partial would normally emit
+  og:image from .Params.images or a page-bundle "cover"/"feature"
+  resource, but our photos are Hugo Pipes resources (assets/), not page
+  resources, and the actual og-sized derivative only exists once this
+  template resizes it - so front matter alone can't reach it. Generate
+  and link it here instead, for "photo" layout pages only.
 
+  og:image only: opengraph.html's own image block (which runs after this,
+  see head.html) emits nothing when it finds no cover/page image, so
+  there's no duplicate og:image. twitter:card/twitter:image are handled
+  by this site's own override of templates/twitter_cards.html instead of
+  being added here too, since that partial's "no image found" branch
+  would otherwise still fire and emit a conflicting
+  twitter:card=summary alongside this.
+*/}}
+{{- if eq .Layout "photo" }}
+  {{- $img := resources.Get .Params.photoFile }}
+  {{- with $img }}
+    {{- $og := .Resize "1200x jpg q82" }}
+    <meta property="og:image" content="{{ $og.Permalink }}">
+    <meta property="og:image:width" content="{{ $og.Width }}">
+    <meta property="og:image:height" content="{{ $og.Height }}">
+  {{- end }}
+{{- end }}
+
+{{ template "_internal/google_analytics.html" . }}
