@@ -1,6 +1,6 @@
 ---
 alt: "Ridge After Ridge"
-date: 2025-08-04
+date: 2025-08-05
 image: "ridge-after-ridge.jpg"
 location: "Kananaskis Country, Canada"
 camera: "Sony A7CII"
