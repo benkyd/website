@@ -24,7 +24,9 @@ FIELDS = ["alt", "date", "image", "location", "camera", "lens",
 # Derivative sizes: (axis, pixels). A fixed set, so the cache stays bounded.
 VARIANTS = {
     "thumb": ("w", 640),    # gallery grid
+    "thumb2x": ("w", 1280), # gallery grid on high-density screens
     "teaser": ("h", 260),   # homepage strip - same height for every photo
+    "teaser2x": ("h", 520),
     "full": ("w", 2200),    # single photo page
     "hero": ("w", 1600),    # homepage banner
     "og": ("w", 1200),      # link previews

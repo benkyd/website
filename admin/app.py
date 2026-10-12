@@ -99,8 +99,8 @@ GALLERY_TMPL = """<header class="page-header">
 {% for p in photos %}
 <a href="/photography/{{ p.slug }}/" class="photo-tile photo-ph reveal" style="--ph:url({{ p.ph }})" aria-label="View full size: {{ p.alt }}">
 <picture>
-<source type="image/webp" srcset="{{ p.thumb_webp }}">
-<img src="{{ p.thumb_jpg }}" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}" style="view-transition-name:p-{{ p.slug }}"
+<source type="image/webp" srcset="{{ p.thumb_webp }} 1x, {{ p.thumb2x_webp }} 2x">
+<img src="{{ p.thumb_jpg }}" srcset="{{ p.thumb_jpg }} 1x, {{ p.thumb2x_jpg }} 2x" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}" style="view-transition-name:p-{{ p.slug }}"
  {% if loop.index0 < 4 %}loading="eager"{% if loop.first %} fetchpriority="high"{% endif %}{% else %}loading="lazy"{% endif %} decoding="async">
 </picture>
 <span class="photo-tile-cap">{{ p.alt }}{% if p.when %}<small>{{ p.when }}</small>{% endif %}</span>
@@ -191,7 +191,9 @@ def gallery():
         items.append(dict(slug=p["slug"], alt=p["alt"], when=when_line(p), w=w, h=h,
                           ph=photos.placeholder(p),
                           thumb_webp=photos.variant_url(p, "thumb", "webp"),
-                          thumb_jpg=photos.variant_url(p, "thumb", "jpg")))
+                          thumb_jpg=photos.variant_url(p, "thumb", "jpg"),
+                          thumb2x_webp=photos.variant_url(p, "thumb2x", "webp"),
+                          thumb2x_jpg=photos.variant_url(p, "thumb2x", "jpg")))
     extra = image_meta(all_photos[0], "website") if all_photos else ""
     main = render_template_string(GALLERY_TMPL, photos=items, site=SITE_URL)
     return render_page(main, "Photography", "Photography by Ben Kyd.", "/photography/", extra)
@@ -238,11 +240,14 @@ def recent():
         w, h = photos.variant_size(p, "teaser")
         out.append(dict(alt=p["alt"], slug=p["slug"], url=f"/photography/{p['slug']}/",
                         width=w, height=h, thumb=photos.variant_url(p, "teaser", "webp"),
+                        thumb2x=photos.variant_url(p, "teaser2x", "webp"),
                         ph=photos.placeholder(p)))
     return jsonify(
         hero=dict(alt=hero["alt"], slug=hero["slug"], url=f"/photography/{hero['slug']}/",
                   when=when_line(hero), width=hw, height=hh,
-                  src=photos.variant_url(hero, "hero", "webp"), ph=photos.placeholder(hero)),
+                  src=photos.variant_url(hero, "hero", "webp"), ph=photos.placeholder(hero),
+                  srcset=", ".join(f"{photos.variant_url(hero, v, 'webp')} {photos.variant_size(hero, v)[0]}w"
+                                   for v in ("hero", "full"))),
         photos=out)
 
 

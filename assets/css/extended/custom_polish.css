@@ -39,12 +39,12 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32 0 0 0 0 .24 0 0 0 0 .16 0 0 0 1.1 -.35'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 body.dark::before {
   filter: invert(1);
-  opacity: 0.03;
+  opacity: 0.06;
 }
 
 /* ---------- blur-up images ---------- */
@@ -104,46 +104,101 @@ body.dark .photo-frame {
 }
 
 /* ---------- homepage hero ---------- */
-.home-hero {
-  display: block;
-  aspect-ratio: 21 / 9;
-  margin-top: 16px;
-  border-radius: var(--radius);
-  background: var(--code-bg);
+/* Full-bleed photo behind the intro. A bottom-weighted scrim keeps the
+   white text readable on any photo, bright snow included. Only styled
+   when scripts run (html.js) and a photo is coming (not .no-photo). */
+body {
+  overflow-x: clip; /* the 100vw hero must not add a sideways scroll */
 }
-.home-hero img {
-  display: block;
+.js .home-hero:not(.no-photo) {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: min(78vh, 780px);
+  margin: -12px calc(50% - 50vw) 36px;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgb(43, 38, 34);
+  color: #fff;
+}
+.js .home-hero:not(.no-photo)::before {
+  z-index: -3;
+}
+.js .home-hero:not(.no-photo) .home-hero-img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.6s ease, transform 0.8s ease;
 }
-.home-hero:hover img {
-  transform: scale(1.02);
+.js .home-hero:not(.no-photo)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.34) 38%, rgba(0, 0, 0, 0) 70%),
+    linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
+}
+.home-hero-inner {
+  width: 100%;
+  max-width: calc(var(--main-width) + var(--gap) * 2);
+  margin: 0 auto;
+  padding: 0 12px;
+}
+.js .home-hero:not(.no-photo) .home-hero-inner {
+  padding-bottom: 36px;
+}
+.js .home-hero:not(.no-photo) .home-info {
+  margin: 0;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
+}
+.js .home-hero:not(.no-photo) .home-info h1 {
+  color: #fff;
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.05;
+}
+.js .home-hero:not(.no-photo) .home-info .entry-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.05rem;
+}
+.js .home-hero:not(.no-photo) .social-icons a {
+  color: rgba(255, 255, 255, 0.92);
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.35));
+}
+.js .home-hero:not(.no-photo) .social-icons a:hover {
+  color: #fff;
+  opacity: 0.75;
 }
 .home-hero-cap {
   position: absolute;
-  inset: auto 0 0 0;
-  padding: 48px 18px 14px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
-  color: #fff;
-  font-size: 0.95rem;
-  line-height: 1.35;
+  right: 16px;
+  bottom: 14px;
+  max-width: 45%;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: right;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
-.home-hero-cap:empty {
+.home-hero-cap:hover {
+  color: #fff;
+}
+.no-photo .home-hero-cap,
+html:not(.js) .home-hero-cap,
+html:not(.js) .home-hero-img,
+.no-photo .home-hero-img {
   display: none;
 }
-.home-hero-cap small {
-  display: block;
-  font-size: 0.78rem;
-  opacity: 0.85;
-}
-.home-hero + .home-info {
-  margin-top: 28px;
-}
-@media (max-width: 600px) {
-  .home-hero {
-    aspect-ratio: 4 / 3;
+@media (max-width: 768px) {
+  .js .home-hero:not(.no-photo) {
+    min-height: 72svh;
+  }
+  .home-hero-cap {
+    top: 14px;
+    bottom: auto;
+    max-width: 70%;
   }
 }
 
@@ -281,4 +336,29 @@ body.dark {
   display: block;
   margin-bottom: 2px;
   font-style: italic;
+}
+
+/* ---------- hover ---------- */
+/* Scaling a photo inside a clipped, rounded, lifting card made Chrome
+   re-rasterise the corners and edges mid-animation (shimmer, square
+   corners, soft image). Hover now only deepens the shadow and fades in
+   the caption - nothing moves. */
+.photo-tile:hover,
+.photo-tile:focus-visible {
+  transform: none;
+}
+.photo-tile:hover img,
+.photo-tile:focus-visible img,
+.photo-teaser-strip a:hover img {
+  transform: none;
+  filter: none;
+}
+.photo-teaser-strip a {
+  transition: box-shadow 0.2s ease;
+}
+.photo-teaser-strip a:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+body.dark .photo-teaser-strip a:hover {
+  box-shadow: 0 0 0 1px var(--tertiary);
 }
