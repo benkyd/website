@@ -2,14 +2,13 @@
 title: "Welcome"
 date: 2025-07-09T12:00:00+01:00
 author: Ben Kyd
-tags: ["Test"]
+tags: ["Meta"]
 categories: ["Blog"]
 draft: false
 ---
 
-This is where I dump notes and ideas about embedded systems, firmware, and hardware acceleration.
+I'm Ben. I write GPU kernel software for a living, and this site is where the rest of it ends up: embedded systems, firmware, and whichever side project has taken over my evenings lately.
 
-No tutorials, no preaching, just the stuff I actually work on.
+It's also home to my [photography](/photography/), a mix of film and digital, mostly from trips and walks.
 
-If that’s your thing, cool.
-
+Posts will be irregular. Some will be proper write-ups, others just notes I wanted to keep somewhere.
