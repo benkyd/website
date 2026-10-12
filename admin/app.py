@@ -111,10 +111,7 @@ GALLERY_TMPL = """<header class="page-header">
 <p>No photos yet.</p>
 {% endif %}"""
 
-PHOTO_TMPL = """<header class="page-header">
-<div class="breadcrumbs"><a href="{{ site }}/">Home</a>&nbsp;»&nbsp;<a href="{{ site }}/photography/">Photography</a></div>
-</header>
-<figure class="photo-single-figure">
+PHOTO_TMPL = """<figure class="photo-single-figure">
 <span class="photo-frame photo-ph" style="--ph:url({{ ph }})">
 <picture>
 <source type="image/webp" srcset="{{ full_webp }}">

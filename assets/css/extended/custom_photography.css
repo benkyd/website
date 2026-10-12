@@ -90,7 +90,9 @@ body:has(.photo-single-figure) .nav {
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: 80dvh;
+  /* photo + caption fit on one screen: header 60px, margins and the
+     caption below take the rest */
+  max-height: max(320px, calc(100svh - 210px));
   border-radius: var(--radius);
   display: inline-block;
 }
