@@ -2,7 +2,7 @@
 alt: "Ridge After Ridge"
 date: 2025-08-01
 image: "ridge-after-ridge.jpg"
-location: "Kananaskis Country"
+location: "Kananaskis Country, Canada"
 camera: "Sony A7CII"
 lens: "FE 40mm F2.5 G"
 aperture: "8"
