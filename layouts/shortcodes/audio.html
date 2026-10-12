@@ -1,0 +1,10 @@
+{{- /* {{< audio src="/clip.wav" title="Caption" >}} - a native player that
+       site.js upgrades to a waveform player; works without scripts. */}}
+{{- $src := .Get "src" }}
+<figure class="audio-player">
+  <audio src="{{ $src }}" preload="metadata" controls></audio>
+  <figcaption>
+    <span class="audio-title">{{ .Get "title" | default "Audio" }}</span>
+    <a class="audio-download" href="{{ $src }}" download>Download</a>
+  </figcaption>
+</figure>

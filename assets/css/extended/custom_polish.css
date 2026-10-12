@@ -362,3 +362,95 @@ body.dark {
 body.dark .photo-teaser-strip a:hover {
   box-shadow: 0 0 0 1px var(--tertiary);
 }
+
+/* ---------- audio player (shortcodes/audio.html + site.js) ---------- */
+.audio-player {
+  margin: 20px 0;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--entry);
+}
+.audio-player audio {
+  width: 100%;
+}
+.audio-ui {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.audio-play {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--theme);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.audio-play:hover {
+  filter: brightness(1.08);
+}
+.audio-play:active {
+  transform: scale(0.94);
+}
+.audio-play svg {
+  margin-left: 1px;
+}
+.audio-wave {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  cursor: pointer;
+  touch-action: none;
+  border-radius: 4px;
+}
+.audio-wave:focus-visible,
+.audio-play:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.audio-time {
+  flex: none;
+  min-width: 6.5em;
+  text-align: right;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+.post-content .audio-player figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 0;
+  font-weight: 400;
+  text-align: left;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--secondary);
+}
+.post-content .audio-player .audio-download {
+  flex: none;
+  white-space: nowrap;
+  font-weight: 400;
+  box-shadow: none;
+  border: 0;
+  font-style: normal;
+  color: var(--secondary);
+  text-decoration: none;
+}
+.post-content .audio-player .audio-download:hover {
+  color: var(--accent);
+}
+@media (max-width: 480px) {
+  .audio-time {
+    min-width: 0;
+    font-size: 11px;
+  }
+}

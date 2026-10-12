@@ -136,13 +136,13 @@ Radio stations also emphasise the high-frequency components of the sound, so app
 
 So... You've done all that, and your audio sounds like this...
 
-[Audio Link](/demod-fm-my-audio.wav)
+{{< audio src="/demod-fm-my-audio.wav" title="My demodulator - the whole 2.4MHz band, unfiltered" >}}
 
 Well that's not right? 
 
 The answer lies in many areas that we have glossed over here, most notably that we are applying demodulation to the *entire* 2.4MHz sample range, that means we are probably hearing a bunch of other radio stations, and a few megahertz of the noise floor, channel filtering before demodulation is essential. Perhaps filtering is a topic for another day?
 
-[Audio Link](/demod-fm-sdrpp-audio.wav)
+{{< audio src="/demod-fm-sdrpp-audio.wav" title="The same station in SDR++" >}}
 
 That's what the same station should have sounded like... Thanks [SDR++](https://www.sdrpp.org/)
 
