@@ -1,6 +1,6 @@
 ---
 alt: "Morning on Moraine Lake"
-date: 2025-08-04
+date: 2025-08-05
 image: "morning-on-moraine-lake.jpg"
 location: "Banff, Canada"
 camera: "Agfa Isolette I"
