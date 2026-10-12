@@ -210,6 +210,13 @@
     close.type = "button"; close.className = "lightbox-close"; close.setAttribute("aria-label", "Close");
     close.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     box.appendChild(img); box.appendChild(close);
+    var cap = document.querySelector(".photo-single-caption");
+    if (cap) {
+      var info = document.createElement("div");
+      info.className = "lightbox-info";
+      info.innerHTML = cap.innerHTML;
+      box.appendChild(info);
+    }
     document.body.appendChild(box);
     document.documentElement.classList.add("lightbox-on");
     box.addEventListener("click", shut);

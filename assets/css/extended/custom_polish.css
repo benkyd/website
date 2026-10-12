@@ -490,8 +490,10 @@ body.dark .photo-teaser-strip a:hover {
 }
 .lightbox img {
   max-width: 96vw;
-  max-height: 96vh;
-  max-height: 96dvh;
+  /* leave room for the floating details below */
+  max-height: calc(100vh - 150px);
+  max-height: calc(100dvh - 150px);
+  margin-bottom: 96px;
   width: auto;
   height: auto;
   border-radius: 4px;
@@ -516,4 +518,52 @@ body.dark .photo-teaser-strip a:hover {
 }
 html.lightbox-on {
   overflow: hidden;
+}
+
+/* photo details floating at the bottom of the full screen view */
+.lightbox-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  width: fit-content;
+  max-width: min(92vw, 720px);
+  margin-inline: auto;
+  padding: 10px 18px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.42);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  text-align: center;
+  line-height: 1.35;
+}
+.lightbox-info .photo-single-alt {
+  display: block;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.lightbox-info .photo-single-when {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.85rem;
+}
+.lightbox-info .photo-chips {
+  margin-top: 8px;
+}
+.lightbox-info .photo-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.88);
+}
+@media (max-width: 600px) {
+  .lightbox img {
+    margin-bottom: 120px;
+  }
+  .lightbox-info {
+    bottom: 12px;
+    padding: 8px 12px 10px;
+  }
 }

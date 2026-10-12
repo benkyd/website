@@ -10,7 +10,7 @@ import io
 import os
 import re
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 REPO = "/var/www/website"
 PHOTOS_DIR = os.path.join(REPO, "photos")
@@ -32,6 +32,16 @@ VARIANTS = {
     "hero": ("w", 1600),    # homepage banner
     "og": ("w", 1200),      # link previews
 }
+# Large sizes get a small visible watermark drawn into the pixels; every size
+# carries copyright/artist tags. Bump WATERMARK_VERSION after changing either
+# so browsers and the CDN fetch the new images.
+WATERMARK = "\u00a9 Ben Kyd"
+WATERMARKED = {"full", "og"}
+WATERMARK_VERSION = "w1"
+WATERMARK_FONT = os.path.join(REPO, "assets", "fonts", "Libron-Regular.ttf")
+ARTIST = "Ben Kyd"
+COPYRIGHT = "Copyright Ben Kyd. All rights reserved. benkyd.co.uk"
+
 FORMATS = {"webp": ("WEBP", "image/webp", {"quality": 80}),
            "jpg": ("JPEG", "image/jpeg", {"quality": 84, "optimize": True, "progressive": True})}
 
@@ -156,17 +166,45 @@ def variant_size(photo, variant):
     return (w, h) if h <= n else (max(1, round(w * n / h)), n)
 
 
+def variant_ver(photo, variant):
+    return photo["ver"] + "-" + WATERMARK_VERSION if variant in WATERMARKED else photo["ver"] + "-m1"
+
+
 def variant_url(photo, variant, ext):
-    return f"/photography/img/{photo['slug']}/{variant}.{ext}?v={photo['ver']}"
+    return f"/photography/img/{photo['slug']}/{variant}.{ext}?v={variant_ver(photo, variant)}"
+
+
+def watermark(im):
+    """Small translucent mark in the bottom-right corner, sized to the image."""
+    w, h = im.size
+    size = max(14, round(min(w, h) * 0.022))
+    font = ImageFont.truetype(WATERMARK_FONT, size)
+    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    l, t, r, b = d.textbbox((0, 0), WATERMARK, font=font)
+    margin = round(min(w, h) * 0.025)
+    x, y = w - margin - (r - l) - l, h - margin - (b - t) - t
+    shadow = max(1, size // 18)
+    d.text((x + shadow, y + shadow), WATERMARK, font=font, fill=(0, 0, 0, 70))
+    d.text((x, y), WATERMARK, font=font, fill=(255, 255, 255, 165))
+    return Image.alpha_composite(im.convert("RGBA"), layer).convert("RGB")
+
+
+def rights_exif():
+    exif = Image.Exif()
+    exif[0x013B] = ARTIST
+    exif[0x8298] = COPYRIGHT
+    return exif.tobytes()
 
 
 def variant_file(photo, variant, ext):
     """Path to the resized image, generating it on first use.
 
-    Re-encoding drops all metadata from the output (EXIF, including any GPS
-    position), so what's served never leaks more than the picture itself.
+    Re-encoding drops the original's metadata (EXIF, including any GPS
+    position); the output carries only artist/copyright tags, plus a visible
+    watermark on the large sizes.
     """
-    out = os.path.join(CACHE_DIR, f"{photo['slug']}-{variant}-{photo['ver']}.{ext}")
+    out = os.path.join(CACHE_DIR, f"{photo['slug']}-{variant}-{variant_ver(photo, variant)}.{ext}")
     if os.path.exists(out):
         return out
     os.makedirs(CACHE_DIR, exist_ok=True)
@@ -183,8 +221,10 @@ def variant_file(photo, variant, ext):
             im = im.crop(crop_pixels(box, *im.size))
         if im.size != (tw, th):
             im = im.resize((tw, th), Image.Resampling.LANCZOS)
+        if variant in WATERMARKED:
+            im = watermark(im)
         tmp = f"{out}.{os.getpid()}.tmp"
-        im.save(tmp, fmt, **opts)
+        im.save(tmp, fmt, exif=rights_exif(), **opts)
     os.replace(tmp, out)
     return out
 
