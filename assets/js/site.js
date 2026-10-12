@@ -6,9 +6,14 @@
   // in once loaded. Also used for photos the homepage adds later.
   function settle(root) {
     (root || document).querySelectorAll(".photo-ph img").forEach(function (img) {
-      if (img.complete && img.naturalWidth) { img.classList.add("loaded"); return; }
-      img.addEventListener("load", function () { img.classList.add("loaded"); }, { once: true });
-      img.addEventListener("error", function () { img.classList.add("loaded"); }, { once: true });
+      if (img.dataset.settled) return;
+      img.dataset.settled = "1";
+      function done() { img.classList.remove("fading"); img.classList.add("loaded"); }
+      // already decoded (cached, or loaded before this ran): show as-is
+      if (img.complete && img.naturalWidth) { done(); return; }
+      img.classList.add("fading");
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
     });
   }
   window.siteSettle = settle;
@@ -17,17 +22,14 @@
   // Gallery tiles rise in as they scroll into view. Anything already on
   // screen at load is shown straight away so it doesn't flash.
   var tiles = document.querySelectorAll(".reveal");
-  if (reduceMotion || !("IntersectionObserver" in window)) {
-    tiles.forEach(function (t) { t.classList.add("in"); });
-  } else {
+  if (!reduceMotion && "IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        if (e.isIntersecting) { e.target.classList.remove("pending"); io.unobserve(e.target); }
       });
     }, { rootMargin: "0px 0px -40px 0px" });
     tiles.forEach(function (t) {
-      if (t.getBoundingClientRect().top < window.innerHeight) t.classList.add("in", "instant");
-      else io.observe(t);
+      if (t.getBoundingClientRect().top > window.innerHeight) { t.classList.add("pending"); io.observe(t); }
     });
   }
 

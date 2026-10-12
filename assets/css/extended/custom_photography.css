@@ -32,7 +32,8 @@ body:has(.photo-single-figure) .nav {
   so hovering one tile never repaints the rest (CSS columns did).
 */
 .photo-grid {
-  --row-h: 340px;
+  /* scales with the window so two photos usually share a row */
+  --row-h: clamp(300px, 30vw, 460px);
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -48,12 +49,12 @@ body:has(.photo-single-figure) .nav {
 }
 @media (max-width: 1100px) {
   .photo-grid {
-    --row-h: 260px;
+    --row-h: 300px;
   }
 }
 @media (max-width: 600px) {
   .photo-grid {
-    --row-h: 150px;
+    --row-h: 200px;
     gap: 8px;
   }
 }

@@ -99,14 +99,15 @@ GALLERY_TMPL = """<header class="page-header">
 {% for p in photos %}
 <a href="/photography/{{ p.slug }}/" class="photo-tile photo-ph reveal" style="--ph:url({{ p.ph }});--a:{{ p.ratio }}" aria-label="View full size: {{ p.alt }}">
 <picture>
-<source type="image/webp" srcset="{{ p.thumb_webp }} 1x, {{ p.thumb2x_webp }} 2x">
-<img src="{{ p.thumb_jpg }}" srcset="{{ p.thumb_jpg }} 1x, {{ p.thumb2x_jpg }} 2x" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}" style="view-transition-name:p-{{ p.slug }}"
+<source type="image/webp" srcset="{{ p.thumb_webp }} 640w, {{ p.thumb2x_webp }} 1280w" sizes="(max-width: 600px) 100vw, 60vw">
+<img src="{{ p.thumb_jpg }}" srcset="{{ p.thumb_jpg }} 640w, {{ p.thumb2x_jpg }} 1280w" sizes="(max-width: 600px) 100vw, 60vw" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}"
  {% if loop.index0 < 4 %}loading="eager"{% if loop.first %} fetchpriority="high"{% endif %}{% else %}loading="lazy"{% endif %} decoding="async">
 </picture>
 <span class="photo-tile-cap">{{ p.alt }}{% if p.when %}<small>{{ p.when }}</small>{% endif %}</span>
 </a>
 {% endfor %}
 </div>
+<script type="speculationrules">{"prerender": [{"where": {"href_matches": "/photography/*"}, "eagerness": "moderate"}]}</script>
 {% else %}
 <p>No photos yet.</p>
 {% endif %}"""
@@ -115,7 +116,7 @@ PHOTO_TMPL = """<figure class="photo-single-figure">
 <span class="photo-frame photo-ph" style="--ph:url({{ ph }})">
 <picture>
 <source type="image/webp" srcset="{{ full_webp }}">
-<img src="{{ full_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" style="view-transition-name:p-{{ p.slug }}" loading="eager" fetchpriority="high" decoding="async">
+<img src="{{ full_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
 </picture>
 </span>
 <figcaption class="photo-single-caption">
@@ -130,7 +131,8 @@ PHOTO_TMPL = """<figure class="photo-single-figure">
 <a class="photo-single-up" href="/photography/">Back to Photography</a>
 <span class="photo-single-hint" aria-hidden="true">Use &larr; &rarr; to browse</span>
 {% if older %}<a class="photo-single-next" href="/photography/{{ older.slug }}/">Next&nbsp;&rsaquo;</a>{% endif %}
-</nav>"""
+</nav>
+{% if newer or older %}<script type="speculationrules">{"prerender": [{"urls": [{% if newer %}"/photography/{{ newer.slug }}/"{% endif %}{% if newer and older %}, {% endif %}{% if older %}"/photography/{{ older.slug }}/"{% endif %}]}]}</script>{% endif %}"""
 
 IMAGE_META_TMPL = """
 <meta property="og:type" content="{{ og_type }}">
