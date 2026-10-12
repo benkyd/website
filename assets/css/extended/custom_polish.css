@@ -1,0 +1,284 @@
+/*
+  Finishing layer: loaded last (extended/*.css are bundled alphabetically).
+  Blur-up images, homepage hero, scroll reveal, page transitions, paper
+  grain, type details, blog post styling and the reading-progress bar.
+  Anything that hides content before JS shows it is scoped to html.js
+  (set in extend_head.html), so the site still works without scripts.
+*/
+
+/* ---------- type ---------- */
+body {
+  font-feature-settings: "kern", "liga";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+.post-title {
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+p,
+li {
+  text-wrap: pretty;
+}
+.home-info .entry-content,
+.post-description,
+.photo-single-when,
+.photo-tile-cap small,
+.home-hero-cap small {
+  font-style: italic;
+}
+
+/* ---------- paper grain ---------- */
+/* A faint fixed noise texture behind the content (never over photos). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+body.dark::before {
+  filter: invert(1);
+  opacity: 0.03;
+}
+
+/* ---------- blur-up images ---------- */
+/* .photo-ph carries --ph: a tiny inline JPEG, drawn blurred underneath until
+   the real image has loaded and faded in over it. */
+.photo-ph {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.photo-ph::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background: var(--ph, none) center / cover no-repeat;
+  filter: blur(18px);
+}
+.photo-ph img {
+  transition: opacity 0.6s ease, transform 0.25s ease, filter 0.25s ease;
+}
+.js .photo-ph img:not(.loaded) {
+  opacity: 0;
+}
+
+/* single photo: the frame shrink-wraps the image and carries the shadow */
+.photo-frame {
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  vertical-align: top;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+body.dark .photo-frame {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+.photo-single-figure img {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* ---------- gallery scroll reveal ---------- */
+/* Uses the separate `translate` property so the hover lift (transform)
+   keeps its own quick timing. */
+.js .reveal {
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity 0.7s ease, translate 0.7s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.js .reveal.in {
+  opacity: 1;
+  translate: none;
+}
+.js .reveal.instant {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ---------- homepage hero ---------- */
+.home-hero {
+  display: block;
+  aspect-ratio: 21 / 9;
+  margin-top: 16px;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+}
+.home-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.6s ease, transform 0.8s ease;
+}
+.home-hero:hover img {
+  transform: scale(1.02);
+}
+.home-hero-cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 48px 18px 14px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.home-hero-cap:empty {
+  display: none;
+}
+.home-hero-cap small {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+.home-hero + .home-info {
+  margin-top: 28px;
+}
+@media (max-width: 600px) {
+  .home-hero {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* ---------- single photo details ---------- */
+.photo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.photo-chip {
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--entry);
+  color: var(--secondary);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+body.dark .photo-chip {
+  border-color: var(--tertiary);
+}
+.photo-single-prev,
+.photo-single-up,
+.photo-single-next {
+  grid-row: 1;
+}
+.photo-single-hint {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  opacity: 0.6;
+}
+@media (hover: none) {
+  .photo-single-hint {
+    display: none;
+  }
+}
+
+/* ---------- page transitions (Chrome/Safari; others just navigate) ---------- */
+@view-transition {
+  navigation: auto;
+}
+.header {
+  view-transition-name: site-header;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+}
+::view-transition-group(*) {
+  animation-duration: 0.38s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* ---------- blog posts ---------- */
+/* a slightly narrower reading column (header narrowed to match) */
+.main:has(.post-single),
+body:has(.post-single) .nav {
+  max-width: calc(680px + var(--gap) * 2);
+}
+
+/* warm code: blocks pick up a brown-black instead of monokai's grey, and
+   inline code a parchment tint */
+:root {
+  --code-bg: rgb(242, 237, 228);
+  --code-block-bg: rgb(39, 35, 32);
+}
+body.dark {
+  --code-bg: rgb(55, 52, 50);
+  --code-block-bg: rgb(36, 33, 31);
+}
+.post-content .highlight pre,
+.post-content pre {
+  background-color: var(--code-block-bg) !important;
+}
+.post-content .highlight,
+.post-content pre {
+  border-radius: var(--radius);
+}
+
+/* an image followed by an italic line becomes a captioned figure */
+.post-content p:has(> img) {
+  text-align: center;
+}
+.post-content p > img {
+  margin-inline: auto;
+  border-radius: var(--radius);
+}
+.post-content p > img ~ em {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: var(--secondary);
+}
+
+/* reading progress */
+.read-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 200;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* ---------- footer ---------- */
+.footer .social-icons {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 6px;
+}
+.footer .social-icons a svg {
+  width: 20px;
+  height: 20px;
+}
+.footer .social-icons a {
+  color: var(--secondary);
+  border-bottom: 0;
+}
+.footer .social-icons a:hover {
+  color: var(--accent);
+}
+.footer-note {
+  display: block;
+  margin-bottom: 2px;
+  font-style: italic;
+}

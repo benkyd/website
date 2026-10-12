@@ -1,0 +1,16 @@
+{{- /* Link-preview card for pages without an image of their own: the title
+       set in Libron on the site's off-white, rendered once at build time.
+       Returns the image resource. */}}
+{{- $title := .Title }}
+{{- $sub := "Ben Kyd · benkyd.co.uk" }}
+{{- if .IsHome }}
+  {{- $title = site.Title }}
+  {{- $sub = "GPU Kernel Software Engineer / Amateur Photographer" }}
+{{- end }}
+{{- $bold := resources.Get "fonts/Libron-Bold.ttf" }}
+{{- $reg := resources.Get "fonts/Libron-Regular.ttf" }}
+{{- $size := cond (gt (len $title) 48) 58 72 }}
+{{- $img := (resources.Get "images/og-base.png").Filter
+  (images.Text $title (dict "font" $bold "size" $size "color" "#1e1e1e" "x" 80 "y" 110 "linespacing" 14))
+  (images.Text $sub (dict "font" $reg "size" 30 "color" "#a8572c" "x" 80 "y" 520)) }}
+{{- return $img }}

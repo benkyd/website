@@ -97,10 +97,10 @@ GALLERY_TMPL = """<header class="page-header">
 {% if photos %}
 <div class="photo-grid">
 {% for p in photos %}
-<a href="/photography/{{ p.slug }}/" class="photo-tile" aria-label="View full size: {{ p.alt }}">
+<a href="/photography/{{ p.slug }}/" class="photo-tile photo-ph reveal" style="--ph:url({{ p.ph }})" aria-label="View full size: {{ p.alt }}">
 <picture>
 <source type="image/webp" srcset="{{ p.thumb_webp }}">
-<img src="{{ p.thumb_jpg }}" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}"
+<img src="{{ p.thumb_jpg }}" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}" style="view-transition-name:p-{{ p.slug }}"
  {% if loop.index0 < 4 %}loading="eager"{% if loop.first %} fetchpriority="high"{% endif %}{% else %}loading="lazy"{% endif %} decoding="async">
 </picture>
 <span class="photo-tile-cap">{{ p.alt }}{% if p.when %}<small>{{ p.when }}</small>{% endif %}</span>
@@ -115,20 +115,23 @@ PHOTO_TMPL = """<header class="page-header">
 <div class="breadcrumbs"><a href="{{ site }}/">Home</a>&nbsp;»&nbsp;<a href="{{ site }}/photography/">Photography</a></div>
 </header>
 <figure class="photo-single-figure">
+<span class="photo-frame photo-ph" style="--ph:url({{ ph }})">
 <picture>
 <source type="image/webp" srcset="{{ full_webp }}">
-<img src="{{ full_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" loading="eager" fetchpriority="high" decoding="async">
+<img src="{{ full_jpg }}" alt="{{ p.alt }}" width="{{ w }}" height="{{ h }}" style="view-transition-name:p-{{ p.slug }}" loading="eager" fetchpriority="high" decoding="async">
 </picture>
+</span>
 <figcaption class="photo-single-caption">
 <span class="photo-single-alt">{{ p.alt }}</span>
 {% if when %}<span class="photo-single-when">{{ when }}</span>{% endif %}
-{% if gear %}<span class="photo-single-exif">{{ gear }}</span>{% endif %}
+{% if chips %}<span class="photo-chips">{% for c in chips %}<span class="photo-chip">{{ c }}</span>{% endfor %}</span>{% endif %}
 </figcaption>
 </figure>
 {% for para in paragraphs %}<p class="photo-single-body">{{ para }}</p>{% endfor %}
 <nav class="photo-single-nav">
 {% if newer %}<a class="photo-single-prev" href="/photography/{{ newer.slug }}/">&lsaquo;&nbsp;Previous</a>{% endif %}
 <a class="photo-single-up" href="/photography/">Back to Photography</a>
+<span class="photo-single-hint" aria-hidden="true">Use &larr; &rarr; to browse</span>
 {% if older %}<a class="photo-single-next" href="/photography/{{ older.slug }}/">Next&nbsp;&rsaquo;</a>{% endif %}
 </nav>"""
 
@@ -186,6 +189,7 @@ def gallery():
     for p in all_photos:
         w, h = photos.variant_size(p, "thumb")
         items.append(dict(slug=p["slug"], alt=p["alt"], when=when_line(p), w=w, h=h,
+                          ph=photos.placeholder(p),
                           thumb_webp=photos.variant_url(p, "thumb", "webp"),
                           thumb_jpg=photos.variant_url(p, "thumb", "jpg")))
     extra = image_meta(all_photos[0], "website") if all_photos else ""
@@ -210,7 +214,8 @@ def photo_page(slug):
     w, h = photos.variant_size(p, "full")
     when = when_line(p)
     main = render_template_string(
-        PHOTO_TMPL, p=p, w=w, h=h, when=when, gear=photos.gear_line(p), site=SITE_URL,
+        PHOTO_TMPL, p=p, w=w, h=h, when=when, chips=photos.gear_chips(p), site=SITE_URL,
+        ph=photos.placeholder(p),
         paragraphs=[x.strip() for x in p.get("body", "").split("\n\n") if x.strip()],
         full_webp=photos.variant_url(p, "full", "webp"),
         full_jpg=photos.variant_url(p, "full", "jpg"),
@@ -221,12 +226,24 @@ def photo_page(slug):
 
 @app.route("/photography/recent.json")
 def recent():
+    """Homepage data: a hero (the newest photo marked featured, else the
+    newest photo) plus the next four for the "Recent photos" strip."""
+    all_ = photos.load_all()
+    if not all_:
+        return jsonify(hero=None, photos=[])
+    hero = next((p for p in all_ if p.get("featured")), all_[0])
+    hw, hh = photos.variant_size(hero, "hero")
     out = []
-    for p in photos.load_all()[:4]:
+    for p in [p for p in all_ if p is not hero][:4]:
         w, h = photos.variant_size(p, "teaser")
-        out.append(dict(alt=p["alt"], url=f"/photography/{p['slug']}/", width=w, height=h,
-                        thumb=photos.variant_url(p, "teaser", "webp")))
-    return jsonify(out)
+        out.append(dict(alt=p["alt"], slug=p["slug"], url=f"/photography/{p['slug']}/",
+                        width=w, height=h, thumb=photos.variant_url(p, "teaser", "webp"),
+                        ph=photos.placeholder(p)))
+    return jsonify(
+        hero=dict(alt=hero["alt"], slug=hero["slug"], url=f"/photography/{hero['slug']}/",
+                  when=when_line(hero), width=hw, height=hh,
+                  src=photos.variant_url(hero, "hero", "webp"), ph=photos.placeholder(hero)),
+        photos=out)
 
 
 @app.route("/photography/img/<slug>/<variant>.<ext>")
@@ -255,6 +272,8 @@ h2{font-size:1.15rem;margin:2.25rem 0 1rem}
 label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
 label:first-child{margin-top:0}
 .hint{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
+label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
 .gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
 input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
 .topbar{display:flex;gap:1rem;margin-bottom:1rem;font-size:.95rem}
@@ -285,6 +304,8 @@ FIELDS_HTML = """<label>Caption / alt text</label>
 <input type="text" name="location" value="{{ p.location }}" placeholder="e.g. Les Deux Alpes, France"/>
 <label>Date</label>
 <input type="month" name="date" value="{{ p.month }}"/>
+<label class="check"><input type="checkbox" name="featured" value="1"{% if p.featured %} checked{% endif %}/> Feature on the homepage</label>
+<p class="hint">The newest featured photo is the big one at the top of the homepage. With none featured, the newest photo is used.</p>
 <div class="section">Gear (optional)</div>
 <p class="hint">Not read from the file - type what you shot it with.</p>
 <label>Camera</label>
@@ -367,7 +388,7 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
 </div></body></html>"""
 
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
-         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": ""}
+         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "featured": ""}
 
 
 def client_ip():
@@ -445,6 +466,7 @@ def form_data(existing_date=""):
         "shutter": (f.get("shutter") or "").strip().removesuffix("s"),
         "iso": (f.get("iso") or "").strip().removeprefix("ISO").strip(),
         "filmStock": (f.get("film_stock") or "").strip(),
+        "featured": "true" if f.get("featured") else "",
     }, None
 
 

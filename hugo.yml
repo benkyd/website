@@ -28,7 +28,8 @@ params:
   ShowPageNums: true
   ShowToc: true
   # comments: false
-  images: ["images/papermod-cover.png"]
+  assets:
+    theme_color: "#faf9f6"
   ShareButtons: ["linkedin", "twitter"]
 
   profileMode:

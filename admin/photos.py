@@ -3,7 +3,9 @@
 Only the .md files are in git. Images and resized derivatives live on this
 server (derivatives are generated on first request and cached under cache/).
 """
+import base64
 import glob
+import io
 import os
 import re
 
@@ -17,13 +19,14 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 # Front matter keys, in the order they're written.
 FIELDS = ["alt", "date", "image", "location", "camera", "lens",
-          "focalLength", "aperture", "shutter", "iso", "filmStock"]
+          "focalLength", "aperture", "shutter", "iso", "filmStock", "featured"]
 
 # Derivative sizes: (axis, pixels). A fixed set, so the cache stays bounded.
 VARIANTS = {
     "thumb": ("w", 640),    # gallery grid
     "teaser": ("h", 260),   # homepage strip - same height for every photo
     "full": ("w", 2200),    # single photo page
+    "hero": ("w", 1600),    # homepage banner
     "og": ("w", 1200),      # link previews
 }
 FORMATS = {"webp": ("WEBP", "image/webp", {"quality": 80}),
@@ -32,6 +35,7 @@ FORMATS = {"webp": ("WEBP", "image/webp", {"quality": 80}),
 _FM_RE = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
 _LINE_RE = re.compile(r'^(\w+):\s*(?:"((?:[^"\\]|\\.)*)"|(\S.*?))\s*$', re.M)
 _size_cache = {}
+_placeholder_cache = {}
 
 
 def md_path(slug):
@@ -141,6 +145,26 @@ def variant_file(photo, variant, ext):
         im.save(tmp, fmt, **opts)
     os.replace(tmp, out)
     return out
+
+
+def placeholder(photo):
+    """A ~24px-wide JPEG as a data: URI - shown blurred while the real image loads."""
+    key = (photo["src"], photo["mtime"])
+    if key not in _placeholder_cache:
+        with Image.open(photo["src"]) as im:
+            im.draft("RGB", (64, 64))
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((24, 24))
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=60)
+        _placeholder_cache[key] = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+    return _placeholder_cache[key]
+
+
+def gear_chips(photo):
+    """Camera, lens, settings and film as separate labels."""
+    return [x for x in (photo.get("camera"), photo.get("lens"),
+                        settings_line(photo), photo.get("filmStock")) if x]
 
 
 def purge_cache(slug):

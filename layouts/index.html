@@ -11,6 +11,15 @@
 
 {{- $paginator := .Paginate $pages }}
 
+{{- if eq $paginator.PageNumber 1 }}
+{{- /* Hero: the featured (or newest) photo, filled in from /photography/recent.json.
+       The box is reserved up front so the page doesn't jump when it arrives. */}}
+<a class="home-hero photo-ph" href="/photography/" aria-label="Photography">
+  <img alt="" decoding="async" fetchpriority="high">
+  <span class="home-hero-cap"></span>
+</a>
+{{- end }}
+
 {{- if and site.Params.homeInfoParams (eq $paginator.PageNumber 1) }}
 {{- partial "home_info.html" . }}
 {{- end }}
@@ -24,18 +33,37 @@
   <div class="photo-teaser-strip"></div>
 </div>
 <script>
-fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : []; }).then(function (photos) {
-  if (!photos.length) return;
+fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : {}; }).then(function (data) {
+  var hero = document.querySelector(".home-hero");
+  var h = data.hero;
+  if (!h) { hero.remove(); return; }
+  hero.href = h.url;
+  hero.setAttribute("aria-label", h.alt);
+  hero.style.setProperty("--ph", "url(" + h.ph + ")");
+  var himg = hero.querySelector("img");
+  himg.alt = h.alt; himg.width = h.width; himg.height = h.height;
+  himg.style.viewTransitionName = "p-" + h.slug;
+  himg.src = h.src;
+  var cap = hero.querySelector(".home-hero-cap");
+  cap.textContent = h.alt;
+  if (h.when) { var small = document.createElement("small"); small.textContent = h.when; cap.appendChild(small); }
+
+  var photos = data.photos || [];
+  if (!photos.length) { window.siteSettle && siteSettle(hero); return; }
   var box = document.querySelector(".photo-teaser");
   var strip = box.querySelector(".photo-teaser-strip");
   var tiles = photos.map(function (p) {
     var a = document.createElement("a");
     a.href = p.url;
+    a.className = "photo-ph";
     a.setAttribute("aria-label", p.alt);
     a.style.flex = (p.width / p.height) + " 1 0";
+    a.style.setProperty("--ph", "url(" + p.ph + ")");
     var img = document.createElement("img");
-    img.src = p.thumb; img.alt = p.alt; img.width = p.width; img.height = p.height;
+    img.alt = p.alt; img.width = p.width; img.height = p.height;
     img.loading = "lazy"; img.decoding = "async";
+    img.style.viewTransitionName = "p-" + p.slug;
+    img.src = p.thumb;
     a.appendChild(img);
     return a;
   });
@@ -45,14 +73,17 @@ fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : [
     strip.replaceChildren();
     var per = narrow.matches ? 2 : 4, row;
     tiles.forEach(function (a, i) {
-      if (i % per === 0) { row = document.createElement("div"); row.className = "photo-teaser-row"; strip.appendChild(row); }
+      // a lone photo on the last row joins the row above instead
+      var lone = i === tiles.length - 1 && i % per === 0 && i > 0;
+      if (i % per === 0 && !lone) { row = document.createElement("div"); row.className = "photo-teaser-row"; strip.appendChild(row); }
       row.appendChild(a);
     });
   }
   layout();
   narrow.addEventListener("change", layout);
   box.hidden = false;
-}).catch(function () {});
+  window.siteSettle && siteSettle(document);
+}).catch(function () { var h = document.querySelector(".home-hero"); h && h.remove(); });
 </script>
 <div class="home-section-title">
   <h2>Writing</h2>
