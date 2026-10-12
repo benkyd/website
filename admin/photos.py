@@ -211,9 +211,9 @@ def gear_chips(photo):
                         settings_line(photo), photo.get("filmStock")) if x]
 
 
-def uncropped_preview(photo, width=1600):
+def uncropped_preview(photo, width=2400):
     """Upright, uncropped JPEG for the admin crop view."""
-    out = os.path.join(CACHE_DIR, f"{photo['slug']}-source-{photo['mtime']}.jpg")
+    out = os.path.join(CACHE_DIR, f"{photo['slug']}-source{width}-{photo['mtime']}.jpg")
     if os.path.exists(out):
         return out
     os.makedirs(CACHE_DIR, exist_ok=True)

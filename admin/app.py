@@ -277,13 +277,15 @@ h2{font-size:1.15rem;margin:2.25rem 0 1rem}
 label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
 label:first-child{margin-top:0}
 .hint{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
-.card-wide{max-width:760px}
+.card-wide{max-width:1200px}
+.card-wide > :not(.crop){max-width:520px}
+body:has(.card-wide) .wrap{max-width:1240px}
 .btn-small{font:inherit;font-size:.85rem;padding:.35rem .8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer}
 .btn-small:hover{border-color:var(--accent);color:var(--accent)}
 .crop-stage{position:relative;display:inline-block;max-width:calc(100% - 16px);margin:.6rem 8px .8rem;line-height:0;touch-action:none;user-select:none}
 .crop-shade{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .crop-hole{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.55)}
-.crop-img{display:block;max-width:100%;max-height:60vh;width:auto;height:auto}
+.crop-img{display:block;max-width:100%;max-height:min(80vh,1100px);width:auto;height:auto}
 .crop-box{position:absolute;outline:1px solid rgba(255,255,255,.9);cursor:move}
 .crop-box::before,.crop-box::after{content:"";position:absolute;inset:0;pointer-events:none;border:0 solid rgba(255,255,255,.35)}
 .crop-box::before{left:33.33%;right:33.33%;border-left-width:1px;border-right-width:1px}
@@ -293,6 +295,15 @@ label:first-child{margin-top:0}
 .crop-h[data-h=sw]{left:-7px;bottom:-7px;cursor:nesw-resize}.crop-h[data-h=se]{right:-7px;bottom:-7px;cursor:nwse-resize}
 .crop-h[data-h=n]{left:calc(50% - 7px);top:-7px;cursor:ns-resize}.crop-h[data-h=s]{left:calc(50% - 7px);bottom:-7px;cursor:ns-resize}
 .crop-h[data-h=w]{top:calc(50% - 7px);left:-7px;cursor:ew-resize}.crop-h[data-h=e]{top:calc(50% - 7px);right:-7px;cursor:ew-resize}
+.crop-loupe{position:fixed;z-index:200;width:200px;height:200px;border-radius:8px;border:2px solid #fff;box-shadow:0 6px 24px rgba(0,0,0,.45);pointer-events:none}
+.crop-full{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:16px;background:#121214}
+.crop-full .crop-stage{margin:0}
+.crop-full .crop-img{max-width:calc(100vw - 48px);max-height:calc(100vh - 90px)}
+.crop-full .crop-tools{margin:0}
+.crop-full .crop-info{color:#bbb}
+.crop-full .btn-small{background:#2a2a2e;color:#eee;border-color:#444}
+.crop-full .btn-small[data-act=full]{background:var(--accent);border-color:var(--accent);color:#fff}
+html.crop-locked{overflow:hidden}
 .crop-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.4rem}
 .crop-info{font-size:.8rem;color:var(--muted)}
 label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
@@ -366,7 +377,7 @@ TEMPLATE = """<!DOCTYPE html>
 <p class="topbar"><a href="/photography/">&lsaquo; View the gallery</a></p>
 <h1>Add a photo</h1>
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<form method="post" action="/admin/upload" enctype="multipart/form-data" class="card">
+<form method="post" action="/admin/upload" enctype="multipart/form-data" class="card card-wide">
 <label>Image (jpg / png / webp)</label>
 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required/>
 <div class="crop" data-src="">
@@ -377,6 +388,7 @@ TEMPLATE = """<!DOCTYPE html>
 <div class="crop-tools" hidden>
 <button type="button" class="btn-small" data-act="auto">Remove border</button>
 <button type="button" class="btn-small" data-act="reset">Reset crop</button>
+<button type="button" class="btn-small" data-act="full">Full screen</button>
 <span class="crop-info"></span>
 </div>
 <input type="hidden" name="crop" value="">
@@ -408,6 +420,34 @@ document.querySelectorAll(".crop").forEach(function (root) {
   var box = root.querySelector(".crop-box"), tools = root.querySelector(".crop-tools");
   var input = root.querySelector("input[name=crop]"), info = root.querySelector(".crop-info");
   var hole = root.querySelector(".crop-hole");
+  var loupe = document.createElement("canvas"), LS = 200, ZOOM = 4;
+  loupe.className = "crop-loupe"; loupe.width = loupe.height = LS * (window.devicePixelRatio || 1);
+  loupe.hidden = true; document.body.appendChild(loupe);
+  var lctx = loupe.getContext("2d");
+
+  // Magnifier: while an edge or corner is dragged, show the area around
+  // that edge at ZOOM x the on-screen size, next to the cursor.
+  function drawLoupe(h, px, py) {
+    var r = img.getBoundingClientRect(), nat = img.naturalWidth / r.width;
+    var fx = h.indexOf("w") >= 0 ? c[0] : h.indexOf("e") >= 0 ? c[2] : (c[0] + c[2]) / 2;
+    var fy = h.indexOf("n") >= 0 ? c[1] : h.indexOf("s") >= 0 ? c[3] : (c[1] + c[3]) / 2;
+    var span = LS / ZOOM * nat;                       // natural px shown across the loupe
+    var sx = fx * img.naturalWidth - span / 2, sy = fy * img.naturalHeight - span / 2;
+    var d = loupe.width, k = d / span;
+    lctx.fillStyle = "#222"; lctx.fillRect(0, 0, d, d);
+    lctx.imageSmoothingEnabled = false;
+    lctx.drawImage(img, sx, sy, span, span, 0, 0, d, d);
+    var x0 = (c[0] * img.naturalWidth - sx) * k, y0 = (c[1] * img.naturalHeight - sy) * k;
+    var x1 = (c[2] * img.naturalWidth - sx) * k, y1 = (c[3] * img.naturalHeight - sy) * k;
+    lctx.fillStyle = "rgba(0,0,0,.55)";
+    lctx.beginPath(); lctx.rect(0, 0, d, d); lctx.rect(x0, y0, x1 - x0, y1 - y0); lctx.fill("evenodd");
+    lctx.strokeStyle = "#fff"; lctx.lineWidth = Math.max(1, d / LS);
+    lctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    var off = 28, lx = px + off, ly = py + off;
+    if (lx + LS > window.innerWidth - 8) lx = px - off - LS;
+    if (ly + LS > window.innerHeight - 8) ly = py - off - LS;
+    loupe.style.left = lx + "px"; loupe.style.top = ly + "px"; loupe.hidden = false;
+  }
   var form = root.closest("form"), file = form.querySelector("input[type=file]");
   var c = parse(input.value) || [0, 0, 1, 1], MIN = 0.05;
 
@@ -452,9 +492,10 @@ document.querySelectorAll(".crop").forEach(function (root) {
       if (drag.h.indexOf("s") >= 0) n[3] = Math.max(Math.min(1, s[3] + dy), s[1] + MIN);
     }
     c = n; render();
+    if (drag.h !== "move") drawLoupe(drag.h, e.clientX, e.clientY);
   });
-  box.addEventListener("pointerup", function () { drag = null; });
-  box.addEventListener("pointercancel", function () { drag = null; });
+  box.addEventListener("pointerup", function () { drag = null; loupe.hidden = true; });
+  box.addEventListener("pointercancel", function () { drag = null; loupe.hidden = true; });
 
   // Find a uniform border (white mount, black film rebate, scanner bed) on
   // each side and crop just inside it.
@@ -482,8 +523,8 @@ document.querySelectorAll(".crop").forEach(function (root) {
       var ref = median(line(at(0), vertical));
       if (ref > 28 && ref < 232) return 0;
       var k = 0;
-      while (k < n * 0.12 && frac(at(k), vertical, ref) >= 0.97) k++;
-      if (k === 0 || k >= n * 0.12) return 0;
+      while (k < n * 0.45 && frac(at(k), vertical, ref) >= 0.97) k++;
+      if (k === 0 || k >= n * 0.45) return 0;
       return frac(at(Math.min(n - 1, k + 2)), vertical, ref) < 0.75 ? k : 0;
     }
     var inset = 0.004;
@@ -497,6 +538,17 @@ document.querySelectorAll(".crop").forEach(function (root) {
     var act = e.target.dataset.act;
     if (act === "auto") autoBorder();
     if (act === "reset") { c = [0, 0, 1, 1]; render(); }
+    if (act === "full") setFull(!root.classList.contains("crop-full"));
+  });
+  // Full screen: the photo as large as the window allows.
+  var fullBtn = tools.querySelector("[data-act=full]");
+  function setFull(on) {
+    root.classList.toggle("crop-full", on);
+    document.documentElement.classList.toggle("crop-locked", on);
+    fullBtn.textContent = on ? "Done" : "Full screen";
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && root.classList.contains("crop-full")) setFull(false);
   });
   if (file) file.addEventListener("change", function () {
     if (file.files[0]) show(URL.createObjectURL(file.files[0]), false);
@@ -525,6 +577,7 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
 <div class="crop-tools" hidden>
 <button type="button" class="btn-small" data-act="auto">Remove border</button>
 <button type="button" class="btn-small" data-act="reset">Reset crop</button>
+<button type="button" class="btn-small" data-act="full">Full screen</button>
 <span class="crop-info"></span>
 </div>
 <input type="hidden" name="crop" value="{{ p.crop }}">
@@ -547,6 +600,34 @@ document.querySelectorAll(".crop").forEach(function (root) {
   var box = root.querySelector(".crop-box"), tools = root.querySelector(".crop-tools");
   var input = root.querySelector("input[name=crop]"), info = root.querySelector(".crop-info");
   var hole = root.querySelector(".crop-hole");
+  var loupe = document.createElement("canvas"), LS = 200, ZOOM = 4;
+  loupe.className = "crop-loupe"; loupe.width = loupe.height = LS * (window.devicePixelRatio || 1);
+  loupe.hidden = true; document.body.appendChild(loupe);
+  var lctx = loupe.getContext("2d");
+
+  // Magnifier: while an edge or corner is dragged, show the area around
+  // that edge at ZOOM x the on-screen size, next to the cursor.
+  function drawLoupe(h, px, py) {
+    var r = img.getBoundingClientRect(), nat = img.naturalWidth / r.width;
+    var fx = h.indexOf("w") >= 0 ? c[0] : h.indexOf("e") >= 0 ? c[2] : (c[0] + c[2]) / 2;
+    var fy = h.indexOf("n") >= 0 ? c[1] : h.indexOf("s") >= 0 ? c[3] : (c[1] + c[3]) / 2;
+    var span = LS / ZOOM * nat;                       // natural px shown across the loupe
+    var sx = fx * img.naturalWidth - span / 2, sy = fy * img.naturalHeight - span / 2;
+    var d = loupe.width, k = d / span;
+    lctx.fillStyle = "#222"; lctx.fillRect(0, 0, d, d);
+    lctx.imageSmoothingEnabled = false;
+    lctx.drawImage(img, sx, sy, span, span, 0, 0, d, d);
+    var x0 = (c[0] * img.naturalWidth - sx) * k, y0 = (c[1] * img.naturalHeight - sy) * k;
+    var x1 = (c[2] * img.naturalWidth - sx) * k, y1 = (c[3] * img.naturalHeight - sy) * k;
+    lctx.fillStyle = "rgba(0,0,0,.55)";
+    lctx.beginPath(); lctx.rect(0, 0, d, d); lctx.rect(x0, y0, x1 - x0, y1 - y0); lctx.fill("evenodd");
+    lctx.strokeStyle = "#fff"; lctx.lineWidth = Math.max(1, d / LS);
+    lctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    var off = 28, lx = px + off, ly = py + off;
+    if (lx + LS > window.innerWidth - 8) lx = px - off - LS;
+    if (ly + LS > window.innerHeight - 8) ly = py - off - LS;
+    loupe.style.left = lx + "px"; loupe.style.top = ly + "px"; loupe.hidden = false;
+  }
   var form = root.closest("form"), file = form.querySelector("input[type=file]");
   var c = parse(input.value) || [0, 0, 1, 1], MIN = 0.05;
 
@@ -591,9 +672,10 @@ document.querySelectorAll(".crop").forEach(function (root) {
       if (drag.h.indexOf("s") >= 0) n[3] = Math.max(Math.min(1, s[3] + dy), s[1] + MIN);
     }
     c = n; render();
+    if (drag.h !== "move") drawLoupe(drag.h, e.clientX, e.clientY);
   });
-  box.addEventListener("pointerup", function () { drag = null; });
-  box.addEventListener("pointercancel", function () { drag = null; });
+  box.addEventListener("pointerup", function () { drag = null; loupe.hidden = true; });
+  box.addEventListener("pointercancel", function () { drag = null; loupe.hidden = true; });
 
   // Find a uniform border (white mount, black film rebate, scanner bed) on
   // each side and crop just inside it.
@@ -621,8 +703,8 @@ document.querySelectorAll(".crop").forEach(function (root) {
       var ref = median(line(at(0), vertical));
       if (ref > 28 && ref < 232) return 0;
       var k = 0;
-      while (k < n * 0.12 && frac(at(k), vertical, ref) >= 0.97) k++;
-      if (k === 0 || k >= n * 0.12) return 0;
+      while (k < n * 0.45 && frac(at(k), vertical, ref) >= 0.97) k++;
+      if (k === 0 || k >= n * 0.45) return 0;
       return frac(at(Math.min(n - 1, k + 2)), vertical, ref) < 0.75 ? k : 0;
     }
     var inset = 0.004;
@@ -636,6 +718,17 @@ document.querySelectorAll(".crop").forEach(function (root) {
     var act = e.target.dataset.act;
     if (act === "auto") autoBorder();
     if (act === "reset") { c = [0, 0, 1, 1]; render(); }
+    if (act === "full") setFull(!root.classList.contains("crop-full"));
+  });
+  // Full screen: the photo as large as the window allows.
+  var fullBtn = tools.querySelector("[data-act=full]");
+  function setFull(on) {
+    root.classList.toggle("crop-full", on);
+    document.documentElement.classList.toggle("crop-locked", on);
+    fullBtn.textContent = on ? "Done" : "Full screen";
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && root.classList.contains("crop-full")) setFull(false);
   });
   if (file) file.addEventListener("change", function () {
     if (file.files[0]) show(URL.createObjectURL(file.files[0]), false);
