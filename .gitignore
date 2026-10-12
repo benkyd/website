@@ -28,3 +28,14 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Hugo build cache
+resources/_gen/
+.hugo_build.lock
+__pycache__/
+
+# Built site and photos live on the server only (nightly host backup covers
+# /var/www/website). A pull never touches these; a fresh clone builds fine
+# without them, photo pages just render without their image.
+/public/
+/assets/photography/
