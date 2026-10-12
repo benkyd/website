@@ -105,6 +105,9 @@ def load_all():
         p = load(os.path.basename(path)[:-3])
         if p:
             photos.append(p)
+    # newest first; within a day (e.g. several uploads in one month, all on
+    # the 1st) fall back to the slug so the order is at least stable
+    photos.sort(key=lambda p: p["slug"])
     photos.sort(key=lambda p: p.get("date", ""), reverse=True)
     return photos
 

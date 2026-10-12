@@ -331,7 +331,14 @@ a{color:var(--accent)}
 .tile{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card);color:var(--text);text-decoration:none;transition:box-shadow .2s,transform .2s}
 .tile:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
 .tile img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.tile .cap{padding:.5rem .6rem;font-size:.85rem}
+.tile .cap{display:flex;flex-direction:column;gap:.4rem;padding:.5rem .6rem;font-size:.85rem}
+.tile .cap > a{flex:1;min-width:0;color:inherit;text-decoration:none}
+.tile:hover{transform:none}
+.month{margin:1.4rem 0 .6rem;font-weight:700}
+.move{display:flex;gap:.25rem;justify-content:flex-end}
+.move button{width:1.8rem;height:1.8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:1rem;line-height:1;cursor:pointer}
+.move button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.move button:disabled{opacity:.3;cursor:default}
 img.preview{max-width:min(100%,520px);max-height:50vh;border-radius:8px;margin-bottom:1rem;display:block}
 @media (max-width:480px){body{padding:1rem}.gear-row{grid-template-columns:repeat(2,1fr)}}"""
 
@@ -401,14 +408,24 @@ TEMPLATE = """<!DOCTYPE html>
 </form>
 
 <h2>Existing photos ({{ photos|length }})</h2>
+<p class="hint">Newest first, as on the site. Use &lsaquo; &rsaquo; to reorder photos within a month.</p>
+{% for month, group in photos|groupby("month")|sort(attribute="grouper", reverse=True) %}
+<div class="month" id="month-{{ month }}">{{ group[0].month_label }}</div>
 <div class="grid">
-{% for q in photos %}
-<a class="tile" href="/admin/edit/{{ q.slug }}">
-  <img src="{{ q.thumb }}" alt=""/>
-  <div class="cap">{{ q.alt }}</div>
-</a>
+{% for q in group|sort(attribute="rank") %}
+<div class="tile">
+  <a href="/admin/edit/{{ q.slug }}"><img src="{{ q.thumb }}" alt=""/></a>
+  <div class="cap">
+    <a href="/admin/edit/{{ q.slug }}">{{ q.alt }}</a>
+    {% if group|length > 1 %}<form method="post" action="/admin/move/{{ q.slug }}" class="move">
+      <button name="dir" value="up" title="Show earlier"{% if loop.first %} disabled{% endif %}>&lsaquo;</button>
+      <button name="dir" value="down" title="Show later"{% if loop.last %} disabled{% endif %}>&rsaquo;</button>
+    </form>{% endif %}
+  </div>
+</div>
 {% endfor %}
 </div>
+{% endfor %}
 
 <form method="post" action="/admin/logout" style="max-width:520px;margin-top:2rem">
 <button class="btn btn-ghost" type="submit">Sign Out</button>
@@ -774,6 +791,8 @@ def admin_photos():
         q["month"] = p.get("date", "")[:7]
         q["thumb"] = photos.variant_url(p, "thumb", "webp")
         q["mtime"] = p["mtime"]
+        q["month_label"] = month_year(p.get("date", "")) or "Undated"
+        q["rank"] = len(out)
         out.append(q)
     return out
 
@@ -849,9 +868,13 @@ def save_upload(file, slug):
 
 def commit_push(slug, message):
     """Version the metadata. Images aren't in git - the host backup covers them."""
-    if os.environ.get("PHOTO_NO_GIT"):  # test instances
+    return commit_paths([f"photos/{slug}.md"], message)
+
+
+def commit_paths(paths, message):
+    if os.environ.get("PHOTO_NO_GIT") or not paths:  # test instances
         return ""
-    run(["git", "add", "-A", "--", f"photos/{slug}.md"])
+    run(["git", "add", "-A", "--", *paths])
     commit = run(["git", "commit", "-q", "-m", message])
     out = (commit.stdout + commit.stderr).lower()
     if commit.returncode != 0 and "nothing to commit" not in out:
@@ -968,6 +991,37 @@ def edit_save(slug):
     photos.write(slug, data, p.get("body", ""))
     note = commit_push(slug, f"Edit photo: {data['alt']}")
     return render_edit(slug, f"Saved.{note}", ok=True)
+
+
+@app.route("/admin/move/<slug>", methods=["POST"])
+def move(slug):
+    """Swap a photo with its neighbour within the same month. Only the month
+    is ever shown, so the day of the date is free to act as the position:
+    the month's photos are renumbered so the one shown first has the latest day."""
+    if not require_login():
+        return redirect("/admin")
+    ordered = photos.load_all()
+    p = next((q for q in ordered if q["slug"] == slug), None)
+    if not p:
+        return redirect("/admin")
+    month = p.get("date", "")[:7]
+    group = [q for q in ordered if q.get("date", "")[:7] == month]
+    i = group.index(p)
+    j = i - 1 if request.form.get("dir") == "up" else i + 1
+    if not 0 <= j < len(group):
+        return redirect("/admin")
+    if len(group) > 28:
+        return render_index("Can't reorder a month with more than 28 photos.")
+    group[i], group[j] = group[j], group[i]
+    changed = []
+    for n, q in enumerate(group):
+        day = f"{month}-{len(group) - n:02d}"
+        if q.get("date") != day:
+            q["date"] = day
+            photos.write(q["slug"], q, q.get("body", ""))
+            changed.append(q["slug"])
+    note = commit_paths([f"photos/{s}.md" for s in changed], f"Reorder photos: {month_year(month)}")
+    return redirect("/admin#month-" + month) if not note else render_index("Reordered." + note, ok=True)
 
 
 @app.route("/admin/delete/<slug>", methods=["POST"])
