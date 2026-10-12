@@ -12,7 +12,7 @@ disableShare: true
 
 I write GPU kernel software. Most of my background is embedded: firmware, drivers, hardware acceleration and FPGA toolchains, at Apple, Intel and ChamSys, and through my own consultancy, Ben Labs Ltd.
 
-Outside work I mostly build low-level things for fun: a RISC-V emulator, game engines, a couple of operating systems. Ive contributed to Zephyr, Meshtastic and SDR++, and whatever I\m working on now is on [GitHub](https://github.com/benkyd).
+Outside work I mostly build low-level things for fun: a RISC-V emulator, game engines, a couple of operating systems. I've contributed to Zephyr, Meshtastic and SDR++, and whatever I'm working on now is on [GitHub](https://github.com/benkyd).
 
 ### What I work with
 
@@ -22,6 +22,8 @@ Outside work I mostly build low-level things for fun: a RISC-V emulator, game en
 
 I also take photos, on film and digital. They're [here](/photography/).
 
-You can email me at [ben@benkyd.co.uk](mailto:ben@benkyd.co.uk).
+### Enquiries
+
+For consulting, collaborations and other enquiries: [ben@benkyd.co.uk](mailto:ben@benkyd.co.uk)
 
 ![A lake beneath steep mountains](/photo.jpg)
