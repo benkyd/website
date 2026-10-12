@@ -103,6 +103,7 @@ GALLERY_TMPL = """<header class="page-header">
 <img src="{{ p.thumb_jpg }}" alt="{{ p.alt }}" width="{{ p.w }}" height="{{ p.h }}"
  {% if loop.index0 < 4 %}loading="eager"{% if loop.first %} fetchpriority="high"{% endif %}{% else %}loading="lazy"{% endif %} decoding="async">
 </picture>
+<span class="photo-tile-cap">{{ p.alt }}{% if p.when %}<small>{{ p.when }}</small>{% endif %}</span>
 </a>
 {% endfor %}
 </div>
@@ -148,6 +149,10 @@ def month_year(value):
         return ""
 
 
+def when_line(p):
+    return " · ".join(x for x in (p.get("location"), month_year(p.get("date", ""))) if x)
+
+
 def describe(p):
     return f"{p['alt']} — {p['location']}" if p.get("location") else p["alt"]
 
@@ -157,6 +162,16 @@ def image_meta(p, og_type):
     return render_template_string(
         IMAGE_META_TMPL, og_type=og_type, w=w, h=h,
         image=absolute(photos.variant_url(p, "og", "jpg")))
+
+
+@app.errorhandler(404)
+def not_found(_e):
+    # the site's own 404 page rather than Flask's bare one
+    try:
+        with open(os.path.join(REPO, "public", "404.html")) as f:
+            return f.read(), 404
+    except OSError:
+        return "Not found", 404
 
 
 @app.route("/photography")
@@ -170,7 +185,7 @@ def gallery():
     items = []
     for p in all_photos:
         w, h = photos.variant_size(p, "thumb")
-        items.append(dict(slug=p["slug"], alt=p["alt"], w=w, h=h,
+        items.append(dict(slug=p["slug"], alt=p["alt"], when=when_line(p), w=w, h=h,
                           thumb_webp=photos.variant_url(p, "thumb", "webp"),
                           thumb_jpg=photos.variant_url(p, "thumb", "jpg")))
     extra = image_meta(all_photos[0], "website") if all_photos else ""
@@ -193,7 +208,7 @@ def photo_page(slug):
     ordered = photos.load_all()
     i = next(n for n, q in enumerate(ordered) if q["slug"] == slug)
     w, h = photos.variant_size(p, "full")
-    when = " · ".join(x for x in (p.get("location"), month_year(p.get("date", ""))) if x)
+    when = when_line(p)
     main = render_template_string(
         PHOTO_TMPL, p=p, w=w, h=h, when=when, gear=photos.gear_line(p), site=SITE_URL,
         paragraphs=[x.strip() for x in p.get("body", "").split("\n\n") if x.strip()],
@@ -227,33 +242,42 @@ def photo_image(slug, variant, ext):
 
 # ----------------------------------------------------------------- admin ----
 
-STYLE = """*{box-sizing:border-box;margin:0;padding:0}
-body{background:#14161a;color:#e8e8e6;font-family:system-ui,sans-serif;padding:1.5rem;min-height:100vh}
-h1{font-size:1.3rem;margin-bottom:1.5rem;letter-spacing:.02em}
-h2{font-size:1rem;margin:2rem 0 1rem;color:#c5c6ca}
-.card{background:#1d2026;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:1.25rem;margin-bottom:1rem;max-width:480px}
-label{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#9a9ca3;margin-bottom:.4rem;margin-top:.9rem}
+STYLE = """@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Regular.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Bold.woff2) format("woff2");font-weight:700}
+:root{--bg:#faf9f6;--card:#fdfcfa;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#a8572c;--on-accent:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#2e2e33;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#232427;--accent:#e08c61;--on-accent:#1d1e20}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Libron,Georgia,serif;padding:1.5rem;min-height:100vh;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:1.6rem;margin-bottom:1.25rem}
+h2{font-size:1.15rem;margin:2.25rem 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.25rem;margin-bottom:1rem;max-width:520px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
 label:first-child{margin-top:0}
-.hint{font-size:.75rem;color:#6b6d74;margin-top:-.25rem;margin-bottom:.5rem;text-transform:none;letter-spacing:0}
-.gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
-.gear-row label{font-size:.65rem}
-input[type=text],input[type=month],input[type=password],input[type=file]{width:100%;padding:.6rem .8rem;background:#101216;border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#e8e8e6;font-size:1rem}
-input:focus{outline:none;border-color:#6fa8ff}
-.btn{width:100%;padding:.8rem;background:#6fa8ff;color:#0a0a0a;border:none;border-radius:4px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
-.btn:active{background:#8fbaff}
-.btn-danger{background:#e05c5c;color:#1a0a0a}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.15);color:#c5c6ca}
-.status{padding:.75rem 1rem;border-radius:4px;margin-bottom:1rem;font-size:.9rem;max-width:480px}
-.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86efac}
-.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
-.login-wrap{max-width:320px;margin:4rem auto}
-.section{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#6fa8ff;margin-top:1.3rem;margin-bottom:-.3rem}
-a{color:#6fa8ff}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;max-width:900px}
-.tile{display:block;border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;background:#1d2026;color:#e8e8e6}
+.hint{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+.gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
+input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
+.topbar{display:flex;gap:1rem;margin-bottom:1rem;font-size:.95rem}
+.gear-row label{font-size:.75rem;white-space:nowrap}
+input[type=text],input[type=month],input[type=password],input[type=file]{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+.btn{width:100%;padding:.75rem;background:var(--accent);color:var(--on-accent);border:none;border-radius:6px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
+.btn:hover{filter:brightness(1.07)}
+.btn-danger{background:transparent;color:#c0392b;border:1px solid currentColor;margin-top:0}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.status{padding:.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:.95rem;max-width:520px}
+.ok{background:rgba(34,140,80,.1);border:1px solid rgba(34,140,80,.35)}
+.err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35)}
+.login-wrap{max-width:340px;margin:12vh auto}
+.section{font-size:1.05rem;font-weight:700;margin-top:1.6rem;margin-bottom:.2rem;padding-top:1rem;border-top:1px solid var(--line)}
+a{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.tile{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card);color:var(--text);text-decoration:none;transition:box-shadow .2s,transform .2s}
+.tile:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
 .tile img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.tile .cap{padding:.5rem .6rem;font-size:.8rem}
-img.preview{max-width:100%;border-radius:6px;margin-bottom:1rem;display:block}"""
+.tile .cap{padding:.5rem .6rem;font-size:.85rem}
+img.preview{max-width:min(100%,520px);max-height:50vh;border-radius:8px;margin-bottom:1rem;display:block}
+@media (max-width:480px){body{padding:1rem}.gear-row{grid-template-columns:repeat(2,1fr)}}"""
 
 FIELDS_HTML = """<label>Caption / alt text</label>
 <input type="text" name="alt" value="{{ p.alt }}" placeholder="A short description of the photo" required/>
@@ -283,7 +307,7 @@ TEMPLATE = """<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Photography Admin</title>
-<style>""" + STYLE + """</style></head><body>
+<style>""" + STYLE + """</style></head><body><div class="wrap">
 {% if not logged_in %}
 <div class="login-wrap">
 <h1>Photography Admin</h1>
@@ -295,6 +319,7 @@ TEMPLATE = """<!DOCTYPE html>
 </form>
 </div>
 {% else %}
+<p class="topbar"><a href="/photography/">&lsaquo; View the gallery</a></p>
 <h1>Add a photo</h1>
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
 <form method="post" action="/admin/upload" enctype="multipart/form-data" class="card">
@@ -314,18 +339,18 @@ TEMPLATE = """<!DOCTYPE html>
 {% endfor %}
 </div>
 
-<form method="post" action="/admin/logout" style="max-width:480px;margin-top:2rem">
+<form method="post" action="/admin/logout" style="max-width:520px;margin-top:2rem">
 <button class="btn btn-ghost" type="submit">Sign Out</button>
 </form>
 {% endif %}
-</body></html>"""
+</div></body></html>"""
 
 EDIT_TEMPLATE = """<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Edit photo - Photography Admin</title>
-<style>""" + STYLE + """</style></head><body>
-<p><a href="/admin">&lsaquo; Back</a> &middot; <a href="/photography/{{ p.slug }}/">View</a></p>
+<style>""" + STYLE + """</style></head><body><div class="wrap">
+<p class="topbar"><a href="/admin">&lsaquo; All photos</a><a href="/photography/{{ p.slug }}/">View on site</a></p>
 <h1>Edit photo</h1>
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
 <img class="preview" src="{{ p.thumb }}" alt=""/>
@@ -335,11 +360,11 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
 """ + FIELDS_HTML + """
 <button class="btn" type="submit">Save</button>
 </form>
-<form method="post" action="/admin/delete/{{ p.slug }}" class="card"
+<form method="post" action="/admin/delete/{{ p.slug }}" style="max-width:520px"
       onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
 <button class="btn btn-danger" type="submit">Delete this photo</button>
 </form>
-</body></html>"""
+</div></body></html>"""
 
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
          "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": ""}

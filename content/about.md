@@ -3,12 +3,14 @@ title: "About Me"
 date: 2025-07-09
 draft: false
 ShowToc: false
+hideMeta: true
+disableShare: true
 ---
 
 ## Ben Kyd  
 **Embedded Acceleration & Kernel Engineer**
 
-I'm a programmer, engineer, amature photographer and nature lover.
+I'm a programmer, engineer, amateur photographer and nature lover.
 
 I work across embedded systems, electrical engineering, hardware acceleration, and graphics. I’m interested in the kind of problems that sit close to the metal-firmware, FPGAs, real-time performance, and systems where software and hardware are tightly coupled.
 

@@ -28,7 +28,7 @@ fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : [
   if (!photos.length) return;
   var box = document.querySelector(".photo-teaser");
   var strip = box.querySelector(".photo-teaser-strip");
-  photos.forEach(function (p) {
+  var tiles = photos.map(function (p) {
     var a = document.createElement("a");
     a.href = p.url;
     a.setAttribute("aria-label", p.alt);
@@ -37,8 +37,20 @@ fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : [
     img.src = p.thumb; img.alt = p.alt; img.width = p.width; img.height = p.height;
     img.loading = "lazy"; img.decoding = "async";
     a.appendChild(img);
-    strip.appendChild(a);
+    return a;
   });
+  // one row of four on wide screens, rows of two on phones
+  var narrow = window.matchMedia("(max-width: 600px)");
+  function layout() {
+    strip.replaceChildren();
+    var per = narrow.matches ? 2 : 4, row;
+    tiles.forEach(function (a, i) {
+      if (i % per === 0) { row = document.createElement("div"); row.className = "photo-teaser-row"; strip.appendChild(row); }
+      row.appendChild(a);
+    });
+  }
+  layout();
+  narrow.addEventListener("change", layout);
   box.hidden = false;
 }).catch(function () {});
 </script>

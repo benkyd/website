@@ -3,6 +3,16 @@
   padding: 12px;
 }
 
+/* header lines up with the content column below it (the theme's nav is a
+   wider 1024px row, so the logo and menu sat outside the text edges) */
+.nav {
+  max-width: calc(var(--main-width) + var(--gap) * 2);
+}
+.logo,
+#menu {
+  margin-inline: 12px;
+}
+
 /* PaperMod gives list-kind pages (home, section lists) a grey tint in
    light mode (.dark.list already neutralizes this for dark mode) -
    keep all pages on the same background. */
@@ -16,6 +26,23 @@
    whatever comes next on the home page. */
 .home-info {
   min-height: auto;
+}
+
+/* 404: the theme's is a bare giant "404" with no way back */
+.not-found-page {
+  margin: 12vh 0;
+  text-align: center;
+  color: var(--secondary);
+}
+.not-found-page .not-found-code {
+  font-size: 96px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+.not-found-page a {
+  color: var(--accent);
 }
 
 /* off-white instead of pure white in light mode. This theme toggles dark
