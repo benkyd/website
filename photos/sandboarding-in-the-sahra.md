@@ -1,10 +1,7 @@
 ---
-title: "Sandboarding in the Sahra"
 alt: "Sandboarding in the Sahra"
-description: "Sandboarding in the Sahra — Merzouga, Morocco"
-layout: "photo"
 date: 2026-10-01
-photoFile: "photography/sandboarding-in-the-sahra.jpg"
+image: "sandboarding-in-the-sahra.jpg"
 location: "Merzouga, Morocco"
 camera: "Sony A7CII"
 lens: "Tamron E 28-75mm F2.8"

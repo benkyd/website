@@ -16,32 +16,32 @@
 {{- end }}
 
 {{- if eq $paginator.PageNumber 1 }}
-{{- $photoSection := site.GetPage "photography" }}
-{{- with $photoSection }}
-{{- $recent := where site.RegularPages "Params.photoFile" "ne" nil }}
-{{- $recent = $recent.ByDate.Reverse }}
-{{- $recent = $recent | first 4 }}
-{{- if $recent }}
-<div class="photo-teaser">
+<div class="photo-teaser" hidden>
   <div class="photo-teaser-header">
     <h2>Recent photos</h2>
-    <a href="{{ $photoSection.Permalink }}">All photos&nbsp;&rsaquo;</a>
+    <a href="/photography/">All photos&nbsp;&rsaquo;</a>
   </div>
-  <div class="photo-teaser-strip">
-    {{- range $recent }}
-    {{- $img := resources.Get .Params.photoFile }}
-    {{- if $img }}
-    {{- $thumb := $img.Resize "x260 webp q72" }}
-    <a href="{{ .Permalink }}" aria-label="{{ .Title }}">
-      <img src="{{ $thumb.RelPermalink }}" alt="{{ .Title }}" loading="lazy" decoding="async"
-        width="{{ $thumb.Width }}" height="{{ $thumb.Height }}">
-    </a>
-    {{- end }}
-    {{- end }}
-  </div>
+  <div class="photo-teaser-strip"></div>
 </div>
-{{- end }}
-{{- end }}
+<script>
+fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : []; }).then(function (photos) {
+  if (!photos.length) return;
+  var box = document.querySelector(".photo-teaser");
+  var strip = box.querySelector(".photo-teaser-strip");
+  photos.forEach(function (p) {
+    var a = document.createElement("a");
+    a.href = p.url;
+    a.setAttribute("aria-label", p.alt);
+    a.style.flex = (p.width / p.height) + " 1 0";
+    var img = document.createElement("img");
+    img.src = p.thumb; img.alt = p.alt; img.width = p.width; img.height = p.height;
+    img.loading = "lazy"; img.decoding = "async";
+    a.appendChild(img);
+    strip.appendChild(a);
+  });
+  box.hidden = false;
+}).catch(function () {});
+</script>
 {{- end }}
 
 {{- range $index, $page := $paginator.Pages }}

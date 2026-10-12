@@ -1,0 +1,8 @@
+{{- /*
+  Shell for the photography pages. nginx routes /photography/* to the photo
+  app (admin/app.py), which reads this built file from public/ and injects
+  the gallery or a single photo into #photo-main and per-photo meta into
+  the photo-head marker. Hugo only needs rebuilding when the site's look
+  changes - adding/editing/deleting photos never touches HTML.
+*/}}
+{{- define "main" }}<div id="photo-main"></div>{{ end }}

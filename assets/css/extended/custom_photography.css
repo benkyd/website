@@ -124,32 +124,27 @@
   color: var(--secondary);
 }
 
+/* One justified row: each tile's flex-grow is its aspect ratio (set by the
+   homepage script), so every photo gets the same height and the row exactly
+   fills the width whatever mix of square/landscape/portrait it holds. */
 .photo-teaser-strip {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
 .photo-teaser-strip a {
   display: block;
-  height: 130px;
+  min-width: 0;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
 }
 
 .photo-teaser-strip img {
-  height: 100%;
-  width: auto;
+  width: 100%;
+  height: auto;
   display: block;
-  object-fit: cover;
   transition: transform 0.25s ease;
-}
-
-@media (min-width: 640px) {
-  .photo-teaser-strip a {
-    height: 180px;
-  }
 }
 
 .photo-teaser-strip a:hover img {

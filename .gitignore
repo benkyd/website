@@ -34,8 +34,10 @@ resources/_gen/
 .hugo_build.lock
 __pycache__/
 
-# Built site and photos live on the server only (nightly host backup covers
-# /var/www/website). A pull never touches these; a fresh clone builds fine
-# without them, photo pages just render without their image.
+# Built site, photo images and their resized cache live on the server only
+# (the nightly host backup covers /var/www/website, minus cache/). A pull
+# never touches these; a fresh clone builds and runs fine without them.
 /public/
-/assets/photography/
+/cache/
+/photos/*
+!/photos/*.md
