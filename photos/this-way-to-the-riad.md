@@ -1,7 +1,7 @@
 ---
-alt: "Tunnel in the Souks"
+alt: "This Way to the Riad"
 date: 2026-10-01
-image: "tunnel-in-the-soukes.jpg"
+image: "this-way-to-the-riad.jpg"
 location: "Souks of Marrakech, Morocco"
 camera: "Agfa Isolette I"
 filmStock: "Ilford HP5"
