@@ -5,4 +5,5 @@ image: "crystal-crag.jpg"
 location: "Mammoth Lakes, USA"
 camera: "Agfa Isolette I"
 filmStock: "Kodak Gold 200"
+heroCrop: "0.0000,0.2761,1.0000,0.7239"
 ---
