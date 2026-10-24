@@ -14,11 +14,14 @@
 {{- if and site.Params.homeInfoParams (eq $paginator.PageNumber 1) }}
 {{- /* Hero: the intro set over a full-width photo - random per visit, the
        newest, or a pinned one (set in the photo admin), filled in from
-       /photography/recent.json. With scripts on, the
+       /photography/recent.json. It loads in levels: the blurred inline
+       placeholder, then a small image, then the full size fading in on top
+       (only requested once the small one is in, so they don't compete).  With scripts on, the
        space is reserved up front so nothing jumps; if no photo arrives it
        falls back to the plain intro (.no-photo). */}}
 <section class="home-hero photo-ph">
-  <picture><img class="home-hero-img" alt="" decoding="async" fetchpriority="high" sizes="100vw"></picture>
+  <picture><img class="home-hero-img" alt="" decoding="async" fetchpriority="high"></picture>
+  <picture><img class="home-hero-img" alt="" decoding="async" sizes="100vw"></picture>
   <div class="home-hero-inner">
     {{- partial "home_info.html" . }}
   </div>
@@ -39,20 +42,30 @@ fetch("/photography/recent.json", { cache: "no-store" }).then(function (r) { ret
   var hero = document.querySelector(".home-hero");
   var h = data.hero;
   if (!h) { hero.classList.add("no-photo"); return; }
-  var himg = hero.querySelector("img");
+  var imgs = hero.querySelectorAll("img"), low = imgs[0], himg = imgs[1];
   // desktop screens get the photo's banner crop, if it has one (the
   // breakpoint matches the CSS one where the hero goes tall and narrow)
   var desk = h.desk && window.matchMedia("(min-width: 769px)");
-  if (desk) {
+  function deskSource(img, srcset) {
     var src = document.createElement("source");
     src.media = desk.media; src.type = "image/webp"; src.sizes = "100vw";
-    src.srcset = h.desk.srcset;
-    himg.parentNode.insertBefore(src, himg);
+    src.srcset = srcset;
+    img.parentNode.insertBefore(src, img);
   }
   hero.style.setProperty("--ph", "url(" + (desk && desk.matches ? h.desk.ph : h.ph) + ")");
-  himg.alt = h.alt; himg.width = h.width; himg.height = h.height;
-  himg.srcset = h.srcset;
-  himg.src = h.src;
+  low.alt = ""; himg.alt = h.alt;
+  himg.width = h.width; himg.height = h.height;
+  if (desk) deskSource(low, h.desk.low);
+  function full() {
+    if (himg.srcset) return;
+    if (desk) deskSource(himg, h.desk.srcset);
+    himg.srcset = h.srcset;
+    himg.src = h.src;
+  }
+  low.addEventListener("load", full, { once: true });
+  low.addEventListener("error", full, { once: true });
+  setTimeout(full, 2500); // don't let a stalled small image hold up the real one
+  low.src = h.low;
   var cap = hero.querySelector(".home-hero-cap");
   cap.href = h.url;
   cap.textContent = h.alt + (h.when ? " \u00b7 " + h.when : "");

@@ -38,6 +38,7 @@ VARIANTS = {
     "hero": ("w", 1600),    # homepage banner
     "banner": ("w", 1600),  # homepage banner on desktop, cut with heroCrop
     "banner2x": ("w", 2560),
+    "bannersm": ("w", 640), # first, quick-loading level of the banner
     "og": ("w", 1200),      # link previews
     "max": ("w", 100000),   # the original's full resolution (never upscaled) -
                             # fetched in the background once a photo page has shown
@@ -54,7 +55,7 @@ ARTIST = "Ben Kyd"
 COPYRIGHT = "Copyright Ben Kyd. All rights reserved. benkyd.co.uk"
 
 # Sizes cut with the photo's banner crop (heroCrop) instead of its crop.
-BANNER = {"banner", "banner2x"}
+BANNER = {"banner", "banner2x", "bannersm"}
 
 FORMATS = {"webp": ("WEBP", "image/webp"), "jpg": ("JPEG", "image/jpeg")}
 

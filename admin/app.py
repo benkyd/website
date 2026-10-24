@@ -244,6 +244,7 @@ def recent():
     desk = None
     if hero.get("herobox"):
         desk = dict(ph=photos.placeholder(hero, "banner"),
+                    low=photos.variant_url(hero, "bannersm", "webp"),
                     srcset=", ".join(f"{photos.variant_url(hero, v, 'webp')} {photos.variant_size(hero, v)[0]}w"
                                      for v in ("banner", "banner2x")))
     out = []
@@ -257,6 +258,8 @@ def recent():
         hero=dict(alt=hero["alt"], slug=hero["slug"], url=f"/photography/{hero['slug']}/",
                   when=when_line(hero), width=hw, height=hh,
                   src=photos.variant_url(hero, "hero", "webp"), ph=photos.placeholder(hero),
+                  # a small level shown first (the gallery thumbnail, often cached)
+                  low=photos.variant_url(hero, "thumb", "webp"),
                   srcset=", ".join(f"{photos.variant_url(hero, v, 'webp')} {photos.variant_size(hero, v)[0]}w"
                                    for v in ("hero", "full")),
                   desk=desk),
