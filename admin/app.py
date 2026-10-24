@@ -763,6 +763,10 @@ EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
 
 
 def client_ip():
+    # Behind nginx every request comes from loopback; nginx resolves the
+    # visitor's address from Cloudflare's CF-Connecting-IP and passes it on.
+    if request.remote_addr in ("127.0.0.1", "::1"):
+        return request.headers.get("X-Real-IP") or "unknown"
     return request.remote_addr or "unknown"
 
 

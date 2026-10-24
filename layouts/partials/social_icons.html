@@ -1,0 +1,23 @@
+{{- /* PaperMod's social_icons.html, plus a key icon for the PGP page and
+       same-tab links for anything on this site. */}}
+<div class="social-icons" {{ with .align}}align="{{.}}" {{- end }}>
+    {{- range site.Params.socialIcons }}
+    {{- $external := hasPrefix .url "http" }}
+    <a href="{{ trim .url " " | safeURL }}" {{ if $external }}target="_blank" rel="noopener noreferrer me"{{ end }}
+        title="{{ (.title | default .name) | title }}">
+        {{- if eq .name "pgp" }}
+        <svg class="icon-wide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 24" fill="none" stroke="currentColor"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="28" height="18" rx="4" stroke-width="2"></rect>
+            <g stroke-width="1.6">
+                <path d="M6.5 16.5V7.5h1.75a2.25 2.25 0 0 1 0 4.5H6.5"></path>
+                <path d="M17 9.5a2 2 0 0 0-4 0v5a2 2 0 0 0 4 0v-2.5h-2"></path>
+                <path d="M19.5 16.5V7.5h1.75a2.25 2.25 0 0 1 0 4.5H19.5"></path>
+            </g>
+        </svg>
+        {{- else }}
+        {{ partial "svg.html" . }}
+        {{- end }}
+    </a>
+    {{- end }}
+</div>

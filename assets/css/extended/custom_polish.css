@@ -337,6 +337,13 @@ body.dark {
   width: 20px;
   height: 20px;
 }
+/* the PGP badge is drawn 30x24, wider than the square icons */
+.social-icons a svg.icon-wide {
+  width: 32px;
+}
+.footer .social-icons a svg.icon-wide {
+  width: 25px;
+}
 .footer .social-icons a {
   color: var(--secondary);
   border-bottom: 0;
@@ -573,4 +580,29 @@ html.lightbox-on {
   height: 100%;
   max-height: none;
   object-fit: cover;
+}
+
+/* ---------- quote with source (quote shortcode) ---------- */
+.post-content blockquote.quote footer {
+  margin-top: 6px;
+  color: var(--secondary);
+  font-size: 0.9em;
+}
+
+/* ---------- pgp key link (about page) ---------- */
+/* the fingerprint as plain text, then a download link with a fingerprint icon */
+.pgp-key .fp {
+  margin-right: 0.5em;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+.pgp-key a {
+  white-space: nowrap;
+}
+.pgp-key svg {
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.3em;
+  vertical-align: -0.2em;
 }

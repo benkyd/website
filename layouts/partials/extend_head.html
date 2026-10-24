@@ -9,8 +9,12 @@
 {{- /* lets CSS hide things (fade-ins, reveals) only when JS will show them again */}}
 <script>document.documentElement.classList.add("js")</script>
 <link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | absURL }}">
+<link rel="pgpkey" type="application/pgp-keys" href="{{ "pgp.asc" | absURL }}">
+{{- /* text and data mining rights reserved (W3C TDMRep); noai/noimageai for scrapers that honour them */}}
+<meta name="tdm-reservation" content="1">
+<meta name="tdm-policy" content="{{ "privacy/" | absURL }}">
+<meta name="robots" content="noai, noimageai">
 
 {{- /* Marker the photo app replaces with per-photo title/og/twitter tags. */}}
 {{- if .Params.photoShell }}<meta name="photo-head" content="">{{ end }}
 
-{{ template "_internal/google_analytics.html" . }}

@@ -6,10 +6,9 @@ defaultContentLanguage: "en"
 enableRobotsTXT: true
 fonts: [ "Libron" ] # self-hosted, see assets/css/extended/custom_fonts.css
 fontbody: "Libron"
-googleAnalytics: "G-J2M8RXRC9P"
 
 params:
-  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  env: production # to enable opengraph, twitter-cards and schema.
   mainSections: ["posts"]
   description: "Blog"
   author: Ben Kyd
@@ -63,6 +62,9 @@ params:
     - name: instagram
       title: Instagram
       url: "https://instagram.com/ben_kyd"
+    - name: pgp
+      title: PGP Key
+      url: "/pgp/"
 menu:
   main:
     - identifier: "home"

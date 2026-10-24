@@ -1,0 +1,8 @@
+{{- /* {{< quote source="Who, where" >}}Quoted text{{< /quote >}} - a blockquote
+       with its source underneath. */}}
+<blockquote class="quote">
+  {{ .Inner | markdownify }}
+  {{- with .Get "source" }}
+  <footer>&mdash; {{ . | markdownify }}</footer>
+  {{- end }}
+</blockquote>

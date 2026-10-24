@@ -1,3 +1,11 @@
+# Nothing on this site may be used to train AI models, text or images.
+# See https://benkyd.co.uk/privacy/ and /.well-known/tdmrep.json
+{{- range slice "GPTBot" "ClaudeBot" "anthropic-ai" "Claude-Web" "Google-Extended" "Applebot-Extended" "CCBot" "PerplexityBot" "Bytespider" "Meta-ExternalAgent" "FacebookBot" "cohere-ai" "Diffbot" "ImagesiftBot" "img2dataset" "Omgilibot" "Timpibot" "YouBot" "Amazonbot" }}
+User-agent: {{ . }}
+{{- end }}
+Disallow: /
+
 User-agent: *
-Disallow: /admin
+Allow: /
+
 Sitemap: {{ "sitemap.xml" | absURL }}

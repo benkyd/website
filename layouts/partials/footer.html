@@ -5,11 +5,14 @@
     {{- partial "social_icons.html" (dict) }}
     {{- end }}
     <span class="footer-note">Shot on film &amp; digital</span>
+    {{- if .Params.photoShell }}
+    <span class="footer-note">All photographs &copy; Ben Kyd. All rights reserved, not licensed for AI training.</span>
+    {{- end }}
     {{- if not site.Params.footer.hideCopyright }}
         {{- if site.Copyright }}
         <span>{{ site.Copyright | markdownify }}</span>
         {{- else }}
-        <span>&copy; {{ now.Year }} <a href="{{ "" | absLangURL }}">{{ site.Title }}</a></span>
+        <span>&copy; {{ now.Year }} <a href="{{ "" | absLangURL }}">{{ site.Title }}</a> &middot; <a href="{{ "privacy/" | absLangURL }}">Privacy</a></span>
         {{- end }}
     {{- end }}
 </footer>

@@ -1,0 +1,28 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+This is the OpenPGP key of Ben Kyd.
+
+Name:        Ben Kyd
+Email:       ben@benkyd.co.uk
+Website:     https://benkyd.co.uk
+GitHub:      https://github.com/benkyd
+Fingerprint: 5B28 57AB CD24 95EF EDFB  5252 647E 958E B346 9C14
+Public key:  https://benkyd.co.uk/pgp.asc
+
+To fetch it by email address (Web Key Directory):
+  gpg --locate-keys ben@benkyd.co.uk
+
+To check this statement:
+  curl -s https://benkyd.co.uk/pgp.asc | gpg --import
+  curl -s https://benkyd.co.uk/pgp.txt | gpg --verify
+
+Signed 2026-10-24.
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQRbKFerzSSV7+37UlJkfpWOs0acFAUCaty4WQAKCRBkfpWOs0ac
+FNNgAP4tkHDfCZ7oBwyBkhYH86Mj34hV2o0IPSp5kIqUJQZKTwEAnrVJVejz4R2e
+WfusEQBVnEPUPKcyF6fmPc+i8arR2go=
+=0T+6
+-----END PGP SIGNATURE-----
