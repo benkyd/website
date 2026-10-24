@@ -1,10 +1,13 @@
 """Photo app: serves /photography/* (rendered at request time from photos/)
-and the /admin tool for adding, editing and deleting photos.
+and /admin, the site admin: the photo library and the writing tool for blog
+posts (templates/admin/, static/).
 
 Adding or changing a photo only ever writes photos/<slug>.md and the image
 next to it - no site rebuild. The page chrome (header, nav, footer, CSS) is
 the Hugo-built shell at public/photography/index.html, filled in per request.
+Posts are Hugo content (content/posts/), so publishing one rebuilds the site.
 """
+import glob
 import hashlib
 import os
 import random
@@ -12,16 +15,17 @@ import re
 import subprocess
 import time
 import unicodedata
-from datetime import date
+from datetime import date, datetime
 
-from flask import (Flask, abort, jsonify, redirect, render_template_string,
-                   request, send_file, session)
+from flask import (Flask, abort, jsonify, redirect, render_template,
+                   render_template_string, request, send_file, session)
 from markupsafe import escape
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import photos
+import posts
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/admin/static")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ["ADMIN_SECRET"]
 ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
@@ -290,598 +294,6 @@ def photo_image(slug, variant, ext):
 
 # ----------------------------------------------------------------- admin ----
 
-STYLE = """@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Regular.woff2) format("woff2");font-weight:400}
-@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Italic.woff2) format("woff2");font-weight:400;font-style:italic}
-@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Bold.woff2) format("woff2");font-weight:700}
-@font-face{font-family:"JetBrains Mono";src:url(/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2) format("woff2");font-weight:400}
-:root{--bg:#faf9f6;--card:#fdfcfa;--sheet:#efece5;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#b8406a;--on-accent:#fff;--mono:"JetBrains Mono",ui-monospace,monospace}
-@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#26272a;--sheet:#18191b;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#1f2023;--accent:#ee8fb1;--on-accent:#1d1e20}}
-*{box-sizing:border-box;margin:0;padding:0}
-[hidden]{display:none!important}
-body{background:var(--bg);color:var(--text);font-family:Libron,Georgia,serif;min-height:100vh;line-height:1.5}
-a{color:var(--accent)}
-.mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;font-weight:400}
-.hint{font-size:.82rem;color:var(--muted);margin-bottom:.5rem}
-/* top bar */
-.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:1.4rem;padding:.75rem clamp(1rem,3vw,2rem);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.bar-title{margin-right:auto;color:var(--text);text-decoration:none;font-size:1.1rem;font-weight:700;white-space:nowrap}
-.bar-title i{color:var(--muted);font-weight:400}
-.bar .mono{color:var(--muted);text-decoration:none;background:none;border:0;cursor:pointer;white-space:nowrap}
-.bar .mono:hover{color:var(--accent)}
-.bar form{display:contents}
-.page{max-width:1360px;margin:0 auto;padding:clamp(1rem,3vw,2rem) clamp(1rem,3vw,2rem) 4rem}
-h1{font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:700;line-height:1.08;letter-spacing:-.01em}
-.kicker{display:block;color:var(--muted);margin-bottom:.45rem}
-.kicker a{color:inherit;text-decoration:none}.kicker a:hover{color:var(--accent)}
-/* panels and fields */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.15rem 1.25rem}
-.panel > h2{font-size:1.05rem;font-weight:700;margin-bottom:.15rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.25rem}
-label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
-label:first-child{margin-top:0}
-label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
-label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
-.section{font-size:1rem;font-weight:700;margin-top:1.5rem;margin-bottom:.2rem;padding-top:1rem;border-top:1px solid var(--line)}
-.gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
-.gear-row label{font-size:.75rem;white-space:nowrap}
-input[type=text],input[type=month],input[type=password],input[type=file],select{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
-input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
-input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
-.btn{width:100%;padding:.75rem;background:var(--accent);color:var(--on-accent);border:none;border-radius:6px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
-.btn:hover{filter:brightness(1.07)}
-.btn-danger{background:transparent;color:#c0392b;border:1px solid currentColor;margin-top:0}
-.btn-danger:hover{background:rgba(192,57,43,.08);filter:none}
-.status{padding:.75rem 1rem;border-radius:8px;margin:0 0 1.5rem;font-size:.95rem}
-.status pre{white-space:pre-wrap;font-family:var(--mono);font-size:.75rem;margin-top:.4rem}
-.ok{background:rgba(34,140,80,.1);border:1px solid rgba(34,140,80,.35)}
-.err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35)}
-.login-wrap{max-width:340px;margin:14vh auto;padding:0 1rem}
-.login-wrap h1{margin-bottom:1.25rem}
-/* icons */
-.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.badges{display:flex;gap:.25rem}
-.badge{width:1.65rem;height:1.65rem;border-radius:6px;display:grid;place-items:center;background:rgba(18,18,20,.66);color:#fff;font-size:.9rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.badge.cover{background:var(--accent);color:var(--on-accent)}
-.legend{list-style:none;display:grid;gap:.55rem;margin-top:.6rem;font-size:.88rem}
-.legend li{display:flex;align-items:center;gap:.6rem}
-.legend .badge{flex:none}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.8rem;text-align:center}
-.stats b{display:block;font-size:1.5rem;line-height:1.1}
-.stats span{color:var(--muted)}
-/* library page */
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(1.5rem,3vw,2.75rem);align-items:start}
-.side{position:sticky;top:4.6rem;display:grid;gap:1rem}
-.lib-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
-.lib-head .hint{margin:0;text-align:right;max-width:22rem}
-details.add{border:1px dashed color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:12px;background:var(--card);margin-bottom:2.25rem}
-details.add[open]{border-style:solid;border-color:var(--line)}
-details.add > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;font-size:1.1rem;font-weight:700}
-details.add > summary::-webkit-details-marker{display:none}
-details.add > summary .mono{margin-left:auto;color:var(--muted)}
-.plus{width:1.9rem;height:1.9rem;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:1.1rem;line-height:1;transition:transform .25s ease}
-details.add[open] .plus{transform:rotate(45deg)}
-.add-body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:1.5rem;padding:0 1.2rem 1.25rem}
-.sheet{margin-bottom:2.25rem;scroll-margin-top:5rem}
-.sheet-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:.8rem;color:var(--muted)}
-.sheet-head h2{font-size:1.15rem;font-weight:700;color:var(--text)}
-.sheet-head::after{content:"";flex:1;height:1px;background:var(--line);align-self:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
-.tile{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden;transition:box-shadow .2s,transform .2s,border-color .2s;animation:rise .45s calc(min(var(--i),24) * 22ms) both}
-.tile:hover{box-shadow:0 12px 30px rgba(0,0,0,.12);transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
-.tile-img{position:relative;display:block;aspect-ratio:1;background:var(--sheet)}
-.tile-img img{width:100%;height:100%;object-fit:cover;display:block}
-.tile-img::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.32),transparent 34%);pointer-events:none}
-.frame{position:absolute;top:.6rem;left:.65rem;z-index:1;color:rgba(255,255,255,.92)}
-.tile .badges{position:absolute;top:.45rem;right:.45rem;z-index:1}
-.tile-cap{display:flex;flex-direction:column;gap:.35rem;padding:.6rem .6rem .6rem .7rem;flex:1}
-.tile-cap > a{flex:1;color:var(--text);text-decoration:none;font-size:.95rem;line-height:1.25}
-.tile-cap > a:hover{color:var(--accent)}
-.tile-meta{display:flex;align-items:center;gap:.4rem;min-height:1.6rem}
-.tile-meta small{flex:1;min-width:0;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.move{display:flex;gap:.2rem;flex:none}
-.move button{width:1.6rem;height:1.6rem;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text);font-size:.95rem;line-height:1;cursor:pointer}
-.move button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.move button:disabled{opacity:.3;cursor:default}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}}
-@media (prefers-reduced-motion:reduce){.tile{animation:none}.plus{transition:none}}
-/* edit page */
-.edit-head{display:flex;align-items:flex-end;gap:1rem;margin-bottom:1.5rem}
-.edit-head .badges{margin-left:auto}
-.edit{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:clamp(1.25rem,2.5vw,2rem);align-items:start}
-.tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line);margin:-.2rem 0 1rem}
-.tab{display:flex;align-items:center;gap:.45rem;padding:.55rem .8rem;margin-bottom:-1px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:inherit;font-size:.98rem;cursor:pointer}
-.tab:hover{color:var(--text)}
-.tab[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent);font-weight:700}
-.tab .dot{width:.45rem;height:.45rem;border-radius:50%;background:var(--accent)}
-.edit .crop-img{max-height:max(360px,calc(100vh - 17rem))}
-.danger{display:flex;justify-content:flex-end;margin-top:1rem}
-.danger form{width:360px;max-width:100%}
-@media (max-width:1000px){.layout,.edit{grid-template-columns:1fr}.side{position:static}.danger form{width:100%}}
-@media (max-width:760px){.add-body{grid-template-columns:1fr}.lib-head{flex-direction:column;align-items:flex-start}.lib-head .hint{text-align:left}}
-@media (max-width:480px){.gear-row{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.bar{gap:1rem}.bar-title i{display:none}}
-.btn-small{font:inherit;font-size:.85rem;padding:.35rem .8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer}
-.btn-small:hover{border-color:var(--accent);color:var(--accent)}
-.crop-stage{position:relative;display:inline-block;max-width:calc(100% - 16px);margin:.6rem 8px .8rem;line-height:0;touch-action:none;user-select:none}
-.crop-shade{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.crop-hole{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.55)}
-.crop-img{display:block;max-width:100%;max-height:min(80vh,1100px);width:auto;height:auto}
-.crop-box{position:absolute;outline:1px solid rgba(255,255,255,.9);cursor:move}
-.crop-box::before,.crop-box::after{content:"";position:absolute;inset:0;pointer-events:none;border:0 solid rgba(255,255,255,.35)}
-.crop-box::before{left:33.33%;right:33.33%;border-left-width:1px;border-right-width:1px}
-.crop-box::after{top:33.33%;bottom:33.33%;border-top-width:1px;border-bottom-width:1px}
-.crop-h{position:absolute;width:14px;height:14px;background:#fff;border:1px solid rgba(0,0,0,.35);border-radius:3px;z-index:1}
-.crop-h[data-h=nw]{left:-7px;top:-7px;cursor:nwse-resize}.crop-h[data-h=ne]{right:-7px;top:-7px;cursor:nesw-resize}
-.crop-h[data-h=sw]{left:-7px;bottom:-7px;cursor:nesw-resize}.crop-h[data-h=se]{right:-7px;bottom:-7px;cursor:nwse-resize}
-.crop-h[data-h=n]{left:calc(50% - 7px);top:-7px;cursor:ns-resize}.crop-h[data-h=s]{left:calc(50% - 7px);bottom:-7px;cursor:ns-resize}
-.crop-h[data-h=w]{top:calc(50% - 7px);left:-7px;cursor:ew-resize}.crop-h[data-h=e]{top:calc(50% - 7px);right:-7px;cursor:ew-resize}
-.crop-loupe{position:fixed;z-index:200;width:200px;height:200px;border-radius:8px;border:2px solid #fff;box-shadow:0 6px 24px rgba(0,0,0,.45);pointer-events:none}
-.crop-full{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:16px;background:#121214}
-.crop-full .crop-stage{margin:0}
-.crop-full .crop-img{max-width:calc(100vw - 48px);max-height:calc(100vh - 90px)}
-.crop-full .crop-tools{margin:0}
-.crop-full .crop-info{color:#bbb}
-.crop-full .btn-small{background:#2a2a2e;color:#eee;border-color:#444}
-.crop-full .btn-small[data-act=full]{background:var(--accent);border-color:var(--accent);color:#fff}
-html.crop-locked{overflow:hidden}
-.crop-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.4rem}
-.crop-info{font-size:.8rem;color:var(--muted)}
-.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;min-height:10rem;padding:1.25rem;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:10px;background:var(--field);color:var(--muted);text-align:center;font-size:.95rem;cursor:pointer;transition:border-color .15s,background-color .15s}
-.drop:hover,.drop:focus-within,.drop.over,html.dragging .drop{border-color:var(--accent)}
-.drop.over{background:color-mix(in srgb,var(--accent) 9%,var(--field))}
-.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0}
-.drop svg{width:1.6rem;height:1.6rem;color:var(--accent)}
-.drop b{color:var(--text)}
-.drop u{color:var(--accent);text-underline-offset:2px}
-.drop.has{min-height:0;flex-direction:row;justify-content:space-between;padding:.7rem 1rem;border-style:solid}
-.drop.has svg,.drop.has .drop-msg{display:none}
-.drop-file{display:none;color:var(--text);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.drop.has .drop-file{display:block}
-.drop-again{display:none;font-size:.85rem}
-.drop.has .drop-again{display:block}
-.btn:disabled{opacity:.6;cursor:progress}"""
-
-
-def drop_zone(required=False):
-    """A file input that is also a drop target (see DROP_JS)."""
-    return f"""<label class="drop">
-<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"{" required" if required else ""}/>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-<span class="drop-msg"><b>Drop an image here</b> or <u>choose a file</u></span>
-<span class="drop-file mono"></span><u class="drop-again">Choose another</u>
-</label>"""
-
-
-DROP_JS = """<script>
-document.querySelectorAll(".drop").forEach(function (zone) {
-  var input = zone.querySelector("input[type=file]"), name = zone.querySelector(".drop-file"), depth = 0;
-  function shown() {
-    var f = input.files[0];
-    zone.classList.toggle("has", !!f);
-    name.textContent = f ? f.name + " \u00b7 " + (f.size / 1048576).toFixed(1) + " MB" : "";
-  }
-  zone.feed = function (files) {
-    var f = Array.prototype.find.call(files || [], function (f) { return /\\.(jpe?g|png|webp)$/i.test(f.name); });
-    if (!f) { alert("Only jpg, png or webp files can be added."); return; }
-    var dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
-    input.dispatchEvent(new Event("change", {bubbles: true}));
-  };
-  input.addEventListener("change", shown);
-  zone.addEventListener("dragenter", function (e) { e.preventDefault(); depth++; zone.classList.add("over"); });
-  zone.addEventListener("dragover", function (e) { e.preventDefault(); });
-  zone.addEventListener("dragleave", function () { if (--depth <= 0) { depth = 0; zone.classList.remove("over"); } });
-  zone.addEventListener("drop", function (e) {
-    e.preventDefault(); depth = 0; zone.classList.remove("over"); zone.feed(e.dataTransfer.files);
-  });
-  shown();
-});
-// A file dropped anywhere else on the page goes to the drop zone too, rather
-// than the browser navigating away to show it.
-(function () {
-  var depth = 0, root = document.documentElement;
-  function files(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, "Files") >= 0; }
-  document.addEventListener("dragenter", function (e) { if (files(e)) { depth++; root.classList.add("dragging"); } });
-  document.addEventListener("dragleave", function () { if (--depth <= 0) { depth = 0; root.classList.remove("dragging"); } });
-  document.addEventListener("dragover", function (e) { if (files(e)) e.preventDefault(); });
-  document.addEventListener("drop", function (e) {
-    depth = 0; root.classList.remove("dragging");
-    if (!files(e) || e.defaultPrevented) return;
-    e.preventDefault();
-    var zone = document.querySelector(".drop");
-    if (!zone) return;
-    var panel = zone.closest("details");
-    if (panel) panel.open = true;
-    zone.feed(e.dataTransfer.files);
-    zone.scrollIntoView({block: "center", behavior: "smooth"});
-  });
-})();
-// Uploads take a while; stop a second click sending the photo twice.
-document.querySelectorAll("form[enctype]").forEach(function (form) {
-  form.addEventListener("submit", function () {
-    var btn = form.querySelector("button[type=submit]");
-    if (btn) { btn.disabled = true; btn.textContent = btn.dataset.busy || "Working\u2026"; }
-  });
-});
-</script>"""
-
-FIELDS_HTML = """<label>Caption / alt text</label>
-<input type="text" name="alt" value="{{ p.alt }}" placeholder="A short description of the photo" required/>
-<label>Location</label>
-<input type="text" name="location" value="{{ p.location }}" placeholder="e.g. Les Deux Alpes, France"/>
-<label>Date</label>
-<input type="month" name="date" value="{{ p.month }}"/>
-<div class="section">Gear (optional)</div>
-<p class="hint">Not read from the file - type what you shot it with.</p>
-<label>Camera</label>
-<input type="text" name="camera" list="cameras-list" value="{{ p.camera }}" placeholder="e.g. Hasselblad 500C"/>
-<label>Lens</label>
-<input type="text" name="lens" list="lenses-list" value="{{ p.lens }}" placeholder="e.g. 80mm f/2.8"/>
-<div class="gear-row">
-<div><label>Focal length</label><input type="text" name="focal_length" value="{{ p.focalLength }}" placeholder="50"/></div>
-<div><label>Aperture</label><input type="text" name="aperture" value="{{ p.aperture }}" placeholder="5.6"/></div>
-<div><label>Shutter</label><input type="text" name="shutter" value="{{ p.shutter }}" placeholder="1/1000"/></div>
-<div><label>ISO</label><input type="text" name="iso" value="{{ p.iso }}" placeholder="100"/></div>
-</div>
-<label>Film stock</label>
-<input type="text" name="film_stock" list="films-list" value="{{ p.filmStock }}" placeholder="e.g. Kodak Portra 400"/>
-<datalist id="cameras-list">{% for c in gear.cameras %}<option value="{{ c }}">{% endfor %}</datalist>
-<datalist id="lenses-list">{% for l in gear.lenses %}<option value="{{ l }}">{% endfor %}</datalist>
-<datalist id="films-list">{% for fs in gear.films %}<option value="{{ fs }}">{% endfor %}</datalist>"""
-
-def crop_widget(name, value, src="", initial="", banner=False):
-    """Markup for one crop view (see CROP_JS). Its box is posted as `name`;
-    `initial` is where the box starts when `value` is empty."""
-    extra = '<button type="button" class="btn-small" data-act="banner">Banner shape</button>\n' if banner else ""
-    reset = "Use the normal crop" if banner else "Reset crop"
-    border = "" if banner else '<button type="button" class="btn-small" data-act="auto">Remove border</button>\n'
-    return f"""<div class="crop" data-src="{src}" data-initial="{initial}">
-<div class="crop-stage" hidden><img class="crop-img" alt=""><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-box">
-<span class="crop-h" data-h="nw"></span><span class="crop-h" data-h="n"></span><span class="crop-h" data-h="ne"></span>
-<span class="crop-h" data-h="e"></span><span class="crop-h" data-h="se"></span><span class="crop-h" data-h="s"></span>
-<span class="crop-h" data-h="sw"></span><span class="crop-h" data-h="w"></span></div></div>
-<div class="crop-tools" hidden>
-{border}{extra}<button type="button" class="btn-small" data-act="reset">{reset}</button>
-<button type="button" class="btn-small" data-act="full">Full screen</button>
-<span class="crop-info"></span>
-</div>
-<input type="hidden" name="{name}" value="{value}">
-</div>"""
-
-CROP_JS = """<script>
-// Crop view: a draggable box over the upright original. The box is kept as
-// fractions (left, top, right, bottom) in the crop view's hidden input.
-document.querySelectorAll(".crop").forEach(function (root) {
-  var stage = root.querySelector(".crop-stage"), img = root.querySelector(".crop-img");
-  var box = root.querySelector(".crop-box"), tools = root.querySelector(".crop-tools");
-  var input = root.querySelector("input[type=hidden]"), info = root.querySelector(".crop-info");
-  var hole = root.querySelector(".crop-hole");
-  var loupe = document.createElement("canvas"), LS = 200, ZOOM = 4;
-  loupe.className = "crop-loupe"; loupe.width = loupe.height = LS * (window.devicePixelRatio || 1);
-  loupe.hidden = true; document.body.appendChild(loupe);
-  var lctx = loupe.getContext("2d");
-
-  // Magnifier: while an edge or corner is dragged, show the area around
-  // that edge at ZOOM x the on-screen size, next to the cursor.
-  function drawLoupe(h, px, py) {
-    var r = img.getBoundingClientRect(), nat = img.naturalWidth / r.width;
-    var fx = h.indexOf("w") >= 0 ? c[0] : h.indexOf("e") >= 0 ? c[2] : (c[0] + c[2]) / 2;
-    var fy = h.indexOf("n") >= 0 ? c[1] : h.indexOf("s") >= 0 ? c[3] : (c[1] + c[3]) / 2;
-    var span = LS / ZOOM * nat;                       // natural px shown across the loupe
-    var sx = fx * img.naturalWidth - span / 2, sy = fy * img.naturalHeight - span / 2;
-    var d = loupe.width, k = d / span;
-    lctx.fillStyle = "#222"; lctx.fillRect(0, 0, d, d);
-    lctx.imageSmoothingEnabled = false;
-    lctx.drawImage(img, sx, sy, span, span, 0, 0, d, d);
-    var x0 = (c[0] * img.naturalWidth - sx) * k, y0 = (c[1] * img.naturalHeight - sy) * k;
-    var x1 = (c[2] * img.naturalWidth - sx) * k, y1 = (c[3] * img.naturalHeight - sy) * k;
-    lctx.fillStyle = "rgba(0,0,0,.55)";
-    lctx.beginPath(); lctx.rect(0, 0, d, d); lctx.rect(x0, y0, x1 - x0, y1 - y0); lctx.fill("evenodd");
-    lctx.strokeStyle = "#fff"; lctx.lineWidth = Math.max(1, d / LS);
-    lctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
-    var off = 28, lx = px + off, ly = py + off;
-    if (lx + LS > window.innerWidth - 8) lx = px - off - LS;
-    if (ly + LS > window.innerHeight - 8) ly = py - off - LS;
-    loupe.style.left = lx + "px"; loupe.style.top = ly + "px"; loupe.hidden = false;
-  }
-  var form = root.closest("form"), file = form.querySelector("input[type=file]");
-  var start = function () { return parse(root.dataset.initial) || [0, 0, 1, 1]; };
-  var c = parse(input.value) || start(), MIN = 0.05;
-
-  function parse(v) {
-    var a = (v || "").split(",").map(Number);
-    return a.length === 4 && a.every(function (x) { return x >= 0 && x <= 1; }) ? a : null;
-  }
-  function render() {
-    [box, hole].forEach(function (el) {
-      el.style.left = c[0] * 100 + "%"; el.style.top = c[1] * 100 + "%";
-      el.style.width = (c[2] - c[0]) * 100 + "%"; el.style.height = (c[3] - c[1]) * 100 + "%";
-    });
-    var full = c[0] <= 0.0001 && c[1] <= 0.0001 && c[2] >= 0.9999 && c[3] >= 0.9999;
-    input.value = full ? "" : c.map(function (x) { return x.toFixed(4); }).join(",");
-    info.textContent = full ? "Not cropped" : "Keeping " + Math.round((c[2] - c[0]) * 100) + "% × " + Math.round((c[3] - c[1]) * 100) + "% of the original";
-    if (img.naturalWidth) {
-      var shape = (c[2] - c[0]) * img.naturalWidth / ((c[3] - c[1]) * img.naturalHeight);
-      info.textContent += " · " + shape.toFixed(1) + ":1";
-    }
-  }
-  function show(src, keep) {
-    if (!keep) c = start();
-    img.onload = function () { stage.hidden = false; tools.hidden = false; render(); };
-    img.src = src;
-  }
-
-  var drag = null;
-  stage.addEventListener("pointerdown", function (e) {
-    if (e.target !== box && !e.target.classList.contains("crop-h")) return;
-    e.preventDefault();
-    box.setPointerCapture(e.pointerId);
-    drag = { h: e.target.dataset.h || "move", x: e.clientX, y: e.clientY, start: c.slice() };
-  });
-  box.addEventListener("pointermove", function (e) {
-    if (!drag) return;
-    var r = img.getBoundingClientRect(), dx = (e.clientX - drag.x) / r.width, dy = (e.clientY - drag.y) / r.height;
-    var s = drag.start, n = s.slice();
-    if (drag.h === "move") {
-      var w = s[2] - s[0], h = s[3] - s[1];
-      n[0] = Math.min(Math.max(0, s[0] + dx), 1 - w); n[2] = n[0] + w;
-      n[1] = Math.min(Math.max(0, s[1] + dy), 1 - h); n[3] = n[1] + h;
-    } else {
-      if (drag.h.indexOf("w") >= 0) n[0] = Math.min(Math.max(0, s[0] + dx), s[2] - MIN);
-      if (drag.h.indexOf("e") >= 0) n[2] = Math.max(Math.min(1, s[2] + dx), s[0] + MIN);
-      if (drag.h.indexOf("n") >= 0) n[1] = Math.min(Math.max(0, s[1] + dy), s[3] - MIN);
-      if (drag.h.indexOf("s") >= 0) n[3] = Math.max(Math.min(1, s[3] + dy), s[1] + MIN);
-    }
-    c = n; render();
-    if (drag.h !== "move") drawLoupe(drag.h, e.clientX, e.clientY);
-  });
-  box.addEventListener("pointerup", function () { drag = null; loupe.hidden = true; });
-  box.addEventListener("pointercancel", function () { drag = null; loupe.hidden = true; });
-
-  // Find a uniform border (white mount, black film rebate, scanner bed) on
-  // each side and crop just inside it.
-  function autoBorder() {
-    var W = Math.min(480, img.naturalWidth), H = Math.round(img.naturalHeight * W / img.naturalWidth);
-    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
-    var ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
-    var d = ctx.getImageData(0, 0, W, H).data;
-    function lum(x, y) { var i = (y * W + x) * 4; return 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; }
-    function line(pos, vertical) {
-      var out = [], n = vertical ? H : W;
-      for (var k = 0; k < n; k++) out.push(vertical ? lum(pos, k) : lum(k, pos));
-      return out;
-    }
-    function median(a) { var b = a.slice().sort(function (p, q) { return p - q; }); return b[b.length >> 1]; }
-    // A border is a near-white or near-black band, almost perfectly uniform,
-    // ending in a sharp step - so bright skies, mist or snow don't count.
-    function frac(pos, vertical, ref) {
-      var vals = line(pos, vertical), hit = 0;
-      for (var j = 0; j < vals.length; j++) if (Math.abs(vals[j] - ref) < 12) hit++;
-      return hit / vals.length;
-    }
-    function scan(vertical, fromEnd) {
-      var n = vertical ? W : H, at = function (k) { return fromEnd ? n - 1 - k : k; };
-      var ref = median(line(at(0), vertical));
-      if (ref > 28 && ref < 232) return 0;
-      var k = 0;
-      while (k < n * 0.45 && frac(at(k), vertical, ref) >= 0.97) k++;
-      if (k === 0 || k >= n * 0.45) return 0;
-      return frac(at(Math.min(n - 1, k + 2)), vertical, ref) < 0.75 ? k : 0;
-    }
-    var inset = 0.004;
-    var l = scan(true, false) / W, r = scan(true, true) / W, t = scan(false, false) / H, b = scan(false, true) / H;
-    c = [l ? l + inset : 0, t ? t + inset : 0, r ? 1 - r - inset : 1, b ? 1 - b - inset : 1];
-    render();
-    if (!l && !r && !t && !b) info.textContent = "No border found";
-  }
-
-  // The homepage banner on a desktop screen is about 2.2:1 - fit the largest
-  // box of that shape inside the current one, keeping its centre.
-  function banner() {
-    var BANNER = 2.2, iw = img.naturalWidth, ih = img.naturalHeight;
-    var w = (c[2] - c[0]) * iw, h = (c[3] - c[1]) * ih;
-    if (w / h > BANNER) w = h * BANNER; else h = w / BANNER;
-    var cx = (c[0] + c[2]) / 2, cy = (c[1] + c[3]) / 2, fw = w / iw / 2, fh = h / ih / 2;
-    c = [cx - fw, cy - fh, cx + fw, cy + fh];
-    render();
-  }
-  tools.addEventListener("click", function (e) {
-    var act = e.target.dataset.act;
-    if (act === "auto") autoBorder();
-    if (act === "reset") { c = start(); render(); }
-    if (act === "banner") banner();
-    if (act === "full") setFull(!root.classList.contains("crop-full"));
-  });
-  // Full screen: the photo as large as the window allows.
-  var fullBtn = tools.querySelector("[data-act=full]");
-  function setFull(on) {
-    root.classList.toggle("crop-full", on);
-    document.documentElement.classList.toggle("crop-locked", on);
-    fullBtn.textContent = on ? "Done" : "Full screen";
-  }
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && root.classList.contains("crop-full")) setFull(false);
-  });
-  if (file) file.addEventListener("change", function () {
-    if (file.files[0]) show(URL.createObjectURL(file.files[0]), false);
-  });
-  if (root.dataset.src) show(root.dataset.src, true);
-});
-</script>"""
-
-
-# Icons for the photo badges, drawn once per page and <use>d.
-ICONS = """<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-<symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
-<symbol id="i-banner" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h12v5H6z"/></symbol>
-<symbol id="i-cover" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
-</svg>"""
-
-# What's special about a photo: on the homepage, cropped, has a banner crop.
-BADGES = """{% macro badges(q, cover) %}<span class="badges">
-{%- if cover %}<span class="badge cover" title="On the homepage"><svg class="ico"><use href="#i-cover"/></svg></span>{% endif -%}
-{%- if q.crop %}<span class="badge" title="Cropped"><svg class="ico"><use href="#i-crop"/></svg></span>{% endif -%}
-{%- if q.heroCrop %}<span class="badge" title="Has a desktop banner crop"><svg class="ico"><use href="#i-banner"/></svg></span>{% endif -%}
-</span>{% endmacro %}"""
-
-BAR = """<header class="bar">
-<a class="bar-title" href="/admin">Ben Kyd <i>&middot; photography admin</i></a>
-<a class="mono" href="/photography/">Gallery &#8599;</a>
-<a class="mono" href="/">Site &#8599;</a>
-<form method="post" action="/admin/logout"><button class="mono" type="submit">Sign out</button></form>
-</header>"""
-
-TEMPLATE = """<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Photography Admin</title>
-<style>""" + STYLE + """</style></head><body>
-{% if not logged_in %}
-<div class="login-wrap">
-<span class="kicker mono">Ben Kyd</span>
-<h1>Photography admin</h1>
-{% if message %}<div class="status err">{{ message }}</div>{% endif %}
-<form method="post" action="/admin/login" class="card">
-<label>Password</label>
-<input type="password" name="password" autofocus required/>
-<button class="btn" type="submit">Sign in</button>
-</form>
-</div>
-{% else %}
-""" + ICONS + BADGES + BAR + """
-<main class="page">
-{% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<div class="layout">
-<div>
-<details class="add"{% if not photos or (message and not ok) %} open{% endif %}>
-<summary><span class="plus" aria-hidden="true">+</span> Add a photo<span class="mono">jpg &middot; png &middot; webp</span></summary>
-<form method="post" action="/admin/upload" enctype="multipart/form-data" class="add-body">
-<div>
-<label>Image</label>
-""" + drop_zone(required=True) + """
-""" + crop_widget("crop", "") + """
-</div>
-<div>
-""" + FIELDS_HTML + """
-<button class="btn" type="submit" data-busy="Publishing…">Publish</button>
-</div>
-</form>
-</details>
-
-<div class="lib-head">
-<div><span class="kicker mono">{{ photos|length }} photos</span><h1>Library</h1></div>
-<p class="hint">Newest first, as on the site. Use &lsaquo; &rsaquo; to reorder photos within a month.</p>
-</div>
-{% for month, group in photos|groupby("month")|sort(attribute="grouper", reverse=True) %}
-<section class="sheet" id="month-{{ month }}">
-<div class="sheet-head"><h2>{{ group[0].month_label }}</h2><span class="mono">{{ group|length }} frame{{ "s" if group|length != 1 }}</span></div>
-<div class="grid">
-{% for q in group|sort(attribute="rank") %}
-<div class="tile" style="--i:{{ q.rank }}">
-  <a class="tile-img" href="/admin/edit/{{ q.slug }}"><img src="{{ q.thumb }}" alt="" loading="lazy"/>
-  <span class="frame mono">{{ "%02d"|format(loop.index) }}</span>
-  {{ badges(q, hero == q.slug or (hero == "newest" and q.rank == 0)) }}</a>
-  <div class="tile-cap">
-    <a href="/admin/edit/{{ q.slug }}">{{ q.alt }}</a>
-    <div class="tile-meta"><small class="mono" title="{{ q.location }}">{{ q.location }}</small>
-    {% if group|length > 1 %}<form method="post" action="/admin/move/{{ q.slug }}" class="move">
-      <button name="dir" value="up" title="Show earlier"{% if loop.first %} disabled{% endif %}>&lsaquo;</button>
-      <button name="dir" value="down" title="Show later"{% if loop.last %} disabled{% endif %}>&rsaquo;</button>
-    </form>{% endif %}</div>
-  </div>
-</div>
-{% endfor %}
-</div>
-</section>
-{% endfor %}
-</div>
-
-<aside class="side">
-<form method="post" action="/admin/hero" class="panel">
-<h2>Homepage photo</h2>
-<p class="hint">The big photo at the top of the homepage.</p>
-<select name="hero" aria-label="Homepage photo">
-<option value="random"{% if hero == "random" %} selected{% endif %}>Random on every visit</option>
-<option value="newest"{% if hero == "newest" %} selected{% endif %}>Newest photo</option>
-<optgroup label="Always this photo">
-{% for q in photos %}<option value="{{ q.slug }}"{% if hero == q.slug %} selected{% endif %}>{{ q.alt }}</option>{% endfor %}
-</optgroup>
-</select>
-<button class="btn" type="submit">Save</button>
-</form>
-<div class="panel">
-<h2>At a glance</h2>
-<div class="stats">
-<div><b>{{ photos|length }}</b><span class="mono">photos</span></div>
-<div><b>{{ photos|selectattr("crop")|list|length }}</b><span class="mono">cropped</span></div>
-<div><b>{{ photos|selectattr("heroCrop")|list|length }}</b><span class="mono">banner</span></div>
-</div>
-<ul class="legend">
-<li><span class="badge cover"><svg class="ico"><use href="#i-cover"/></svg></span> On the homepage</li>
-<li><span class="badge"><svg class="ico"><use href="#i-crop"/></svg></span> Cropped</li>
-<li><span class="badge"><svg class="ico"><use href="#i-banner"/></svg></span> Desktop banner crop</li>
-</ul>
-</div>
-</aside>
-</div>
-</main>
-{% endif %}
-""" + CROP_JS + DROP_JS + """
-</body></html>"""
-
-EDIT_TEMPLATE = """<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>{{ p.alt }} - Photography Admin</title>
-<style>""" + STYLE + """</style></head><body>
-""" + ICONS + BADGES + BAR + """
-<main class="page">
-<div class="edit-head">
-<div><span class="kicker mono"><a href="/admin#month-{{ p.month }}">&lsaquo; Library</a> &middot; {{ p.month_label }} &middot; <a href="/photography/{{ p.slug }}/">View on site &#8599;</a></span>
-<h1>{{ p.alt }}</h1></div>
-{{ badges(p, cover) }}
-</div>
-{% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="edit">
-<section class="panel">
-<div class="tabs" role="tablist">
-<button type="button" class="tab" role="tab" aria-selected="true" data-tab="crop"><svg class="ico"><use href="#i-crop"/></svg> Crop</button>
-<button type="button" class="tab" role="tab" aria-selected="false" data-tab="banner"><svg class="ico"><use href="#i-banner"/></svg> Desktop banner{% if p.heroCrop %} <span class="dot" title="Set"></span>{% endif %}</button>
-</div>
-<div data-panel="crop">
-<p class="hint">Drag the box or its handles. The original file is kept - this only changes what's shown.</p>
-""" + crop_widget("crop", "{{ p.crop }}", "/admin/source/{{ p.slug }}.jpg?v={{ p.mtime }}") + """
-</div>
-<div data-panel="banner" hidden>
-<p class="hint">What the wide banner at the top of the homepage shows on a computer screen when this photo is up there. Phones always use the normal crop. "Banner shape" fits the box to the banner, then drag it into place.</p>
-""" + crop_widget("hero_crop", "{{ p.heroCrop }}", "/admin/source/{{ p.slug }}.jpg?v={{ p.mtime }}",
-                  initial="{{ p.crop }}", banner=True) + """
-</div>
-</section>
-<section class="panel">
-""" + FIELDS_HTML + """
-<label>Replace image (optional)</label>
-""" + drop_zone() + """
-<button class="btn" type="submit" data-busy="Saving…">Save</button>
-</section>
-</form>
-<div class="danger">
-<form method="post" action="/admin/delete/{{ p.slug }}" onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
-<button class="btn btn-danger" type="submit">Delete this photo</button>
-</form>
-</div>
-</main>
-<script>
-document.querySelectorAll(".tab").forEach(function (t, _, all) {
-  t.addEventListener("click", function () {
-    all.forEach(function (o) {
-      o.setAttribute("aria-selected", o === t);
-      document.querySelector("[data-panel=" + o.dataset.tab + "]").hidden = o !== t;
-    });
-  });
-});
-</script>
-""" + CROP_JS + DROP_JS + """
-</body></html>"""
-
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
          "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "crop": "", "heroCrop": ""}
 
@@ -906,10 +318,10 @@ def run(cmd):
     return subprocess.run(cmd, cwd=REPO, capture_output=True, text=True, timeout=120)
 
 
-def slugify(value):
+def slugify(value, fallback="photo"):
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
-    return re.sub(r"[-_\s]+", "-", value).strip("-") or "photo"
+    return re.sub(r"[-_\s]+", "-", value).strip("-") or fallback
 
 
 def admin_photos():
@@ -933,36 +345,90 @@ def gear_history():
             for key, field in (("cameras", "camera"), ("lenses", "lens"), ("films", "filmStock"))}
 
 
-def done(url, message):
+def done(url, message, ok=True):
     """Redirect after a successful POST, so reloading the page that follows
     can't send the form again. The message is shown once, on that page."""
-    session["flash"] = message
+    session["flash"] = [message, ok]
     return redirect(url)
 
 
 def take_flash(message, ok):
     if message is None and "flash" in session:
-        return session.pop("flash"), True
+        flash = session.pop("flash")
+        return (flash[0], flash[1]) if isinstance(flash, list) else (flash, True)
     return message, ok
 
 
-def render_index(message=None, ok=False):
+# Static files are linked with ?v=<newest mtime> so a deploy is picked up.
+STATIC_V = str(int(max((os.path.getmtime(p) for p in glob.glob(
+    os.path.join(app.static_folder, "*"))), default=0)))
+
+
+def page(template, active, message=None, ok=False, **context):
+    """An admin page: the shared shell (nav with counts) plus the page's own
+    template; a message passed on from a redirect is shown once."""
     message, ok = take_flash(message, ok)
+    all_posts = posts.load_all()
+    nav = {"photos": len(photos.load_all()),
+           "posts": len(all_posts)}
+    return render_template(template, active=active, nav=nav, v=STATIC_V,
+                           message=message, ok=ok, site=SITE_URL, **context)
+
+
+def render_photos(message=None, ok=False):
     blank = dict(EMPTY, month=this_month())
-    return render_template_string(TEMPLATE, logged_in=True, message=message, ok=ok,
-                                  p=blank, photos=admin_photos(), gear=gear_history(),
-                                  hero=photos.load_settings()["hero"])
+    return page("admin/photos.html", "photos", message, ok,
+                p=blank, photos=admin_photos(), gear=gear_history(),
+                hero=photos.load_settings()["hero"])
 
 
 def render_edit(slug, message=None, ok=False):
     p = next((q for q in admin_photos() if q["slug"] == slug), None)
     if not p:
-        return redirect("/admin")
-    message, ok = take_flash(message, ok)
+        return redirect("/admin/photos")
     hero = photos.load_settings()["hero"]
     cover = hero == slug or (hero == "newest" and p["rank"] == 0)
-    return render_template_string(EDIT_TEMPLATE, message=message, ok=ok, p=p, cover=cover,
-                                  gear=gear_history())
+    return page("admin/photo_edit.html", "photos", message, ok, p=p, cover=cover,
+                gear=gear_history())
+
+
+def login_page(message=None):
+    return render_template("admin/login.html", message=message, v=STATIC_V)
+
+
+def ago(ts):
+    """A timestamp as "5 min ago", "yesterday", "12 Mar"..."""
+    secs = time.time() - ts
+    if secs < 60:
+        return "just now"
+    if secs < 3600:
+        return f"{int(secs // 60)} min ago"
+    if secs < 86400:
+        return f"{int(secs // 3600)} h ago"
+    if secs < 2 * 86400:
+        return "yesterday"
+    if secs < 7 * 86400:
+        return f"{int(secs // 86400)} days ago"
+    return datetime.fromtimestamp(ts).strftime("%-d %b %Y")
+
+
+def activity(n=9):
+    """The latest commits to photos and posts - most of them made from here."""
+    log = run(["git", "log", f"-{n}", "--format=%ct%x09%s", "--", "photos", "content/posts"])
+    out = []
+    for line in log.stdout.splitlines():
+        ts, _, subject = line.partition("\t")
+        low = subject.lower()
+        kind = "photo" if "photo" in low else "post" if ("post" in low or "draft" in low) else ""
+        out.append(dict(when=ago(int(ts)), what=subject, kind=kind))
+    return out
+
+
+def day_label(value):
+    try:
+        return datetime.strptime(value[:10], "%Y-%m-%d").strftime("%-d %b %Y")
+    except ValueError:
+        return value or "Undated"
 
 
 def form_data(existing_date=""):
@@ -1054,8 +520,33 @@ def commit_paths(paths, message):
 @app.route("/admin")
 def index():
     if not require_login():
-        return render_template_string(TEMPLATE, logged_in=False, message=None)
-    return render_index()
+        return login_page()
+    library = admin_photos()
+    all_posts = posts.load_all()
+    drafts = sorted((p for p in all_posts if p["draft"]), key=lambda p: p["mtime"], reverse=True)
+    for p in drafts:
+        p["edited"] = ago(p["mtime"])
+    hero = photos.load_settings()["hero"]
+    hero_photo = None if hero == "random" else next(
+        (q for q in library if q["slug"] == hero), library[0] if library else None)
+    if hero == "random":
+        hero_label = "A different photo on every visit."
+    elif hero_photo and hero_photo["slug"] == hero:
+        hero_label = f"Always \u201c{hero_photo['alt']}\u201d."
+    else:
+        hero_label = "Always the newest photo."
+    return page("admin/overview.html", "overview",
+                photo_count=len(library), month_count=len({q["month"] for q in library}),
+                recent_photos=library[:5], hero_label=hero_label, hero_photo=hero_photo,
+                drafts=drafts, published=[p for p in all_posts if not p["draft"]],
+                activity=activity())
+
+
+@app.route("/admin/photos")
+def photos_page():
+    if not require_login():
+        return redirect("/admin")
+    return render_photos()
 
 
 @app.route("/admin/login", methods=["POST"])
@@ -1064,8 +555,7 @@ def login():
     count, locked_until = _failed_logins.get(ip, (0, 0))
     now = time.time()
     if now < locked_until:
-        return render_template_string(TEMPLATE, logged_in=False,
-                                      message=f"Too many attempts. Try again in {int(locked_until - now)}s.")
+        return login_page(f"Too many attempts. Try again in {int(locked_until - now)}s.")
     if request.form.get("password") == ADMIN_PASSWORD:
         _failed_logins.pop(ip, None)
         session.clear()
@@ -1075,7 +565,7 @@ def login():
     locked_until = time.time() + LOGIN_LOCKOUT_SECONDS if count >= LOGIN_MAX_ATTEMPTS else 0
     _failed_logins[ip] = (count, locked_until)
     msg = f"Too many attempts. Locked for {LOGIN_LOCKOUT_SECONDS}s." if locked_until else "Wrong password."
-    return render_template_string(TEMPLATE, logged_in=False, message=msg)
+    return login_page(msg)
 
 
 @app.route("/admin/logout", methods=["POST"])
@@ -1090,13 +580,13 @@ def upload():
         return redirect("/admin")
     file = request.files.get("image")
     if not file or not file.filename:
-        return render_index("No file selected.")
+        return render_photos("No file selected.")
     data, err = form_data()
     if err:
-        return render_index(err)
+        return render_photos(err)
     dupe = find_duplicate(file)
     if dupe:
-        return render_index(f'That image is already in the library as '
+        return render_photos(f'That image is already in the library as '
                             f'<a href="/admin/edit/{dupe["slug"]}">{escape(dupe["alt"])}</a>.')
 
     base = slug = slugify(data["alt"])
@@ -1106,12 +596,12 @@ def upload():
 
     name, err = save_upload(file, slug)
     if err:
-        return render_index(err)
+        return render_photos(err)
     data["image"] = name
     photos.write(slug, data)
     note = commit_push(slug, f"Add photo: {data['alt']}")
     link = f"/photography/{slug}/"
-    return done("/admin", f'Published: <a href="{link}">{escape(SITE_URL + link)}</a>{note}')
+    return done("/admin/photos", f'Published: <a href="{link}">{escape(SITE_URL + link)}</a>{note}')
 
 
 @app.route("/admin/source/<slug>.jpg")
@@ -1140,7 +630,7 @@ def edit_save(slug):
         return redirect("/admin")
     p = photos.load(slug)
     if not p:
-        return redirect("/admin")
+        return redirect("/admin/photos")
     data, err = form_data(p.get("date", ""))
     if err:
         return render_edit(slug, err)
@@ -1173,15 +663,15 @@ def move(slug):
     ordered = photos.load_all()
     p = next((q for q in ordered if q["slug"] == slug), None)
     if not p:
-        return redirect("/admin")
+        return redirect("/admin/photos")
     month = p.get("date", "")[:7]
     group = [q for q in ordered if q.get("date", "")[:7] == month]
     i = group.index(p)
     j = i - 1 if request.form.get("dir") == "up" else i + 1
     if not 0 <= j < len(group):
-        return redirect("/admin")
+        return redirect("/admin/photos")
     if len(group) > 28:
-        return render_index("Can't reorder a month with more than 28 photos.")
+        return render_photos("Can't reorder a month with more than 28 photos.")
     group[i], group[j] = group[j], group[i]
     changed = []
     for n, q in enumerate(group):
@@ -1191,7 +681,7 @@ def move(slug):
             photos.write(q["slug"], q, q.get("body", ""))
             changed.append(q["slug"])
     note = commit_paths([f"photos/{s}.md" for s in changed], f"Reorder photos: {month_year(month)}")
-    return redirect("/admin#month-" + month) if not note else render_index("Reordered." + note, ok=True)
+    return redirect("/admin/photos#month-" + month) if not note else render_photos("Reordered." + note, ok=True)
 
 
 @app.route("/admin/hero", methods=["POST"])
@@ -1200,13 +690,13 @@ def set_hero():
         return redirect("/admin")
     choice = request.form.get("hero", "")
     if choice not in ("random", "newest") and not photos.load(choice):
-        return render_index("Pick a photo from the list.")
+        return render_photos("Pick a photo from the list.")
     settings = photos.load_settings()
     settings["hero"] = choice
     photos.save_settings(settings)
     label = choice if choice in ("random", "newest") else photos.load(choice)["alt"]
     note = commit_paths(["photos/_settings.json"], f"Homepage photo: {label}")
-    return render_index(f"Homepage photo saved.{note}", ok=True)
+    return done("/admin/photos", f"Homepage photo saved.{note}")
 
 
 @app.route("/admin/delete/<slug>", methods=["POST"])
@@ -1215,12 +705,201 @@ def delete(slug):
         return redirect("/admin")
     p = photos.load(slug)
     if not p:
-        return redirect("/admin")
+        return redirect("/admin/photos")
     os.remove(photos.md_path(slug))
     os.remove(p["src"])
     photos.purge_cache(slug)
     note = commit_push(slug, f"Delete photo: {p['alt']}")
-    return render_index(f"Deleted.{note}", ok=True)
+    return done("/admin/photos", f"Deleted.{note}")
+
+
+# --------------------------------------------------------------- writing ----
+
+def site_stylesheet():
+    """The site's built stylesheet, so the editor's preview looks like a post."""
+    try:
+        with open(os.path.join(REPO, "public", "index.html")) as f:
+            m = re.search(r"/assets/css/stylesheet\.[0-9a-f]+\.css", f.read())
+        return m.group(0) if m else ""
+    except OSError:
+        return ""
+
+
+def post_fields(post):
+    """A post as the editor's fields."""
+    return {"title": post["title"], "description": post["description"], "tags": post["tags"],
+            "date": post["date"][:10], "slug": post["slug"], "body": post["body"].rstrip()}
+
+
+def json_error(message, status=400):
+    return jsonify(ok=False, message=message), status
+
+
+@app.route("/admin/posts")
+def posts_page():
+    if not require_login():
+        return redirect("/admin")
+    all_ = posts.load_all()
+    for p in all_:
+        p["edited"] = ago(p["mtime"])
+        p["date_label"] = day_label(p["date"])
+        p["unsaved"] = posts.load_autosave(p) is not None
+    drafts = sorted((p for p in all_ if p["draft"]), key=lambda p: p["mtime"], reverse=True)
+    return page("admin/posts.html", "posts", drafts=drafts,
+                published=[p for p in all_ if not p["draft"]])
+
+
+@app.route("/admin/posts/new", methods=["POST"])
+def post_new():
+    if not require_login():
+        return redirect("/admin")
+    title = (request.form.get("title") or "").strip() or "Untitled"
+    slug = posts.create(slugify(title, "post"), title)
+    note = commit_paths(["content/posts"], f"New draft: {title}")
+    if note:
+        return done(f"/admin/posts/{slug}", f"Draft started{note}", ok=False)
+    return redirect(f"/admin/posts/{slug}")
+
+
+@app.route("/admin/posts/<slug>")
+def post_edit(slug):
+    if not require_login():
+        return redirect("/admin")
+    post = posts.load(slug)
+    if not post:
+        return redirect("/admin/posts")
+    saved = post_fields(post)
+    auto = posts.load_autosave(post)
+    fields = dict(saved, **{k: auto[k] for k in saved if k in auto}) if auto else saved
+    base = f"/admin/posts/{slug}"
+    cfg = {"saved": saved, "css": site_stylesheet(), "autosavedAt": auto["at"] if auto else None,
+           "urls": {"save": base + "/save", "autosave": base + "/autosave",
+                    "image": base + "/image", "files": base + "/files/"}}
+    all_tags = sorted({t for p in posts.load_all() for t in p["tags"]}, key=str.lower)
+    return page("admin/post_edit.html", "posts", post=post, f=fields, auto=auto,
+                auto_when=ago(auto["at"]) if auto else "", cfg=cfg, all_tags=all_tags,
+                date_label=day_label(post["date"]))
+
+
+@app.route("/admin/posts/<slug>/save", methods=["POST"])
+def post_save(slug):
+    """Save from the editor (JSON). "publish" and "unpublish" also flip the
+    draft flag; anything that changes what's on the site rebuilds it."""
+    if not require_login():
+        return json_error("You've been signed out. Sign in again in another tab, then save.", 401)
+    post = posts.load(slug)
+    if not post:
+        return json_error("That post no longer exists.", 404)
+    d = request.get_json(silent=True) or {}
+    action = d.get("action", "save")
+    if action not in ("save", "publish", "unpublish"):
+        return json_error("Unknown action.")
+    title = str(d.get("title") or "").strip()
+    if not title:
+        return json_error("A title is needed.")
+    description = str(d.get("description") or "").strip()
+    tags = list(dict.fromkeys(str(t).strip() for t in d.get("tags") or [] if str(t).strip()))
+    day = str(d.get("date") or "").strip()
+    if day and not re.match(r"^\d{4}-\d{2}-\d{2}$", day):
+        return json_error("That date isn't valid.")
+    was_draft = post["draft"]
+    draft = {"publish": False, "unpublish": True}.get(action, was_draft)
+    if action == "publish" and d.get("today"):
+        day = date.today().isoformat()
+
+    new_slug = str(d.get("slug") or slug).strip().lower()
+    if new_slug != slug:
+        if not was_draft:
+            return json_error("A published post's address can't change - links to it would break.")
+        if not posts.SLUG_RE.match(new_slug):
+            return json_error("The address can only use a-z, 0-9 and single hyphens.")
+        if posts.taken(new_slug):
+            return json_error(f"Another post already uses /posts/{new_slug}/.")
+        post = posts.rename(post, new_slug)
+
+    posts.save(post, title, description, tags, day, draft, str(d.get("body") or ""))
+    posts.clear_autosave(post["slug"])
+    verb = {"publish": "Publish post", "unpublish": "Unpublish post"}.get(action, "Edit post")
+    note = commit_paths(["content/posts"], f"{verb}: {title}")
+    link = f'<a href="{post["url"]}" target="_blank" rel="noopener">{escape(SITE_URL + post["url"])}</a>'
+    message = {"publish": f"Published: {link}", "unpublish": "Unpublished - it's no longer on the site."}.get(
+        action, "Draft saved." if draft else f"Updated on the site: {link}")
+    error = posts.rebuild() if not (draft and was_draft) else None
+    if error:
+        message += f" But the site rebuild failed, so the site hasn't changed yet: <pre>{escape(error)}</pre>"
+    if not draft and day > date.today().isoformat():
+        message += " Its date is in the future, so it won't show on the site until then."
+    message += note
+    if action != "save" or post["slug"] != slug:
+        session["flash"] = [message, not (error or note)]
+        return jsonify(ok=True, reload=f"/admin/posts/{post['slug']}")
+    return jsonify(ok=True, message=message)
+
+
+@app.route("/admin/posts/<slug>/autosave", methods=["POST"])
+def post_autosave(slug):
+    if not require_login():
+        return json_error("Signed out.", 401)
+    post = posts.load(slug)
+    if not post:
+        return json_error("That post no longer exists.", 404)
+    d = request.get_json(silent=True) or {}
+    fields = {k: d.get(k) for k in ("title", "description", "tags", "date", "slug", "body")}
+    return jsonify(ok=True, at=posts.autosave(slug, fields))
+
+
+@app.route("/admin/posts/<slug>/discard", methods=["POST"])
+def post_discard(slug):
+    if not require_login():
+        return redirect("/admin")
+    posts.clear_autosave(slug)
+    return redirect(f"/admin/posts/{slug}")
+
+
+@app.route("/admin/posts/<slug>/image", methods=["POST"])
+def post_image(slug):
+    """An image dropped or pasted into the editor: saved beside the post and
+    committed straight away (the post's text is saved separately)."""
+    if not require_login():
+        return json_error("Signed out.", 401)
+    post = posts.load(slug)
+    file = request.files.get("image")
+    if not post or not file or not file.filename:
+        return json_error("No image received.")
+    post, result = posts.add_image(post, file)
+    if not post:
+        return json_error(result)
+    note = commit_paths(["content/posts"], f"Add image to post: {post['title']}")
+    return jsonify(ok=True, name=result, message=note)
+
+
+@app.route("/admin/posts/<slug>/files/<name>")
+def post_file(slug, name):
+    if not require_login():
+        abort(403)
+    post = posts.load(slug)
+    path = posts.image_path(post, name) if post else None
+    if not path:
+        abort(404)
+    resp = send_file(path, max_age=0)
+    resp.headers["Cache-Control"] = "private, no-store"  # drafts' images stay out of Cloudflare
+    return resp
+
+
+@app.route("/admin/posts/<slug>/delete", methods=["POST"])
+def post_delete(slug):
+    if not require_login():
+        return redirect("/admin")
+    post = posts.load(slug)
+    if not post:
+        return redirect("/admin/posts")
+    posts.delete(post)
+    note = commit_paths(["content/posts"], f"Delete post: {post['title']}")
+    error = None if post["draft"] else posts.rebuild()
+    message = f"Deleted “{escape(post['title'])}”."
+    if error:
+        message += f" But the site rebuild failed: <pre>{escape(error)}</pre>"
+    return done("/admin/posts", message + note, ok=not (error or note))
 
 
 if __name__ == "__main__":

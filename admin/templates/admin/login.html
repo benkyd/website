@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<title>Sign in · Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css?v={{ v }}"/>
+</head><body>
+<div class="login-wrap">
+<span class="kicker mono">Ben Kyd</span>
+<h1>Site admin</h1>
+{% if message %}<div class="status err">{{ message }}</div>{% endif %}
+<form method="post" action="/admin/login" class="card">
+<label>Password</label>
+<input type="password" name="password" autocomplete="current-password" autofocus required/>
+<button class="btn" type="submit">Sign in</button>
+</form>
+</div>
+</body></html>

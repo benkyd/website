@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import flash %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block body_class %}writing{% endblock %}
+{% block main %}<div class="editor" data-editor style="display:contents">
+<div class="ed-top">
+<span class="kicker mono"><a href="/admin/posts">&lsaquo; Writing</a>{% if not post.draft %} &middot; <a href="{{ post.url }}" target="_blank" rel="noopener">View on site &#8599;</a>{% endif %}</span>
+<div class="ed-state">
+{% if post.draft %}<span class="chip draft">Draft</span>{% else %}<span class="chip live">Live</span>{% endif %}
+<span class="words mono"></span>
+<span class="ed-save mono" aria-live="polite"></span>
+</div>
+<div class="ed-buttons">
+{% if post.draft %}
+<button class="btn inline ghost" type="button" data-action="save" title="Ctrl/⌘ S">Save draft</button>
+<button class="btn inline" type="button" data-action="publish">Publish</button>
+{% else %}
+<button class="btn inline ghost" type="button" data-action="unpublish">Unpublish</button>
+<button class="btn inline" type="button" data-action="save" title="Saves and updates the site (Ctrl/⌘ S)">Update</button>
+{% endif %}
+</div>
+</div>
+{% if message or auto %}<div style="padding:.9rem clamp(1rem,2.4vw,1.75rem) 0">
+{{ flash(message, ok) }}
+{% if auto %}<div class="status ok" style="margin-bottom:0;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+<span>Restored changes autosaved {{ auto_when }} that weren't saved to the post.</span>
+<form method="post" action="/admin/posts/{{ post.slug }}/discard" style="margin-left:auto" onsubmit="return confirm('Throw away the autosaved changes and go back to the saved post?');">
+<button class="btn-small" type="submit">Discard them</button></form>
+</div>{% endif %}
+</div>{% endif %}
+<div class="ed-head">
+<input class="ed-title" type="text" value="{{ f.title }}" placeholder="Title" aria-label="Title"/>
+<input class="ed-desc" type="text" value="{{ f.description }}" placeholder="A one-line description, shown under the title and in link previews" aria-label="Description"/>
+<details class="ed-details">
+<summary class="mono">Details &middot; tags, date, address</summary>
+<div class="ed-fields">
+<div><label>Tags <span class="muted">(comma separated)</span></label><input type="text" name="tags" value="{{ f.tags|join(', ') }}" list="tag-list" placeholder="Programming, RF"/></div>
+<div><label>Date</label><input type="date" name="date" value="{{ f.date }}"/></div>
+<div><label>Address{% if not post.draft %} <span class="muted">(fixed once published)</span>{% endif %}</label>
+<div class="url"><span>/posts/</span><input type="text" name="slug" value="{{ f.slug }}" spellcheck="false" aria-label="Address"{% if not post.draft %} disabled{% endif %}/></div></div>
+<div><form method="post" action="/admin/posts/{{ post.slug }}/delete" onsubmit="return confirm('Delete this post?{% if not post.draft %} It will be taken off the site.{% endif %} This can only be undone from git.');">
+<button class="btn btn-danger" type="submit">Delete post</button></form></div>
+</div>
+<datalist id="tag-list">{% for t in all_tags %}<option value="{{ t }}">{% endfor %}</datalist>
+</details>
+</div>
+<div class="ed-bar" role="toolbar" aria-label="Formatting">
+<button type="button" data-md="bold" title="Bold (Ctrl/⌘ B)"><b>B</b></button>
+<button type="button" data-md="italic" title="Italic (Ctrl/⌘ I)"><i>I</i></button>
+<button type="button" data-md="heading" title="Heading">H</button>
+<span class="sep"></span>
+<button type="button" data-md="link" title="Link (Ctrl/⌘ K)"><svg class="ico"><use href="#i-link"/></svg></button>
+<button type="button" data-md="quote" title="Quote"><svg class="ico"><use href="#i-quote"/></svg></button>
+<button type="button" data-md="code" title="Code"><svg class="ico"><use href="#i-code"/></svg></button>
+<button type="button" data-md="list" title="List"><svg class="ico"><use href="#i-list"/></svg></button>
+<button type="button" data-md="image" title="Add an image - or drop or paste one into the text"><svg class="ico"><use href="#i-image"/></svg></button>
+<div class="views" role="group" aria-label="View">
+<button type="button" data-view="write" aria-pressed="false">Write</button>
+<button type="button" data-view="split" aria-pressed="false">Split</button>
+<button type="button" data-view="preview" aria-pressed="false">Preview</button>
+</div>
+</div>
+<div class="ed-panes" data-view="split">
+<div class="ed-write"><textarea class="ed-text" spellcheck="true" aria-label="Post text (Markdown)" placeholder="Write in Markdown. Drop or paste images straight in.">{{ f.body }}</textarea></div>
+<div class="ed-preview"><iframe title="Preview" sandbox="allow-same-origin allow-scripts allow-popups"></iframe></div>
+</div>
+</div>
+<dialog id="publish-dialog">
+<form method="dialog">
+<h2>Publish &ldquo;{{ post.title }}&rdquo;?</h2>
+<p class="hint">It goes live at {{ site }}/posts/<span class="pub-slug">{{ f.slug }}</span>/ and the site is rebuilt.</p>
+<label class="check"><input type="checkbox" name="today" checked/> Date it today rather than {{ date_label }}</label>
+<div class="row">
+<button class="btn inline ghost" value="cancel">Cancel</button>
+<button class="btn inline" value="publish">Publish</button>
+</div>
+</form>
+</dialog>
+<script type="application/json" id="post-data">{{ cfg|tojson }}</script>
+{% endblock %}
+{% block scripts %}<script src="/admin/static/marked.min.js?v={{ v }}"></script>
+<script src="/admin/static/editor.js?v={{ v }}"></script>{% endblock %}

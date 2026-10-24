@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<title>{% block title %}{% endblock %} · Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css?v={{ v }}"/>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% include "admin/_icons.html" %}
+<div class="app">
+<aside class="rail">
+<a class="brand" href="/admin"><b>Ben Kyd</b><span class="mono">Site admin</span></a>
+<nav class="nav" aria-label="Admin">
+<a href="/admin"{% if active == "overview" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-overview"/></svg>Overview</a>
+<a href="/admin/photos"{% if active == "photos" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-camera"/></svg>Photos<span class="count">{{ nav.photos }}</span></a>
+<a href="/admin/posts"{% if active == "posts" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-pen"/></svg>Writing<span class="count">{{ nav.posts }}</span></a>
+</nav>
+<div class="rail-foot">
+<a href="/" target="_blank" rel="noopener"><svg class="ico"><use href="#i-ext"/></svg><span class="label">View site</span></a>
+<form method="post" action="/admin/logout"><button type="submit" title="Sign out"><svg class="ico"><use href="#i-out"/></svg><span class="label">Sign out</span></button></form>
+</div>
+</aside>
+<main class="main">{% block main %}{% endblock %}</main>
+</div>
+{% block scripts %}{% endblock %}
+<script src="/admin/static/admin.js?v={{ v }}"></script>
+</body></html>

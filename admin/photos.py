@@ -10,10 +10,13 @@ import io
 import json
 import os
 import re
+import threading
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-REPO = "/var/www/website"
+# SITE_REPO points a test instance at a copy of the site, so it can't touch
+# the live library.
+REPO = os.environ.get("SITE_REPO", "/var/www/website")
 PHOTOS_DIR = os.path.join(REPO, "photos")
 CACHE_DIR = os.path.join(REPO, "cache", "photos")
 ALLOWED_EXT = {"jpg", "jpeg", "png", "webp"}
@@ -283,7 +286,7 @@ def variant_file(photo, variant, ext):
             im = im.resize((tw, th), Image.Resampling.LANCZOS)
         if variant in WATERMARKED:
             im = watermark(im)
-        tmp = f"{out}.{os.getpid()}.tmp"
+        tmp = f"{out}.{os.getpid()}.{threading.get_ident()}.tmp"
         extra = {"icc_profile": icc} if icc else {}
         im.save(tmp, fmt, exif=rights_exif(), **extra, **encode_options(variant, ext))
     os.replace(tmp, out)
@@ -323,7 +326,7 @@ def uncropped_preview(photo, width=2400):
         im.draft("RGB", (width, width))
         im = ImageOps.exif_transpose(im).convert("RGB")
         im.thumbnail((width, width), Image.Resampling.LANCZOS)
-        tmp = f"{out}.{os.getpid()}.tmp"
+        tmp = f"{out}.{os.getpid()}.{threading.get_ident()}.tmp"
         im.save(tmp, "JPEG", quality=85)
     os.replace(tmp, out)
     return out

@@ -41,3 +41,4 @@ __pycache__/
 /cache/
 /photos/*
 !/photos/*.md
+!/photos/_settings.json

@@ -1,0 +1,57 @@
+{# What's special about a photo: on the homepage, cropped, has a banner crop. #}
+{% macro badges(q, cover) %}<span class="badges">
+{%- if cover %}<span class="badge cover" title="On the homepage"><svg class="ico"><use href="#i-cover"/></svg></span>{% endif -%}
+{%- if q.crop %}<span class="badge" title="Cropped"><svg class="ico"><use href="#i-crop"/></svg></span>{% endif -%}
+{%- if q.heroCrop %}<span class="badge" title="Has a desktop banner crop"><svg class="ico"><use href="#i-banner"/></svg></span>{% endif -%}
+</span>{% endmacro %}
+
+{# A file input that is also a drop target (see drop.js). #}
+{% macro drop_zone(required=False) %}<label class="drop">
+<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"{% if required %} required{% endif %}/>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+<span class="drop-msg"><b>Drop an image here</b> or <u>choose a file</u></span>
+<span class="drop-file mono"></span><u class="drop-again">Choose another</u>
+</label>{% endmacro %}
+
+{# One crop view (see crop.js). Its box is posted as `name`; `initial` is
+   where the box starts when `value` is empty. #}
+{% macro crop_widget(name, value, src="", initial="", banner=False) %}<div class="crop" data-src="{{ src }}" data-initial="{{ initial }}">
+<div class="crop-stage" hidden><img class="crop-img" alt=""><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-box">
+<span class="crop-h" data-h="nw"></span><span class="crop-h" data-h="n"></span><span class="crop-h" data-h="ne"></span>
+<span class="crop-h" data-h="e"></span><span class="crop-h" data-h="se"></span><span class="crop-h" data-h="s"></span>
+<span class="crop-h" data-h="sw"></span><span class="crop-h" data-h="w"></span></div></div>
+<div class="crop-tools" hidden>
+{% if not banner %}<button type="button" class="btn-small" data-act="auto">Remove border</button>
+{% else %}<button type="button" class="btn-small" data-act="banner">Banner shape</button>
+{% endif %}<button type="button" class="btn-small" data-act="reset">{{ "Use the normal crop" if banner else "Reset crop" }}</button>
+<button type="button" class="btn-small" data-act="full">Full screen</button>
+<span class="crop-info"></span>
+</div>
+<input type="hidden" name="{{ name }}" value="{{ value }}">
+</div>{% endmacro %}
+
+{% macro photo_fields(p, gear) %}<label>Caption / alt text</label>
+<input type="text" name="alt" value="{{ p.alt }}" placeholder="A short description of the photo" required/>
+<label>Location</label>
+<input type="text" name="location" value="{{ p.location }}" placeholder="e.g. Les Deux Alpes, France"/>
+<label>Date</label>
+<input type="month" name="date" value="{{ p.month }}"/>
+<div class="section">Gear (optional)</div>
+<p class="hint">Not read from the file - type what you shot it with.</p>
+<label>Camera</label>
+<input type="text" name="camera" list="cameras-list" value="{{ p.camera }}" placeholder="e.g. Hasselblad 500C"/>
+<label>Lens</label>
+<input type="text" name="lens" list="lenses-list" value="{{ p.lens }}" placeholder="e.g. 80mm f/2.8"/>
+<div class="gear-row">
+<div><label>Focal length</label><input type="text" name="focal_length" value="{{ p.focalLength }}" placeholder="50"/></div>
+<div><label>Aperture</label><input type="text" name="aperture" value="{{ p.aperture }}" placeholder="5.6"/></div>
+<div><label>Shutter</label><input type="text" name="shutter" value="{{ p.shutter }}" placeholder="1/1000"/></div>
+<div><label>ISO</label><input type="text" name="iso" value="{{ p.iso }}" placeholder="100"/></div>
+</div>
+<label>Film stock</label>
+<input type="text" name="film_stock" list="films-list" value="{{ p.filmStock }}" placeholder="e.g. Kodak Portra 400"/>
+<datalist id="cameras-list">{% for c in gear.cameras %}<option value="{{ c }}">{% endfor %}</datalist>
+<datalist id="lenses-list">{% for l in gear.lenses %}<option value="{{ l }}">{% endfor %}</datalist>
+<datalist id="films-list">{% for fs in gear.films %}<option value="{{ fs }}">{% endfor %}</datalist>{% endmacro %}
+
+{% macro flash(message, ok) %}{% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}{% endmacro %}

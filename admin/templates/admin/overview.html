@@ -1,0 +1,47 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import flash %}
+{% block title %}Overview{% endblock %}
+{% block main %}<div class="wrap">
+<div class="head"><div><span class="kicker mono">benkyd.co.uk</span><h1>Overview</h1></div></div>
+{{ flash(message, ok) }}
+<div class="ov">
+
+<section class="tile-card">
+<header><svg class="ico"><use href="#i-pen"/></svg><h2>Writing</h2><a href="/admin/posts">All posts &rsaquo;</a></header>
+<div class="big-stats">
+<div><b>{{ published|length }}</b><span class="mono">published</span></div>
+<div><b>{{ drafts|length }}</b><span class="mono">draft{{ "s" if drafts|length != 1 }}</span></div>
+</div>
+{% if drafts %}{% set d = drafts[0] %}
+<a class="continue" href="/admin/posts/{{ d.slug }}"><span class="mono">Continue writing</span><b>{{ d.title }}</b>
+<span class="mono">{{ "{:,}".format(d.words) }} words &middot; edited {{ d.edited }}</span></a>
+{% endif %}
+<form class="actions" method="post" action="/admin/posts/new">
+<input type="hidden" name="title" value="Untitled"/>
+<button class="btn inline" type="submit"><svg class="ico"><use href="#i-plus"/></svg>New post</button>
+</form>
+</section>
+
+<section class="tile-card">
+<header><svg class="ico"><use href="#i-camera"/></svg><h2>Photos</h2><a href="/admin/photos">Library &rsaquo;</a></header>
+<div class="big-stats">
+<div><b>{{ photo_count }}</b><span class="mono">photos</span></div>
+<div><b>{{ month_count }}</b><span class="mono">months</span></div>
+</div>
+{% if recent_photos %}<div class="strip">{% for q in recent_photos %}<a href="/admin/edit/{{ q.slug }}" title="{{ q.alt }}"><img src="{{ q.thumb }}" alt="{{ q.alt }}" loading="lazy"/></a>{% endfor %}</div>{% endif %}
+<div class="actions"><a class="btn inline" href="/admin/photos#add"><svg class="ico"><use href="#i-plus"/></svg>Add a photo</a></div>
+</section>
+
+<section class="tile-card two-thirds">
+<header><svg class="ico"><use href="#i-overview"/></svg><h2>Recent changes</h2></header>
+{% if activity %}<ul class="activity">{% for a in activity %}
+<li><span class="when mono">{{ a.when }}</span><span class="dot-i {{ a.kind }}"></span><span class="what" title="{{ a.what }}">{{ a.what }}</span></li>
+{% endfor %}</ul>{% else %}<p class="muted">Nothing yet.</p>{% endif %}
+</section>
+
+<section class="tile-card third">
+<header><svg class="ico"><use href="#i-cover"/></svg><h2>Homepage photo</h2><a href="/admin/photos">Change &rsaquo;</a></header>
+<div class="hero-pick">{% if hero_photo %}<img src="{{ hero_photo.thumb }}" alt=""/>{% endif %}<p>{{ hero_label }}</p></div>
+</section>
+</div>
+</div>{% endblock %}

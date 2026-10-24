@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import flash %}
+{% block title %}Writing{% endblock %}
+{% macro row(q, i) %}<div class="post-row" style="--i:{{ i }}">
+<a href="/admin/posts/{{ q.slug }}"><b>{{ q.title }}</b>
+{% if q.description %}<p>{{ q.description }}</p>{% endif %}
+<span class="post-meta mono"><span>{{ q.date_label }}</span><span>{{ "{:,}".format(q.words) }} words</span>{% if q.tags %}<span>{{ q.tags|join(" · ") }}</span>{% endif %}<span>edited {{ q.edited }}</span></span></a>
+<span class="post-side">
+{% if q.unsaved %}<span class="chip unsaved" title="Autosaved changes that haven't been saved to the post">Unsaved</span>{% endif %}
+{% if q.draft %}<span class="chip draft">Draft</span>{% else %}<span class="chip live">Live</span><a href="{{ q.url }}" target="_blank" rel="noopener">View &#8599;</a>{% endif %}
+</span>
+</div>{% endmacro %}
+{% block main %}<div class="wrap">
+<div class="head">
+<div><span class="kicker mono">{{ published|length }} published &middot; {{ drafts|length }} draft{{ "s" if drafts|length != 1 }}</span><h1>Writing</h1></div>
+<form class="new-post" method="post" action="/admin/posts/new">
+<input type="text" name="title" placeholder="Title of a new post" aria-label="Title of a new post"/>
+<button class="btn inline" type="submit"><svg class="ico"><use href="#i-plus"/></svg>Start writing</button>
+</form>
+</div>
+{{ flash(message, ok) }}
+<div class="sheet"><div class="sheet-head"><h2>Drafts</h2><span class="mono">not on the site</span></div>
+{% if drafts %}<div class="posts">{% for q in drafts %}{{ row(q, loop.index0) }}{% endfor %}</div>
+{% else %}<div class="empty">No drafts. Start one above.</div>{% endif %}
+</div>
+<div class="sheet"><div class="sheet-head"><h2>Published</h2><span class="mono">on the site, newest first</span></div>
+{% if published %}<div class="posts">{% for q in published %}{{ row(q, loop.index0) }}{% endfor %}</div>
+{% else %}<div class="empty">Nothing published yet.</div>{% endif %}
+</div>
+</div>{% endblock %}

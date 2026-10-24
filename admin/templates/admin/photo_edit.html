@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import badges, drop_zone, crop_widget, photo_fields, flash %}
+{% block title %}{{ p.alt }}{% endblock %}
+{% block main %}<div class="wrap">
+<div class="head edit-head">
+<div><span class="kicker mono"><a href="/admin/photos#month-{{ p.month }}">&lsaquo; Photos</a> &middot; {{ p.month_label }} &middot; <a href="/photography/{{ p.slug }}/" target="_blank" rel="noopener">View on site &#8599;</a></span>
+<h1>{{ p.alt }}</h1></div>
+{{ badges(p, cover) }}
+</div>
+{{ flash(message, ok) }}
+<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="edit">
+<section class="panel">
+<div class="tabs" role="tablist">
+<button type="button" class="tab" role="tab" aria-selected="true" data-tab="crop"><svg class="ico"><use href="#i-crop"/></svg> Crop</button>
+<button type="button" class="tab" role="tab" aria-selected="false" data-tab="banner"><svg class="ico"><use href="#i-banner"/></svg> Desktop banner{% if p.heroCrop %} <span class="dot" title="Set"></span>{% endif %}</button>
+</div>
+<div data-panel="crop">
+<p class="hint">Drag the box or its handles. The original file is kept - this only changes what's shown.</p>
+{{ crop_widget("crop", p.crop, "/admin/source/" ~ p.slug ~ ".jpg?v=" ~ p.mtime) }}
+</div>
+<div data-panel="banner" hidden>
+<p class="hint">What the wide banner at the top of the homepage shows on a computer screen when this photo is up there. Phones always use the normal crop. "Banner shape" fits the box to the banner, then drag it into place.</p>
+{{ crop_widget("hero_crop", p.heroCrop, "/admin/source/" ~ p.slug ~ ".jpg?v=" ~ p.mtime, initial=p.crop, banner=True) }}
+</div>
+</section>
+<section class="panel">
+{{ photo_fields(p, gear) }}
+<label>Replace image (optional)</label>
+{{ drop_zone() }}
+<button class="btn" type="submit" data-busy="Saving…">Save</button>
+</section>
+</form>
+<div class="danger">
+<form method="post" action="/admin/delete/{{ p.slug }}" onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
+<button class="btn btn-danger" type="submit">Delete this photo</button>
+</form>
+</div>
+</div>{% endblock %}
+{% block scripts %}<script src="/admin/static/crop.js?v={{ v }}"></script>
+<script src="/admin/static/drop.js?v={{ v }}"></script>{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import badges, drop_zone, crop_widget, photo_fields, flash %}
+{% block title %}Photos{% endblock %}
+{% block main %}<div class="wrap">
+<div class="head">
+<div><span class="kicker mono">{{ photos|length }} photos</span><h1>Photos</h1></div>
+<p class="hint">Newest first, as on the site. Use &lsaquo; &rsaquo; to reorder photos within a month.</p>
+</div>
+{{ flash(message, ok) }}
+<div class="layout">
+<div>
+<details class="add" id="add"{% if not photos or (message and not ok) %} open{% endif %}>
+<summary><span class="plus" aria-hidden="true">+</span> Add a photo<span class="mono">jpg &middot; png &middot; webp</span></summary>
+<form method="post" action="/admin/upload" enctype="multipart/form-data" class="add-body">
+<div>
+<label>Image</label>
+{{ drop_zone(required=True) }}
+{{ crop_widget("crop", "") }}
+</div>
+<div>
+{{ photo_fields(p, gear) }}
+<button class="btn" type="submit" data-busy="Publishing…">Publish</button>
+</div>
+</form>
+</details>
+
+{% for month, group in photos|groupby("month")|sort(attribute="grouper", reverse=True) %}
+<section class="sheet" id="month-{{ month }}">
+<div class="sheet-head"><h2>{{ group[0].month_label }}</h2><span class="mono">{{ group|length }} frame{{ "s" if group|length != 1 }}</span></div>
+<div class="grid">
+{% for q in group|sort(attribute="rank") %}
+<div class="tile" style="--i:{{ q.rank }}">
+  <a class="tile-img" href="/admin/edit/{{ q.slug }}"><img src="{{ q.thumb }}" alt="" loading="lazy"/>
+  <span class="frame mono">{{ "%02d"|format(loop.index) }}</span>
+  {{ badges(q, hero == q.slug or (hero == "newest" and q.rank == 0)) }}</a>
+  <div class="tile-cap">
+    <a href="/admin/edit/{{ q.slug }}">{{ q.alt }}</a>
+    <div class="tile-meta"><small class="mono" title="{{ q.location }}">{{ q.location }}</small>
+    {% if group|length > 1 %}<form method="post" action="/admin/move/{{ q.slug }}" class="move">
+      <button name="dir" value="up" title="Show earlier"{% if loop.first %} disabled{% endif %}>&lsaquo;</button>
+      <button name="dir" value="down" title="Show later"{% if loop.last %} disabled{% endif %}>&rsaquo;</button>
+    </form>{% endif %}</div>
+  </div>
+</div>
+{% endfor %}
+</div>
+</section>
+{% endfor %}
+</div>
+
+<aside class="side">
+<form method="post" action="/admin/hero" class="panel">
+<h2>Homepage photo</h2>
+<p class="hint">The big photo at the top of the homepage.</p>
+<select name="hero" aria-label="Homepage photo">
+<option value="random"{% if hero == "random" %} selected{% endif %}>Random on every visit</option>
+<option value="newest"{% if hero == "newest" %} selected{% endif %}>Newest photo</option>
+<optgroup label="Always this photo">
+{% for q in photos %}<option value="{{ q.slug }}"{% if hero == q.slug %} selected{% endif %}>{{ q.alt }}</option>{% endfor %}
+</optgroup>
+</select>
+<button class="btn" type="submit">Save</button>
+</form>
+<div class="panel">
+<h2>At a glance</h2>
+<div class="stats">
+<div><b>{{ photos|length }}</b><span class="mono">photos</span></div>
+<div><b>{{ photos|selectattr("crop")|list|length }}</b><span class="mono">cropped</span></div>
+<div><b>{{ photos|selectattr("heroCrop")|list|length }}</b><span class="mono">banner</span></div>
+</div>
+<ul class="legend">
+<li><span class="badge cover"><svg class="ico"><use href="#i-cover"/></svg></span> On the homepage</li>
+<li><span class="badge"><svg class="ico"><use href="#i-crop"/></svg></span> Cropped</li>
+<li><span class="badge"><svg class="ico"><use href="#i-banner"/></svg></span> Desktop banner crop</li>
+</ul>
+</div>
+</aside>
+</div>
+</div>{% endblock %}
+{% block scripts %}<script src="/admin/static/crop.js?v={{ v }}"></script>
+<script src="/admin/static/drop.js?v={{ v }}"></script>{% endblock %}
