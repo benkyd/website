@@ -7,6 +7,7 @@ import base64
 import glob
 import hashlib
 import io
+import json
 import os
 import re
 
@@ -20,7 +21,12 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 # Front matter keys, in the order they're written.
 FIELDS = ["alt", "date", "image", "location", "camera", "lens",
-          "focalLength", "aperture", "shutter", "iso", "filmStock", "featured", "crop"]
+          "focalLength", "aperture", "shutter", "iso", "filmStock", "crop"]
+
+# Site-wide settings, versioned alongside the photos. "hero" is the homepage
+# photo: "random" (a different one on every visit), "newest", or a slug.
+SETTINGS_PATH = os.path.join(PHOTOS_DIR, "_settings.json")
+SETTINGS_DEFAULTS = {"hero": "random"}
 
 # Derivative sizes: (axis, pixels). A fixed set, so the cache stays bounded.
 VARIANTS = {
@@ -124,6 +130,20 @@ def write(slug, data, body=""):
     text = "\n".join(lines) + "\n" + (f"\n{body.strip()}\n" if body.strip() else "")
     with open(md_path(slug), "w") as f:
         f.write(text)
+
+
+def load_settings():
+    try:
+        with open(SETTINGS_PATH) as f:
+            return dict(SETTINGS_DEFAULTS, **json.load(f))
+    except (OSError, ValueError):
+        return dict(SETTINGS_DEFAULTS)
+
+
+def save_settings(settings):
+    with open(SETTINGS_PATH, "w") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
 
 
 def parse_crop(value):

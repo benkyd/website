@@ -6,6 +6,7 @@ next to it - no site rebuild. The page chrome (header, nav, footer, CSS) is
 the Hugo-built shell at public/photography/index.html, filled in per request.
 """
 import os
+import random
 import re
 import subprocess
 import time
@@ -231,12 +232,13 @@ def photo_page(slug):
 
 @app.route("/photography/recent.json")
 def recent():
-    """Homepage data: a hero (the newest photo marked featured, else the
-    newest photo) plus the next four for the "Recent photos" strip."""
+    """Homepage data: a hero (chosen by the "Homepage photo" setting - a
+    random one per request, the newest, or a specific photo) plus the newest
+    four others for the "Recent photos" strip."""
     all_ = photos.load_all()
     if not all_:
         return jsonify(hero=None, photos=[])
-    hero = next((p for p in all_ if p.get("featured")), all_[0])
+    hero = pick_hero(all_)
     hw, hh = photos.variant_size(hero, "hero")
     out = []
     for p in [p for p in all_ if p is not hero][:4]:
@@ -245,13 +247,23 @@ def recent():
                         width=w, height=h, thumb=photos.variant_url(p, "teaser", "webp"),
                         thumb2x=photos.variant_url(p, "teaser2x", "webp"),
                         ph=photos.placeholder(p)))
-    return jsonify(
+    resp = jsonify(
         hero=dict(alt=hero["alt"], slug=hero["slug"], url=f"/photography/{hero['slug']}/",
                   when=when_line(hero), width=hw, height=hh,
                   src=photos.variant_url(hero, "hero", "webp"), ph=photos.placeholder(hero),
                   srcset=", ".join(f"{photos.variant_url(hero, v, 'webp')} {photos.variant_size(hero, v)[0]}w"
                                    for v in ("hero", "full"))),
         photos=out)
+    resp.headers["Cache-Control"] = "no-store"  # a fresh pick on every visit
+    return resp
+
+
+def pick_hero(all_):
+    mode = photos.load_settings()["hero"]
+    if mode == "random":
+        return random.choice(all_)
+    # a specific photo, falling back to the newest if it's been deleted
+    return next((p for p in all_ if p["slug"] == mode), all_[0])
 
 
 @app.route("/photography/img/<slug>/<variant>.<ext>")
@@ -315,7 +327,7 @@ label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
 input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
 .topbar{display:flex;gap:1rem;margin-bottom:1rem;font-size:.95rem}
 .gear-row label{font-size:.75rem;white-space:nowrap}
-input[type=text],input[type=month],input[type=password],input[type=file]{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
+input[type=text],input[type=month],input[type=password],input[type=file],select{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
 input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
 .btn{width:100%;padding:.75rem;background:var(--accent);color:var(--on-accent);border:none;border-radius:6px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
 .btn:hover{filter:brightness(1.07)}
@@ -348,8 +360,6 @@ FIELDS_HTML = """<label>Caption / alt text</label>
 <input type="text" name="location" value="{{ p.location }}" placeholder="e.g. Les Deux Alpes, France"/>
 <label>Date</label>
 <input type="month" name="date" value="{{ p.month }}"/>
-<label class="check"><input type="checkbox" name="featured" value="1"{% if p.featured %} checked{% endif %}/> Feature on the homepage</label>
-<p class="hint">The newest featured photo is the big one at the top of the homepage. With none featured, the newest photo is used.</p>
 <div class="section">Gear (optional)</div>
 <p class="hint">Not read from the file - type what you shot it with.</p>
 <label>Camera</label>
@@ -405,6 +415,19 @@ TEMPLATE = """<!DOCTYPE html>
 </div>
 """ + FIELDS_HTML + """
 <button class="btn" type="submit">Publish</button>
+</form>
+
+<h2>Homepage photo</h2>
+<form method="post" action="/admin/hero" class="card">
+<label>The big photo at the top of the homepage</label>
+<select name="hero">
+<option value="random"{% if hero == "random" %} selected{% endif %}>Random - a different one on every visit</option>
+<option value="newest"{% if hero == "newest" %} selected{% endif %}>Newest photo</option>
+<optgroup label="Always this photo">
+{% for q in photos %}<option value="{{ q.slug }}"{% if hero == q.slug %} selected{% endif %}>{{ q.alt }}</option>{% endfor %}
+</optgroup>
+</select>
+<button class="btn" type="submit">Save</button>
 </form>
 
 <h2>Existing photos ({{ photos|length }})</h2>
@@ -759,7 +782,7 @@ document.querySelectorAll(".crop").forEach(function (root) {
 </body></html>"""
 
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
-         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "featured": "", "crop": ""}
+         "focalLength": "", "aperture": "", "shutter": "", "iso": "", "filmStock": "", "crop": ""}
 
 
 def client_ip():
@@ -812,7 +835,8 @@ def gear_history():
 def render_index(message=None, ok=False):
     blank = dict(EMPTY, month=this_month())
     return render_template_string(TEMPLATE, logged_in=True, message=message, ok=ok,
-                                  p=blank, photos=admin_photos(), gear=gear_history())
+                                  p=blank, photos=admin_photos(), gear=gear_history(),
+                                  hero=photos.load_settings()["hero"])
 
 
 def render_edit(slug, message=None, ok=False):
@@ -844,7 +868,6 @@ def form_data(existing_date=""):
         "shutter": (f.get("shutter") or "").strip().removesuffix("s"),
         "iso": (f.get("iso") or "").strip().removeprefix("ISO").strip(),
         "filmStock": (f.get("film_stock") or "").strip(),
-        "featured": "true" if f.get("featured") else "",
         "crop": clean_crop(f.get("crop")),
     }, None
 
@@ -1026,6 +1049,21 @@ def move(slug):
             changed.append(q["slug"])
     note = commit_paths([f"photos/{s}.md" for s in changed], f"Reorder photos: {month_year(month)}")
     return redirect("/admin#month-" + month) if not note else render_index("Reordered." + note, ok=True)
+
+
+@app.route("/admin/hero", methods=["POST"])
+def set_hero():
+    if not require_login():
+        return redirect("/admin")
+    choice = request.form.get("hero", "")
+    if choice not in ("random", "newest") and not photos.load(choice):
+        return render_index("Pick a photo from the list.")
+    settings = photos.load_settings()
+    settings["hero"] = choice
+    photos.save_settings(settings)
+    label = choice if choice in ("random", "newest") else photos.load(choice)["alt"]
+    note = commit_paths(["photos/_settings.json"], f"Homepage photo: {label}")
+    return render_index(f"Homepage photo saved.{note}", ok=True)
 
 
 @app.route("/admin/delete/<slug>", methods=["POST"])

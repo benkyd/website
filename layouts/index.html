@@ -12,8 +12,9 @@
 {{- $paginator := .Paginate $pages }}
 
 {{- if and site.Params.homeInfoParams (eq $paginator.PageNumber 1) }}
-{{- /* Hero: the intro set over a full-width photo - the featured (or newest)
-       one, filled in from /photography/recent.json. With scripts on, the
+{{- /* Hero: the intro set over a full-width photo - random per visit, the
+       newest, or a pinned one (set in the photo admin), filled in from
+       /photography/recent.json. With scripts on, the
        space is reserved up front so nothing jumps; if no photo arrives it
        falls back to the plain intro (.no-photo). */}}
 <section class="home-hero photo-ph">
@@ -34,7 +35,7 @@
   <div class="photo-teaser-strip"></div>
 </div>
 <script>
-fetch("/photography/recent.json").then(function (r) { return r.ok ? r.json() : {}; }).then(function (data) {
+fetch("/photography/recent.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (data) {
   var hero = document.querySelector(".home-hero");
   var h = data.hero;
   if (!h) { hero.classList.add("no-photo"); return; }
