@@ -6,4 +6,5 @@ location: "San Francisco, USA"
 camera: "Minolta X-300"
 filmStock: "Harman Red"
 crop: "0.1811,0.0144,0.8189,0.9856"
+heroCrop: "0.1804,0.4198,0.8182,0.7097"
 ---
