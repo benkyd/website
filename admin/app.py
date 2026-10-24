@@ -5,6 +5,7 @@ Adding or changing a photo only ever writes photos/<slug>.md and the image
 next to it - no site rebuild. The page chrome (header, nav, footer, CSS) is
 the Hugo-built shell at public/photography/index.html, filled in per request.
 """
+import hashlib
 import os
 import random
 import re
@@ -423,7 +424,84 @@ details.add[open] .plus{transform:rotate(45deg)}
 .crop-full .btn-small[data-act=full]{background:var(--accent);border-color:var(--accent);color:#fff}
 html.crop-locked{overflow:hidden}
 .crop-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.4rem}
-.crop-info{font-size:.8rem;color:var(--muted)}"""
+.crop-info{font-size:.8rem;color:var(--muted)}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;min-height:10rem;padding:1.25rem;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:10px;background:var(--field);color:var(--muted);text-align:center;font-size:.95rem;cursor:pointer;transition:border-color .15s,background-color .15s}
+.drop:hover,.drop:focus-within,.drop.over,html.dragging .drop{border-color:var(--accent)}
+.drop.over{background:color-mix(in srgb,var(--accent) 9%,var(--field))}
+.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0}
+.drop svg{width:1.6rem;height:1.6rem;color:var(--accent)}
+.drop b{color:var(--text)}
+.drop u{color:var(--accent);text-underline-offset:2px}
+.drop.has{min-height:0;flex-direction:row;justify-content:space-between;padding:.7rem 1rem;border-style:solid}
+.drop.has svg,.drop.has .drop-msg{display:none}
+.drop-file{display:none;color:var(--text);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drop.has .drop-file{display:block}
+.drop-again{display:none;font-size:.85rem}
+.drop.has .drop-again{display:block}
+.btn:disabled{opacity:.6;cursor:progress}"""
+
+
+def drop_zone(required=False):
+    """A file input that is also a drop target (see DROP_JS)."""
+    return f"""<label class="drop">
+<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"{" required" if required else ""}/>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+<span class="drop-msg"><b>Drop an image here</b> or <u>choose a file</u></span>
+<span class="drop-file mono"></span><u class="drop-again">Choose another</u>
+</label>"""
+
+
+DROP_JS = """<script>
+document.querySelectorAll(".drop").forEach(function (zone) {
+  var input = zone.querySelector("input[type=file]"), name = zone.querySelector(".drop-file"), depth = 0;
+  function shown() {
+    var f = input.files[0];
+    zone.classList.toggle("has", !!f);
+    name.textContent = f ? f.name + " \u00b7 " + (f.size / 1048576).toFixed(1) + " MB" : "";
+  }
+  zone.feed = function (files) {
+    var f = Array.prototype.find.call(files || [], function (f) { return /\\.(jpe?g|png|webp)$/i.test(f.name); });
+    if (!f) { alert("Only jpg, png or webp files can be added."); return; }
+    var dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
+    input.dispatchEvent(new Event("change", {bubbles: true}));
+  };
+  input.addEventListener("change", shown);
+  zone.addEventListener("dragenter", function (e) { e.preventDefault(); depth++; zone.classList.add("over"); });
+  zone.addEventListener("dragover", function (e) { e.preventDefault(); });
+  zone.addEventListener("dragleave", function () { if (--depth <= 0) { depth = 0; zone.classList.remove("over"); } });
+  zone.addEventListener("drop", function (e) {
+    e.preventDefault(); depth = 0; zone.classList.remove("over"); zone.feed(e.dataTransfer.files);
+  });
+  shown();
+});
+// A file dropped anywhere else on the page goes to the drop zone too, rather
+// than the browser navigating away to show it.
+(function () {
+  var depth = 0, root = document.documentElement;
+  function files(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, "Files") >= 0; }
+  document.addEventListener("dragenter", function (e) { if (files(e)) { depth++; root.classList.add("dragging"); } });
+  document.addEventListener("dragleave", function () { if (--depth <= 0) { depth = 0; root.classList.remove("dragging"); } });
+  document.addEventListener("dragover", function (e) { if (files(e)) e.preventDefault(); });
+  document.addEventListener("drop", function (e) {
+    depth = 0; root.classList.remove("dragging");
+    if (!files(e) || e.defaultPrevented) return;
+    e.preventDefault();
+    var zone = document.querySelector(".drop");
+    if (!zone) return;
+    var panel = zone.closest("details");
+    if (panel) panel.open = true;
+    zone.feed(e.dataTransfer.files);
+    zone.scrollIntoView({block: "center", behavior: "smooth"});
+  });
+})();
+// Uploads take a while; stop a second click sending the photo twice.
+document.querySelectorAll("form[enctype]").forEach(function (form) {
+  form.addEventListener("submit", function () {
+    var btn = form.querySelector("button[type=submit]");
+    if (btn) { btn.disabled = true; btn.textContent = btn.dataset.busy || "Working\u2026"; }
+  });
+});
+</script>"""
 
 FIELDS_HTML = """<label>Caption / alt text</label>
 <input type="text" name="alt" value="{{ p.alt }}" placeholder="A short description of the photo" required/>
@@ -678,12 +756,12 @@ TEMPLATE = """<!DOCTYPE html>
 <form method="post" action="/admin/upload" enctype="multipart/form-data" class="add-body">
 <div>
 <label>Image</label>
-<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required/>
+""" + drop_zone(required=True) + """
 """ + crop_widget("crop", "") + """
 </div>
 <div>
 """ + FIELDS_HTML + """
-<button class="btn" type="submit">Publish</button>
+<button class="btn" type="submit" data-busy="Publishing…">Publish</button>
 </div>
 </form>
 </details>
@@ -746,7 +824,7 @@ TEMPLATE = """<!DOCTYPE html>
 </div>
 </main>
 {% endif %}
-""" + CROP_JS + """
+""" + CROP_JS + DROP_JS + """
 </body></html>"""
 
 EDIT_TEMPLATE = """<!DOCTYPE html>
@@ -781,8 +859,8 @@ EDIT_TEMPLATE = """<!DOCTYPE html>
 <section class="panel">
 """ + FIELDS_HTML + """
 <label>Replace image (optional)</label>
-<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"/>
-<button class="btn" type="submit">Save</button>
+""" + drop_zone() + """
+<button class="btn" type="submit" data-busy="Saving…">Save</button>
 </section>
 </form>
 <div class="danger">
@@ -801,7 +879,7 @@ document.querySelectorAll(".tab").forEach(function (t, _, all) {
   });
 });
 </script>
-""" + CROP_JS + """
+""" + CROP_JS + DROP_JS + """
 </body></html>"""
 
 EMPTY = {"alt": "", "location": "", "month": "", "camera": "", "lens": "",
@@ -855,7 +933,21 @@ def gear_history():
             for key, field in (("cameras", "camera"), ("lenses", "lens"), ("films", "filmStock"))}
 
 
+def done(url, message):
+    """Redirect after a successful POST, so reloading the page that follows
+    can't send the form again. The message is shown once, on that page."""
+    session["flash"] = message
+    return redirect(url)
+
+
+def take_flash(message, ok):
+    if message is None and "flash" in session:
+        return session.pop("flash"), True
+    return message, ok
+
+
 def render_index(message=None, ok=False):
+    message, ok = take_flash(message, ok)
     blank = dict(EMPTY, month=this_month())
     return render_template_string(TEMPLATE, logged_in=True, message=message, ok=ok,
                                   p=blank, photos=admin_photos(), gear=gear_history(),
@@ -866,6 +958,7 @@ def render_edit(slug, message=None, ok=False):
     p = next((q for q in admin_photos() if q["slug"] == slug), None)
     if not p:
         return redirect("/admin")
+    message, ok = take_flash(message, ok)
     hero = photos.load_settings()["hero"]
     cover = hero == slug or (hero == "newest" and p["rank"] == 0)
     return render_template_string(EDIT_TEMPLATE, message=message, ok=ok, p=p, cover=cover,
@@ -920,6 +1013,23 @@ def save_upload(file, slug):
         return None, "That file isn't a readable image."
     os.replace(tmp, os.path.join(photos.PHOTOS_DIR, name))
     return name, None
+
+
+def find_duplicate(file):
+    """The library photo whose image is byte-for-byte the uploaded file, if any."""
+    data = file.stream.read()
+    file.stream.seek(0)
+    digest = hashlib.sha1(data).digest()
+    for p in photos.load_all():
+        try:
+            if os.path.getsize(p["src"]) != len(data):
+                continue
+            with open(p["src"], "rb") as fh:
+                if hashlib.sha1(fh.read()).digest() == digest:
+                    return p
+        except OSError:
+            pass
+    return None
 
 
 def commit_push(slug, message):
@@ -984,6 +1094,10 @@ def upload():
     data, err = form_data()
     if err:
         return render_index(err)
+    dupe = find_duplicate(file)
+    if dupe:
+        return render_index(f'That image is already in the library as '
+                            f'<a href="/admin/edit/{dupe["slug"]}">{escape(dupe["alt"])}</a>.')
 
     base = slug = slugify(data["alt"])
     n = 2
@@ -997,7 +1111,7 @@ def upload():
     photos.write(slug, data)
     note = commit_push(slug, f"Add photo: {data['alt']}")
     link = f"/photography/{slug}/"
-    return render_index(f'Published: <a href="{link}">{escape(SITE_URL + link)}</a>{note}', ok=True)
+    return done("/admin", f'Published: <a href="{link}">{escape(SITE_URL + link)}</a>{note}')
 
 
 @app.route("/admin/source/<slug>.jpg")
@@ -1046,7 +1160,7 @@ def edit_save(slug):
 
     photos.write(slug, data, p.get("body", ""))
     note = commit_push(slug, f"Edit photo: {data['alt']}")
-    return render_edit(slug, f"Saved.{note}", ok=True)
+    return done(f"/admin/edit/{slug}", f"Saved.{note}")
 
 
 @app.route("/admin/move/<slug>", methods=["POST"])
