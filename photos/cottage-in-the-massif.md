@@ -1,6 +1,6 @@
 ---
 alt: "Cottage in the Massif"
-date: 2024-05-01
+date: 2024-05-02
 image: "cottage-in-the-massif.jpg"
 location: "Yr Wyddfa Massif, Wales"
 camera: "Nikon FG"
