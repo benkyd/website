@@ -1,6 +1,6 @@
 ---
 alt: "Reflections of Stained Glass"
-date: 2026-06-04
+date: 2026-06-05
 image: "reflections-of-stained-glass.jpg"
 location: "Basilique du Sacré-Cœur de Montmartre, France"
 camera: "Sony A7CII"
