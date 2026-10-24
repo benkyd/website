@@ -1,6 +1,6 @@
 ---
 alt: "Tryfan North Face"
-date: 2024-05-01
+date: 2024-05-02
 image: "tryfan-north-face.jpg"
 location: "Ogwen Valley, Wales"
 camera: "Sony A7CII"
