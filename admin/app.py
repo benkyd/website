@@ -287,21 +287,114 @@ def photo_image(slug, variant, ext):
 # ----------------------------------------------------------------- admin ----
 
 STYLE = """@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Regular.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Libron;src:url(/fonts/libron/Libron-Italic.woff2) format("woff2");font-weight:400;font-style:italic}
 @font-face{font-family:Libron;src:url(/fonts/libron/Libron-Bold.woff2) format("woff2");font-weight:700}
-:root{--bg:#faf9f6;--card:#fdfcfa;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#b8406a;--on-accent:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#2e2e33;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#232427;--accent:#ee8fb1;--on-accent:#1d1e20}}
+@font-face{font-family:"JetBrains Mono";src:url(/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2) format("woff2");font-weight:400}
+:root{--bg:#faf9f6;--card:#fdfcfa;--sheet:#efece5;--text:#1e1e1e;--muted:#6c6c6c;--line:#e6e3dc;--field:#fff;--accent:#b8406a;--on-accent:#fff;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1e20;--card:#26272a;--sheet:#18191b;--text:#dadadb;--muted:#9b9c9d;--line:#3a3a3f;--field:#1f2023;--accent:#ee8fb1;--on-accent:#1d1e20}}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:Libron,Georgia,serif;padding:1.5rem;min-height:100vh;line-height:1.5}
-.wrap{max-width:900px;margin:0 auto}
-h1{font-size:1.6rem;margin-bottom:1.25rem}
-h2{font-size:1.15rem;margin:2.25rem 0 1rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.25rem;margin-bottom:1rem;max-width:520px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--text);font-family:Libron,Georgia,serif;min-height:100vh;line-height:1.5}
+a{color:var(--accent)}
+.mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;font-weight:400}
+.hint{font-size:.82rem;color:var(--muted);margin-bottom:.5rem}
+/* top bar */
+.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:1.4rem;padding:.75rem clamp(1rem,3vw,2rem);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar-title{margin-right:auto;color:var(--text);text-decoration:none;font-size:1.1rem;font-weight:700;white-space:nowrap}
+.bar-title i{color:var(--muted);font-weight:400}
+.bar .mono{color:var(--muted);text-decoration:none;background:none;border:0;cursor:pointer;white-space:nowrap}
+.bar .mono:hover{color:var(--accent)}
+.bar form{display:contents}
+.page{max-width:1360px;margin:0 auto;padding:clamp(1rem,3vw,2rem) clamp(1rem,3vw,2rem) 4rem}
+h1{font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:700;line-height:1.08;letter-spacing:-.01em}
+.kicker{display:block;color:var(--muted);margin-bottom:.45rem}
+.kicker a{color:inherit;text-decoration:none}.kicker a:hover{color:var(--accent)}
+/* panels and fields */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.15rem 1.25rem}
+.panel > h2{font-size:1.05rem;font-weight:700;margin-bottom:.15rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.25rem}
 label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
 label:first-child{margin-top:0}
-.hint{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
-.card-wide{max-width:1200px}
-.card-wide > :not(.crop){max-width:520px}
-body:has(.card-wide) .wrap{max-width:1240px}
+label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
+label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
+.section{font-size:1rem;font-weight:700;margin-top:1.5rem;margin-bottom:.2rem;padding-top:1rem;border-top:1px solid var(--line)}
+.gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
+.gear-row label{font-size:.75rem;white-space:nowrap}
+input[type=text],input[type=month],input[type=password],input[type=file],select{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
+.btn{width:100%;padding:.75rem;background:var(--accent);color:var(--on-accent);border:none;border-radius:6px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
+.btn:hover{filter:brightness(1.07)}
+.btn-danger{background:transparent;color:#c0392b;border:1px solid currentColor;margin-top:0}
+.btn-danger:hover{background:rgba(192,57,43,.08);filter:none}
+.status{padding:.75rem 1rem;border-radius:8px;margin:0 0 1.5rem;font-size:.95rem}
+.status pre{white-space:pre-wrap;font-family:var(--mono);font-size:.75rem;margin-top:.4rem}
+.ok{background:rgba(34,140,80,.1);border:1px solid rgba(34,140,80,.35)}
+.err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35)}
+.login-wrap{max-width:340px;margin:14vh auto;padding:0 1rem}
+.login-wrap h1{margin-bottom:1.25rem}
+/* icons */
+.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.badges{display:flex;gap:.25rem}
+.badge{width:1.65rem;height:1.65rem;border-radius:6px;display:grid;place-items:center;background:rgba(18,18,20,.66);color:#fff;font-size:.9rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.badge.cover{background:var(--accent);color:var(--on-accent)}
+.legend{list-style:none;display:grid;gap:.55rem;margin-top:.6rem;font-size:.88rem}
+.legend li{display:flex;align-items:center;gap:.6rem}
+.legend .badge{flex:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.8rem;text-align:center}
+.stats b{display:block;font-size:1.5rem;line-height:1.1}
+.stats span{color:var(--muted)}
+/* library page */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(1.5rem,3vw,2.75rem);align-items:start}
+.side{position:sticky;top:4.6rem;display:grid;gap:1rem}
+.lib-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+.lib-head .hint{margin:0;text-align:right;max-width:22rem}
+details.add{border:1px dashed color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:12px;background:var(--card);margin-bottom:2.25rem}
+details.add[open]{border-style:solid;border-color:var(--line)}
+details.add > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;font-size:1.1rem;font-weight:700}
+details.add > summary::-webkit-details-marker{display:none}
+details.add > summary .mono{margin-left:auto;color:var(--muted)}
+.plus{width:1.9rem;height:1.9rem;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:1.1rem;line-height:1;transition:transform .25s ease}
+details.add[open] .plus{transform:rotate(45deg)}
+.add-body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:1.5rem;padding:0 1.2rem 1.25rem}
+.sheet{margin-bottom:2.25rem;scroll-margin-top:5rem}
+.sheet-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:.8rem;color:var(--muted)}
+.sheet-head h2{font-size:1.15rem;font-weight:700;color:var(--text)}
+.sheet-head::after{content:"";flex:1;height:1px;background:var(--line);align-self:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
+.tile{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden;transition:box-shadow .2s,transform .2s,border-color .2s;animation:rise .45s calc(min(var(--i),24) * 22ms) both}
+.tile:hover{box-shadow:0 12px 30px rgba(0,0,0,.12);transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.tile-img{position:relative;display:block;aspect-ratio:1;background:var(--sheet)}
+.tile-img img{width:100%;height:100%;object-fit:cover;display:block}
+.tile-img::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.32),transparent 34%);pointer-events:none}
+.frame{position:absolute;top:.6rem;left:.65rem;z-index:1;color:rgba(255,255,255,.92)}
+.tile .badges{position:absolute;top:.45rem;right:.45rem;z-index:1}
+.tile-cap{display:flex;flex-direction:column;gap:.35rem;padding:.6rem .6rem .6rem .7rem;flex:1}
+.tile-cap > a{flex:1;color:var(--text);text-decoration:none;font-size:.95rem;line-height:1.25}
+.tile-cap > a:hover{color:var(--accent)}
+.tile-meta{display:flex;align-items:center;gap:.4rem;min-height:1.6rem}
+.tile-meta small{flex:1;min-width:0;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.move{display:flex;gap:.2rem;flex:none}
+.move button{width:1.6rem;height:1.6rem;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text);font-size:.95rem;line-height:1;cursor:pointer}
+.move button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.move button:disabled{opacity:.3;cursor:default}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.tile{animation:none}.plus{transition:none}}
+/* edit page */
+.edit-head{display:flex;align-items:flex-end;gap:1rem;margin-bottom:1.5rem}
+.edit-head .badges{margin-left:auto}
+.edit{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:clamp(1.25rem,2.5vw,2rem);align-items:start}
+.tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line);margin:-.2rem 0 1rem}
+.tab{display:flex;align-items:center;gap:.45rem;padding:.55rem .8rem;margin-bottom:-1px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:inherit;font-size:.98rem;cursor:pointer}
+.tab:hover{color:var(--text)}
+.tab[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent);font-weight:700}
+.tab .dot{width:.45rem;height:.45rem;border-radius:50%;background:var(--accent)}
+.edit .crop-img{max-height:max(360px,calc(100vh - 17rem))}
+.danger{display:flex;justify-content:flex-end;margin-top:1rem}
+.danger form{width:360px;max-width:100%}
+@media (max-width:1000px){.layout,.edit{grid-template-columns:1fr}.side{position:static}.danger form{width:100%}}
+@media (max-width:760px){.add-body{grid-template-columns:1fr}.lib-head{flex-direction:column;align-items:flex-start}.lib-head .hint{text-align:left}}
+@media (max-width:480px){.gear-row{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.bar{gap:1rem}.bar-title i{display:none}}
 .btn-small{font:inherit;font-size:.85rem;padding:.35rem .8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer}
 .btn-small:hover{border-color:var(--accent);color:var(--accent)}
 .crop-stage{position:relative;display:inline-block;max-width:calc(100% - 16px);margin:.6rem 8px .8rem;line-height:0;touch-action:none;user-select:none}
@@ -327,39 +420,7 @@ body:has(.card-wide) .wrap{max-width:1240px}
 .crop-full .btn-small[data-act=full]{background:var(--accent);border-color:var(--accent);color:#fff}
 html.crop-locked{overflow:hidden}
 .crop-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.4rem}
-.crop-info{font-size:.8rem;color:var(--muted)}
-label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.95rem;margin-top:1rem;cursor:pointer}
-label.check input{width:1.05rem;height:1.05rem;accent-color:var(--accent)}
-.gear-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.9rem}
-input[type=file]::file-selector-button{font:inherit;font-size:.9rem;padding:.3rem .8rem;margin-right:.8rem;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer}
-.topbar{display:flex;gap:1rem;margin-bottom:1rem;font-size:.95rem}
-.gear-row label{font-size:.75rem;white-space:nowrap}
-input[type=text],input[type=month],input[type=password],input[type=file],select{width:100%;padding:.55rem .75rem;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;font-size:1rem}
-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
-.btn{width:100%;padding:.75rem;background:var(--accent);color:var(--on-accent);border:none;border-radius:6px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem}
-.btn:hover{filter:brightness(1.07)}
-.btn-danger{background:transparent;color:#c0392b;border:1px solid currentColor;margin-top:0}
-.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
-.status{padding:.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:.95rem;max-width:520px}
-.ok{background:rgba(34,140,80,.1);border:1px solid rgba(34,140,80,.35)}
-.err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35)}
-.login-wrap{max-width:340px;margin:12vh auto}
-.section{font-size:1.05rem;font-weight:700;margin-top:1.6rem;margin-bottom:.2rem;padding-top:1rem;border-top:1px solid var(--line)}
-a{color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.tile{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card);color:var(--text);text-decoration:none;transition:box-shadow .2s,transform .2s}
-.tile:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
-.tile img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.tile .cap{display:flex;flex-direction:column;gap:.4rem;padding:.5rem .6rem;font-size:.85rem}
-.tile .cap > a{flex:1;min-width:0;color:inherit;text-decoration:none}
-.tile:hover{transform:none}
-.month{margin:1.4rem 0 .6rem;font-weight:700}
-.move{display:flex;gap:.25rem;justify-content:flex-end}
-.move button{width:1.8rem;height:1.8rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:1rem;line-height:1;cursor:pointer}
-.move button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.move button:disabled{opacity:.3;cursor:default}
-img.preview{max-width:min(100%,520px);max-height:50vh;border-radius:8px;margin-bottom:1rem;display:block}
-@media (max-width:480px){body{padding:1rem}.gear-row{grid-template-columns:repeat(2,1fr)}}"""
+.crop-info{font-size:.8rem;color:var(--muted)}"""
 
 FIELDS_HTML = """<label>Caption / alt text</label>
 <input type="text" name="alt" value="{{ p.alt }}" placeholder="A short description of the photo" required/>
@@ -389,7 +450,7 @@ def crop_widget(name, value, src="", initial="", banner=False):
     """Markup for one crop view (see CROP_JS). Its box is posted as `name`;
     `initial` is where the box starts when `value` is empty."""
     extra = '<button type="button" class="btn-small" data-act="banner">Banner shape</button>\n' if banner else ""
-    reset = "Use the crop above" if banner else "Reset crop"
+    reset = "Use the normal crop" if banner else "Reset crop"
     border = "" if banner else '<button type="button" class="btn-small" data-act="auto">Remove border</button>\n'
     return f"""<div class="crop" data-src="{src}" data-initial="{initial}">
 <div class="crop-stage" hidden><img class="crop-img" alt=""><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-box">
@@ -566,38 +627,98 @@ document.querySelectorAll(".crop").forEach(function (root) {
 </script>"""
 
 
+# Icons for the photo badges, drawn once per page and <use>d.
+ICONS = """<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+<symbol id="i-banner" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h12v5H6z"/></symbol>
+<symbol id="i-cover" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+</svg>"""
+
+# What's special about a photo: on the homepage, cropped, has a banner crop.
+BADGES = """{% macro badges(q, cover) %}<span class="badges">
+{%- if cover %}<span class="badge cover" title="On the homepage"><svg class="ico"><use href="#i-cover"/></svg></span>{% endif -%}
+{%- if q.crop %}<span class="badge" title="Cropped"><svg class="ico"><use href="#i-crop"/></svg></span>{% endif -%}
+{%- if q.heroCrop %}<span class="badge" title="Has a desktop banner crop"><svg class="ico"><use href="#i-banner"/></svg></span>{% endif -%}
+</span>{% endmacro %}"""
+
+BAR = """<header class="bar">
+<a class="bar-title" href="/admin">Ben Kyd <i>&middot; photography admin</i></a>
+<a class="mono" href="/photography/">Gallery &#8599;</a>
+<a class="mono" href="/">Site &#8599;</a>
+<form method="post" action="/admin/logout"><button class="mono" type="submit">Sign out</button></form>
+</header>"""
+
 TEMPLATE = """<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Photography Admin</title>
-<style>""" + STYLE + """</style></head><body><div class="wrap">
+<style>""" + STYLE + """</style></head><body>
 {% if not logged_in %}
 <div class="login-wrap">
-<h1>Photography Admin</h1>
+<span class="kicker mono">Ben Kyd</span>
+<h1>Photography admin</h1>
 {% if message %}<div class="status err">{{ message }}</div>{% endif %}
-<form method="post" action="/admin/login">
+<form method="post" action="/admin/login" class="card">
 <label>Password</label>
 <input type="password" name="password" autofocus required/>
-<button class="btn" type="submit">Sign In</button>
+<button class="btn" type="submit">Sign in</button>
 </form>
 </div>
 {% else %}
-<p class="topbar"><a href="/photography/">&lsaquo; View the gallery</a></p>
-<h1>Add a photo</h1>
+""" + ICONS + BADGES + BAR + """
+<main class="page">
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<form method="post" action="/admin/upload" enctype="multipart/form-data" class="card card-wide">
-<label>Image (jpg / png / webp)</label>
+<div class="layout">
+<div>
+<details class="add"{% if not photos or (message and not ok) %} open{% endif %}>
+<summary><span class="plus" aria-hidden="true">+</span> Add a photo<span class="mono">jpg &middot; png &middot; webp</span></summary>
+<form method="post" action="/admin/upload" enctype="multipart/form-data" class="add-body">
+<div>
+<label>Image</label>
 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required/>
 """ + crop_widget("crop", "") + """
+</div>
+<div>
 """ + FIELDS_HTML + """
 <button class="btn" type="submit">Publish</button>
+</div>
 </form>
+</details>
 
+<div class="lib-head">
+<div><span class="kicker mono">{{ photos|length }} photos</span><h1>Library</h1></div>
+<p class="hint">Newest first, as on the site. Use &lsaquo; &rsaquo; to reorder photos within a month.</p>
+</div>
+{% for month, group in photos|groupby("month")|sort(attribute="grouper", reverse=True) %}
+<section class="sheet" id="month-{{ month }}">
+<div class="sheet-head"><h2>{{ group[0].month_label }}</h2><span class="mono">{{ group|length }} frame{{ "s" if group|length != 1 }}</span></div>
+<div class="grid">
+{% for q in group|sort(attribute="rank") %}
+<div class="tile" style="--i:{{ q.rank }}">
+  <a class="tile-img" href="/admin/edit/{{ q.slug }}"><img src="{{ q.thumb }}" alt="" loading="lazy"/>
+  <span class="frame mono">{{ "%02d"|format(loop.index) }}</span>
+  {{ badges(q, hero == q.slug or (hero == "newest" and q.rank == 0)) }}</a>
+  <div class="tile-cap">
+    <a href="/admin/edit/{{ q.slug }}">{{ q.alt }}</a>
+    <div class="tile-meta"><small class="mono" title="{{ q.location }}">{{ q.location }}</small>
+    {% if group|length > 1 %}<form method="post" action="/admin/move/{{ q.slug }}" class="move">
+      <button name="dir" value="up" title="Show earlier"{% if loop.first %} disabled{% endif %}>&lsaquo;</button>
+      <button name="dir" value="down" title="Show later"{% if loop.last %} disabled{% endif %}>&rsaquo;</button>
+    </form>{% endif %}</div>
+  </div>
+</div>
+{% endfor %}
+</div>
+</section>
+{% endfor %}
+</div>
+
+<aside class="side">
+<form method="post" action="/admin/hero" class="panel">
 <h2>Homepage photo</h2>
-<form method="post" action="/admin/hero" class="card">
-<label>The big photo at the top of the homepage</label>
-<select name="hero">
-<option value="random"{% if hero == "random" %} selected{% endif %}>Random - a different one on every visit</option>
+<p class="hint">The big photo at the top of the homepage.</p>
+<select name="hero" aria-label="Homepage photo">
+<option value="random"{% if hero == "random" %} selected{% endif %}>Random on every visit</option>
 <option value="newest"{% if hero == "newest" %} selected{% endif %}>Newest photo</option>
 <optgroup label="Always this photo">
 {% for q in photos %}<option value="{{ q.slug }}"{% if hero == q.slug %} selected{% endif %}>{{ q.alt }}</option>{% endfor %}
@@ -605,61 +726,78 @@ TEMPLATE = """<!DOCTYPE html>
 </select>
 <button class="btn" type="submit">Save</button>
 </form>
-
-<h2>Existing photos ({{ photos|length }})</h2>
-<p class="hint">Newest first, as on the site. Use &lsaquo; &rsaquo; to reorder photos within a month.</p>
-{% for month, group in photos|groupby("month")|sort(attribute="grouper", reverse=True) %}
-<div class="month" id="month-{{ month }}">{{ group[0].month_label }}</div>
-<div class="grid">
-{% for q in group|sort(attribute="rank") %}
-<div class="tile">
-  <a href="/admin/edit/{{ q.slug }}"><img src="{{ q.thumb }}" alt=""/></a>
-  <div class="cap">
-    <a href="/admin/edit/{{ q.slug }}">{{ q.alt }}</a>
-    {% if group|length > 1 %}<form method="post" action="/admin/move/{{ q.slug }}" class="move">
-      <button name="dir" value="up" title="Show earlier"{% if loop.first %} disabled{% endif %}>&lsaquo;</button>
-      <button name="dir" value="down" title="Show later"{% if loop.last %} disabled{% endif %}>&rsaquo;</button>
-    </form>{% endif %}
-  </div>
+<div class="panel">
+<h2>At a glance</h2>
+<div class="stats">
+<div><b>{{ photos|length }}</b><span class="mono">photos</span></div>
+<div><b>{{ photos|selectattr("crop")|list|length }}</b><span class="mono">cropped</span></div>
+<div><b>{{ photos|selectattr("heroCrop")|list|length }}</b><span class="mono">banner</span></div>
 </div>
-{% endfor %}
+<ul class="legend">
+<li><span class="badge cover"><svg class="ico"><use href="#i-cover"/></svg></span> On the homepage</li>
+<li><span class="badge"><svg class="ico"><use href="#i-crop"/></svg></span> Cropped</li>
+<li><span class="badge"><svg class="ico"><use href="#i-banner"/></svg></span> Desktop banner crop</li>
+</ul>
 </div>
-{% endfor %}
-
-<form method="post" action="/admin/logout" style="max-width:520px;margin-top:2rem">
-<button class="btn btn-ghost" type="submit">Sign Out</button>
-</form>
+</aside>
+</div>
+</main>
 {% endif %}
-</div>
 """ + CROP_JS + """
 </body></html>"""
 
 EDIT_TEMPLATE = """<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Edit photo - Photography Admin</title>
-<style>""" + STYLE + """</style></head><body><div class="wrap">
-<p class="topbar"><a href="/admin">&lsaquo; All photos</a><a href="/photography/{{ p.slug }}/">View on site</a></p>
-<h1>Edit photo</h1>
+<title>{{ p.alt }} - Photography Admin</title>
+<style>""" + STYLE + """</style></head><body>
+""" + ICONS + BADGES + BAR + """
+<main class="page">
+<div class="edit-head">
+<div><span class="kicker mono"><a href="/admin#month-{{ p.month }}">&lsaquo; Library</a> &middot; {{ p.month_label }} &middot; <a href="/photography/{{ p.slug }}/">View on site &#8599;</a></span>
+<h1>{{ p.alt }}</h1></div>
+{{ badges(p, cover) }}
+</div>
 {% if message %}<div class="status {{ 'ok' if ok else 'err' }}">{{ message | safe }}</div>{% endif %}
-<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="card card-wide">
-<label>Crop</label>
+<form method="post" action="/admin/edit/{{ p.slug }}" enctype="multipart/form-data" class="edit">
+<section class="panel">
+<div class="tabs" role="tablist">
+<button type="button" class="tab" role="tab" aria-selected="true" data-tab="crop"><svg class="ico"><use href="#i-crop"/></svg> Crop</button>
+<button type="button" class="tab" role="tab" aria-selected="false" data-tab="banner"><svg class="ico"><use href="#i-banner"/></svg> Desktop banner{% if p.heroCrop %} <span class="dot" title="Set"></span>{% endif %}</button>
+</div>
+<div data-panel="crop">
 <p class="hint">Drag the box or its handles. The original file is kept - this only changes what's shown.</p>
 """ + crop_widget("crop", "{{ p.crop }}", "/admin/source/{{ p.slug }}.jpg?v={{ p.mtime }}") + """
-<label>Homepage banner crop (desktop)</label>
-<p class="hint">What the wide banner at the top of the homepage shows on a computer screen when this photo is up there. Phones always use the crop above. Starts out as the crop above - "Banner shape" fits the box to the banner, then drag it into place.</p>
+</div>
+<div data-panel="banner" hidden>
+<p class="hint">What the wide banner at the top of the homepage shows on a computer screen when this photo is up there. Phones always use the normal crop. "Banner shape" fits the box to the banner, then drag it into place.</p>
 """ + crop_widget("hero_crop", "{{ p.heroCrop }}", "/admin/source/{{ p.slug }}.jpg?v={{ p.mtime }}",
                   initial="{{ p.crop }}", banner=True) + """
+</div>
+</section>
+<section class="panel">
+""" + FIELDS_HTML + """
 <label>Replace image (optional)</label>
 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"/>
-""" + FIELDS_HTML + """
 <button class="btn" type="submit">Save</button>
+</section>
 </form>
-<form method="post" action="/admin/delete/{{ p.slug }}" style="max-width:520px"
-      onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
+<div class="danger">
+<form method="post" action="/admin/delete/{{ p.slug }}" onsubmit="return confirm('Delete this photo? This removes it from the live site.');">
 <button class="btn btn-danger" type="submit">Delete this photo</button>
 </form>
 </div>
+</main>
+<script>
+document.querySelectorAll(".tab").forEach(function (t, _, all) {
+  t.addEventListener("click", function () {
+    all.forEach(function (o) {
+      o.setAttribute("aria-selected", o === t);
+      document.querySelector("[data-panel=" + o.dataset.tab + "]").hidden = o !== t;
+    });
+  });
+});
+</script>
 """ + CROP_JS + """
 </body></html>"""
 
@@ -725,7 +863,10 @@ def render_edit(slug, message=None, ok=False):
     p = next((q for q in admin_photos() if q["slug"] == slug), None)
     if not p:
         return redirect("/admin")
-    return render_template_string(EDIT_TEMPLATE, message=message, ok=ok, p=p, gear=gear_history())
+    hero = photos.load_settings()["hero"]
+    cover = hero == slug or (hero == "newest" and p["rank"] == 0)
+    return render_template_string(EDIT_TEMPLATE, message=message, ok=ok, p=p, cover=cover,
+                                  gear=gear_history())
 
 
 def form_data(existing_date=""):
