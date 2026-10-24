@@ -1,6 +1,6 @@
 ---
 alt: "La Tour Eiffel"
-date: 2026-06-02
+date: 2026-06-03
 image: "la-tour-eiffel.jpg"
 location: "Paris, France"
 camera: "Agfa Isolette I"
