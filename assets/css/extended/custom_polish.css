@@ -144,6 +144,13 @@ body.dark .photo-frame {
   height: 100%;
   object-fit: cover;
 }
+/* the small first level is stretched well past its size: soften it a
+   touch (scaled up so the blurred edges stay outside the frame) until the
+   full size fades in over it */
+.js .home-hero:not(.no-photo) .home-hero-low {
+  filter: blur(4px);
+  transform: scale(1.02);
+}
 .js .home-hero:not(.no-photo)::after {
   content: "";
   position: absolute;
