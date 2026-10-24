@@ -1,6 +1,6 @@
 ---
 alt: "Crystal Crag"
-date: 2026-06-03
+date: 2026-06-02
 image: "crystal-crag.jpg"
 location: "Mammoth Lakes, USA"
 camera: "Agfa Isolette I"
