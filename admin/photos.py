@@ -21,7 +21,7 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 # Front matter keys, in the order they're written.
 FIELDS = ["alt", "date", "image", "location", "camera", "lens",
-          "focalLength", "aperture", "shutter", "iso", "filmStock", "crop"]
+          "focalLength", "aperture", "shutter", "iso", "filmStock", "crop", "heroCrop"]
 
 # Site-wide settings, versioned alongside the photos. "hero" is the homepage
 # photo: "random" (a different one on every visit), "newest", or a slug.
@@ -36,6 +36,8 @@ VARIANTS = {
     "teaser2x": ("h", 520),
     "full": ("w", 2200),    # single photo page
     "hero": ("w", 1600),    # homepage banner
+    "banner": ("w", 1600),  # homepage banner on desktop, cut with heroCrop
+    "banner2x": ("w", 2560),
     "og": ("w", 1200),      # link previews
     "max": ("w", 100000),   # the original's full resolution (never upscaled) -
                             # fetched in the background once a photo page has shown
@@ -50,6 +52,9 @@ QUALITY_VERSION = "q2"
 WATERMARK_FONT = os.path.join(REPO, "assets", "fonts", "Libron-Regular.ttf")
 ARTIST = "Ben Kyd"
 COPYRIGHT = "Copyright Ben Kyd. All rights reserved. benkyd.co.uk"
+
+# Sizes cut with the photo's banner crop (heroCrop) instead of its crop.
+BANNER = {"banner", "banner2x"}
 
 FORMATS = {"webp": ("WEBP", "image/webp"), "jpg": ("JPEG", "image/jpeg")}
 
@@ -99,6 +104,7 @@ def load(slug):
     photo["src"] = src
     photo["mtime"] = int(os.path.getmtime(src))
     photo["cropbox"] = parse_crop(photo.get("crop", ""))
+    photo["herobox"] = parse_crop(photo.get("heroCrop", ""))
     # version for cache keys and URLs: changes when the file or the crop does
     photo["ver"] = str(photo["mtime"]) + (
         "-" + hashlib.sha1(photo["crop"].encode()).hexdigest()[:8] if photo["cropbox"] else "")
@@ -185,17 +191,26 @@ def source_size(photo):
     return _size_cache[key]
 
 
-def display_size(photo):
+def variant_box(photo, variant=None):
+    """The crop a variant is cut with: the banner sizes use the photo's
+    banner crop when it has one, everything else its normal crop."""
+    if variant in BANNER and photo.get("herobox"):
+        return photo["herobox"]
+    return photo.get("cropbox")
+
+
+def display_size(photo, variant=None):
     """Size of the original after orientation and crop."""
     w, h = source_size(photo)
-    if photo.get("cropbox"):
-        l, t, r, b = crop_pixels(photo["cropbox"], w, h)
+    box = variant_box(photo, variant)
+    if box:
+        l, t, r, b = crop_pixels(box, w, h)
         return r - l, b - t
     return w, h
 
 
 def variant_size(photo, variant):
-    w, h = display_size(photo)
+    w, h = display_size(photo, variant)
     axis, n = VARIANTS[variant]
     if axis == "w":
         return (w, h) if w <= n else (n, max(1, round(h * n / w)))
@@ -203,7 +218,10 @@ def variant_size(photo, variant):
 
 
 def variant_ver(photo, variant):
-    return f"{photo['ver']}-{QUALITY_VERSION}" + (f"-{WATERMARK_VERSION}" if variant in WATERMARKED else "")
+    ver = photo["ver"]
+    if variant in BANNER and photo.get("herobox"):
+        ver += "-b" + hashlib.sha1(photo["heroCrop"].encode()).hexdigest()[:8]
+    return f"{ver}-{QUALITY_VERSION}" + (f"-{WATERMARK_VERSION}" if variant in WATERMARKED else "")
 
 
 def variant_url(photo, variant, ext):
@@ -252,7 +270,7 @@ def variant_file(photo, variant, ext):
     os.makedirs(CACHE_DIR, exist_ok=True)
     tw, th = variant_size(photo, variant)
     fmt = FORMATS[ext][0]
-    box = photo.get("cropbox")
+    box = variant_box(photo, variant)
     with Image.open(photo["src"]) as im:
         # keep the colour profile (e.g. Display P3) so colours aren't flattened
         # to sRGB; no JPEG draft-mode shortcut - it softens the result
@@ -271,15 +289,16 @@ def variant_file(photo, variant, ext):
     return out
 
 
-def placeholder(photo):
+def placeholder(photo, variant=None):
     """A ~24px-wide JPEG as a data: URI - shown blurred while the real image loads."""
-    key = (photo["src"], photo["ver"])
+    box = variant_box(photo, variant)
+    key = (photo["src"], photo["ver"], box)
     if key not in _placeholder_cache:
         with Image.open(photo["src"]) as im:
             im.draft("RGB", (256, 256))
             im = ImageOps.exif_transpose(im).convert("RGB")
-            if photo.get("cropbox"):
-                im = im.crop(crop_pixels(photo["cropbox"], *im.size))
+            if box:
+                im = im.crop(crop_pixels(box, *im.size))
             im.thumbnail((24, 24))
             buf = io.BytesIO()
             im.save(buf, "JPEG", quality=60)

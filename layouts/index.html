@@ -18,7 +18,7 @@
        space is reserved up front so nothing jumps; if no photo arrives it
        falls back to the plain intro (.no-photo). */}}
 <section class="home-hero photo-ph">
-  <img class="home-hero-img" alt="" decoding="async" fetchpriority="high" sizes="100vw">
+  <picture><img class="home-hero-img" alt="" decoding="async" fetchpriority="high" sizes="100vw"></picture>
   <div class="home-hero-inner">
     {{- partial "home_info.html" . }}
   </div>
@@ -39,8 +39,17 @@ fetch("/photography/recent.json", { cache: "no-store" }).then(function (r) { ret
   var hero = document.querySelector(".home-hero");
   var h = data.hero;
   if (!h) { hero.classList.add("no-photo"); return; }
-  hero.style.setProperty("--ph", "url(" + h.ph + ")");
   var himg = hero.querySelector("img");
+  // desktop screens get the photo's banner crop, if it has one (the
+  // breakpoint matches the CSS one where the hero goes tall and narrow)
+  var desk = h.desk && window.matchMedia("(min-width: 769px)");
+  if (desk) {
+    var src = document.createElement("source");
+    src.media = desk.media; src.type = "image/webp"; src.sizes = "100vw";
+    src.srcset = h.desk.srcset;
+    himg.parentNode.insertBefore(src, himg);
+  }
+  hero.style.setProperty("--ph", "url(" + (desk && desk.matches ? h.desk.ph : h.ph) + ")");
   himg.alt = h.alt; himg.width = h.width; himg.height = h.height;
   himg.srcset = h.srcset;
   himg.src = h.src;
