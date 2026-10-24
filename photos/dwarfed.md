@@ -9,4 +9,5 @@ focalLength: "48"
 aperture: "3.2"
 shutter: "1/500"
 iso: "100"
+heroCrop: "0.0000,0.4448,1.0000,0.7480"
 ---
