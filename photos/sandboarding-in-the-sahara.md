@@ -1,6 +1,6 @@
 ---
 alt: "Sandboarding in the Sahara"
-date: 2026-10-01
+date: 2026-10-03
 image: "sandboarding-in-the-sahara.jpg"
 location: "Merzouga, Morocco"
 camera: "Sony A7CII"
