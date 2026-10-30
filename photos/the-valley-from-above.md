@@ -1,6 +1,6 @@
 ---
 alt: "The valley, from above"
-date: 2026-02-05
+date: 2026-02-01
 image: "the-valley-from-above.jpg"
 camera: "Agfa Isolette I"
 filmStock: "Ilford HP5"
